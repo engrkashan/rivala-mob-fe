@@ -62,11 +62,13 @@ class MyTextField extends StatefulWidget {
       isright,
       iscenter,
       useCountryCodePicker,
-      showFlag,readOnly,
-      useOutlinedBorder,useCustomFont; // Added this flag for choosing border style
+      showFlag,
+      readOnly,
+      useOutlinedBorder,
+      useCustomFont; // Added this flag for choosing border style
   double? marginBottom;
   int? maxLines;
-  double? labelSize, radius, hintSize,contentvPad;
+  double? labelSize, radius, hintSize, contentvPad;
   Widget? suffixIcon;
   Widget? prefixIcon;
   Color? filledColor,
@@ -91,7 +93,7 @@ class MyTextField extends StatefulWidget {
 class _MyTextFieldState extends State<MyTextField> {
   late FocusNode _focusNode;
   final ValueNotifier<bool> _focusNotifier = ValueNotifier<bool>(false);
-   final ThemeController themeController = Get.find();
+  final ThemeController themeController = Get.find();
   @override
   void initState() {
     super.initState();
@@ -130,7 +132,7 @@ class _MyTextFieldState extends State<MyTextField> {
                 builder: (_, isFocused, child) {
                   return MyText(
                     text: widget.label ?? '',
-                    size:widget.labelSize?? 15,
+                    size: widget.labelSize ?? 15,
                     useCustomFont: widget.useCustomFont,
                     paddingBottom: 8,
                     weight: widget.labelWeight ?? FontWeight.w500,
@@ -156,7 +158,7 @@ class _MyTextFieldState extends State<MyTextField> {
                     _focusNode.unfocus();
                   },
                   cursorColor: kblack2,
-                  readOnly:widget.readOnly?? false,
+                  readOnly: widget.readOnly ?? false,
                   keyboardType: widget.keyboardType,
                   maxLines: widget.maxLines ?? 1,
                   controller: widget.controller,
@@ -166,12 +168,13 @@ class _MyTextFieldState extends State<MyTextField> {
                   obscureText: widget.isObSecure!,
                   obscuringCharacter: '*',
                   style: TextStyle(
-                    fontFamily:widget.useCustomFont==true?themeController.selectedFont.value: AppFonts.poppins,
+                    fontFamily: widget.useCustomFont == true
+                        ? themeController.selectedFont.value
+                        : AppFonts.poppins,
                     fontSize: 15,
                     color: widget.textColor ?? kblack,
                     fontWeight: FontWeight.w400,
                   ),
-                  
                   validator: widget.validator,
                   textAlign: widget.isright == true
                       ? TextAlign.right
@@ -180,7 +183,7 @@ class _MyTextFieldState extends State<MyTextField> {
                           : TextAlign.left,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    isDense: true,
+                      isDense: true,
                       prefixIcon: Padding(
                         padding: const EdgeInsets.only(left: 10, right: 5),
                         child: widget.prefixIcon != null
@@ -189,8 +192,8 @@ class _MyTextFieldState extends State<MyTextField> {
                       ),
                       floatingLabelAlignment: FloatingLabelAlignment.start,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
-                      contentPadding:  EdgeInsets.symmetric(
-                          horizontal: 15, vertical:widget.contentvPad??9),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 15, vertical: widget.contentvPad ?? 9),
                       hintText: widget.hint,
                       suffixIcon: Padding(
                         padding: const EdgeInsets.only(right: 10),
@@ -209,10 +212,10 @@ class _MyTextFieldState extends State<MyTextField> {
                             : widget.hintColor ?? ktertiary,
                       ),
                       suffixText: widget.suffixtext,
-                      
                       hintStyle: TextStyle(
-                          fontFamily:widget.useCustomFont==true?themeController.selectedFont.value: AppFonts.poppins,
-                       
+                        fontFamily: widget.useCustomFont == true
+                            ? themeController.selectedFont.value
+                            : AppFonts.poppins,
                         fontSize: widget.hintSize ?? 12,
                         fontWeight: FontWeight.normal,
                         color: isFocused
@@ -238,6 +241,32 @@ class _MyTextFieldState extends State<MyTextField> {
                                   width: 1),
                             ),
                       focusedBorder: widget.useOutlinedBorder == true
+                          ? OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: widget.fbordercolor ?? ktertiary,
+                                  width: 1),
+                              borderRadius:
+                                  BorderRadius.circular(widget.radius ?? 8),
+                            )
+                          : UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: widget.bordercolor ?? ktertiary,
+                                  width: 1.5),
+                            ),
+                      errorBorder: widget.useOutlinedBorder == true
+                          ? OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: widget.fbordercolor ?? ktertiary,
+                                  width: 1),
+                              borderRadius:
+                                  BorderRadius.circular(widget.radius ?? 8),
+                            )
+                          : UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: widget.bordercolor ?? ktertiary,
+                                  width: 1.5),
+                            ),
+                      focusedErrorBorder: widget.useOutlinedBorder == true
                           ? OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: widget.fbordercolor ?? ktertiary,
@@ -411,12 +440,11 @@ class _MyTextField2State extends State<MyTextField2> {
                           )
                         : widget.suffixIcon,
                     suffixStyle: TextStyle(
-                      fontFamily: AppFonts.poppins,
-                      fontSize: 14,
-                      color: isFocused ? ksecondary : ksecondary
-                    ),
+                        fontFamily: AppFonts.poppins,
+                        fontSize: 14,
+                        color: isFocused ? ksecondary : ksecondary),
                     suffixText: widget.suffixtext,
-                    
+
                     hintStyle: TextStyle(
                       fontFamily: AppFonts.poppins,
                       fontSize: 12,

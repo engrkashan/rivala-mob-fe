@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/store_menu.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/button_container.dart';
@@ -124,8 +123,8 @@ class HeaderImageStack extends StatelessWidget {
           left: 22,
           child: Bounce_widget(
             ontap: () {
-               Navigator.of(context).push(CustomPageRoute(page: StoreMenu()));
-             // Get.to(StoreMenu());
+              Navigator.of(context).push(CustomPageRoute(page: StoreMenu()));
+              // Get.to(StoreMenu());
             },
             widget: Image.asset(
               Assets.imagesMenubutton,
@@ -143,8 +142,9 @@ class HeaderImageStack extends StatelessWidget {
 class store_image_stack extends StatelessWidget {
   final double? height, iconSize, width, radius;
   final bool? showContent, showShadow, quickbut, showIcon, singlePrice;
-  final String? title, price,icon;
+  final String? title, price, icon, url;
   final Color? contentColor;
+  final void Function()? onTap;
   const store_image_stack({
     super.key,
     this.height,
@@ -157,7 +157,11 @@ class store_image_stack extends StatelessWidget {
     this.radius,
     this.title,
     this.price,
-    this.singlePrice=false, this.contentColor, this.icon,
+    this.singlePrice = false,
+    this.contentColor,
+    this.icon,
+    this.url,
+    this.onTap,
   });
 
   @override
@@ -181,13 +185,10 @@ class store_image_stack extends StatelessWidget {
                         ]
                       : []),
               child: Bounce_widget(
-                ontap: () {
-                  Get.to(() => PostDisplay(
-                        isDiscount: true,
-                      ));
-                },
+                ontap: onTap,
                 widget: CommonImageView(
-                  imagePath: Assets.imagesDummyImg,
+                  imagePath: url ?? Assets.imagesDummyImg,
+                  url: url,
                   height: height ?? 360,
                   width: width ?? Get.width * 0.6,
                   radius: radius ?? 15,
@@ -200,7 +201,7 @@ class store_image_stack extends StatelessWidget {
                 right: 10,
                 child: Bounce_widget(
                   widget: Image.asset(
-                  icon??  Assets.imagesStoretag,
+                    icon ?? Assets.imagesStoretag,
                     width: iconSize ?? 40,
                     height: iconSize ?? 40,
                   ),
@@ -229,25 +230,25 @@ class store_image_stack extends StatelessWidget {
           ),
           MyText(
             text: title ?? 'Blue Floral Short',
-            color:contentColor?? kheader,
+            color: contentColor ?? kheader,
             weight: FontWeight.w600,
             useCustomFont: true,
             size: 13,
           ),
           Row(
             children: [
-              if(singlePrice==false)
+              if (singlePrice == false)
+                MyText(
+                  text: price ?? '\$69.00 USD',
+                  color: contentColor ?? kheader,
+                  weight: FontWeight.w400,
+                  size: 9,
+                  decoration: TextDecoration.lineThrough,
+                  useCustomFont: true,
+                ),
               MyText(
-                text: price ?? '\$69.00 USD',
-                color:contentColor?? kheader,
-                weight: FontWeight.w400,
-                size: 9,
-                decoration: TextDecoration.lineThrough,
-                useCustomFont: true,
-              ),
-              MyText(
-                text: price ?? '\$50.00 USD',
-                color:contentColor?? kheader,
+                text: "\$${price}" ?? '\$50.00 USD',
+                color: contentColor ?? kheader,
                 weight: FontWeight.w400,
                 size: 9,
                 useCustomFont: true,
@@ -265,11 +266,13 @@ class store_image_stack extends StatelessWidget {
 class horizontal_slider extends StatelessWidget {
   const horizontal_slider({
     super.key,
-    required double progress, this.color, this.pColor,
+    required double progress,
+    this.color,
+    this.pColor,
   }) : _progress = progress;
 
   final double _progress;
-  final Color? color,pColor;
+  final Color? color, pColor;
 
   @override
   Widget build(BuildContext context) {
@@ -282,7 +285,7 @@ class horizontal_slider extends StatelessWidget {
             height: 3,
             width: double.infinity,
             decoration: BoxDecoration(
-              color:color?? ktertiary.withOpacity(0.2),
+              color: color ?? ktertiary.withOpacity(0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Stack(
@@ -293,7 +296,7 @@ class horizontal_slider extends StatelessWidget {
                     width: 30,
                     height: 3,
                     decoration: BoxDecoration(
-                      color:pColor?? ktertiary,
+                      color: pColor ?? ktertiary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),

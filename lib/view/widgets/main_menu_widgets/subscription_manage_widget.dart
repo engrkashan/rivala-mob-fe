@@ -1,4 +1,3 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -17,6 +16,8 @@ import 'package:rivala/view/widgets/main_menu_widgets/commission_widgets.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+
+import '../dialogboxes.dart';
 
 class subscription_management_container extends StatefulWidget {
   final String? date, amount, savedAmount;
@@ -169,6 +170,8 @@ class subscription_sub_widget extends StatefulWidget {
 
 class _subscription_sub_widgetState extends State<subscription_sub_widget> {
   bool isActive = false;
+  String selectedValue = "Weekly";
+  List item = ['Weekly', 'Monthly', 'Quarterly'];
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -235,9 +238,12 @@ class _subscription_sub_widgetState extends State<subscription_sub_widget> {
                       delay: 0,
                       radius: 8,
                       hint: 'Frequency: Monthly',
-                      items: ['Weekly', 'Monthly', 'Quarterly'],
-                      selectedValue: 'Weekly',
-                      onChanged: (c) {})),
+                      items: item,
+                      selectedValue: selectedValue,
+                      onChanged: (c) {
+                        selectedValue = c;
+                        setState(() {});
+                      })),
               SizedBox(
                 width: 10,
               ),
@@ -247,9 +253,14 @@ class _subscription_sub_widgetState extends State<subscription_sub_widget> {
                     children: [
                       Bounce_widget(
                         ontap: () {
-                          Navigator.of(context).push(
-                            CustomPageRoute(page: SubscriptionChange()),
-                          );
+                          DialogBoxes.showDialog(
+                              context: context,
+                              title:
+                                  "Are you sure you want to pause this subscription?");
+                          // Navigator.of(context).push(
+                          //
+                          //   CustomPageRoute(page: SubscriptionChange()),
+                          // );
                           //  Get.to(() => SubscriptionChange());
                         },
                         widget: CustomeContainer(

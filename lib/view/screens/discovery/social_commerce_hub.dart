@@ -1,15 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/brands_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/discovery/search_discovery_products.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/show_products/curated_brands.dart';
+import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../../../controllers/providers/product_provider.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -19,71 +27,203 @@ class SocialCommerceHub extends StatefulWidget {
 }
 
 class _SocialCommerceHubState extends State<SocialCommerceHub> {
-  final List<Map<String, String>> brands = [
-    {
-      "image": Assets.imagesFitness,
-      "title": "Fitness Culture Gym",
-      "subtitle": "@fitnessculture"
-    },
-    {
-      "image": Assets.imagesNutrition,
-      "title": "Elite Sports",
-      "subtitle": "@elitesports"
-    },
-    {
-      "image": Assets.imagesItovi,
-      "title": "iTOVi",
-      "subtitle": "@adventuretravel"
-    },
-    {
-      "image": Assets.imagesNutrition,
-      "title": "Nutrition Rescue",
-      "subtitle": "@glowbeauty"
-    },
-    {
-      "image": Assets.imagesItovi,
-      "title": "iTOVi",
-      "subtitle": "@trendyapparel"
-    },
-    {
-      "image": Assets.imagesFitness,
-      "title": "Fitness Culture Gym",
-      "subtitle": "@creativestudio"
-    },
-    {
-      "image": Assets.imagesNutrition,
-      "title": "Nutrition Rescue",
-      "subtitle": "@glowbeauty"
-    },
-    {
-      "image": Assets.imagesItovi,
-      "title": "Trendy Apparel",
-      "subtitle": "@trendyapparel"
-    },
-    {
-      "image": Assets.imagesFitness,
-      "title": "Protagonist",
-      "subtitle": "@creativestudio"
-    },
-  ];
+  final ScrollController _scrollController = ScrollController();
+  final Set<String> _loadedFeeds = {};
+
+  final Map<String, GlobalKey> _feedKeys = {
+    "high-earning": GlobalKey(),
+    "back-to-school": GlobalKey(),
+    "trending": GlobalKey(),
+    "for-you": GlobalKey(),
+    "local-product": GlobalKey(),
+  };
+
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<BrandsProvider>().loadRecentBrands();
+      if (!mounted) return;
+      final prd = context.read<ProductProvider>();
+      _loadFeed("recent", prd);
+    });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      for (var entry in _feedKeys.entries) {
+        _tryLoadFeed(entry.key, entry.value);
+      }
+    });
+  }
+
+  void _tryLoadFeed(String feedKey, GlobalKey key) {
+    if (_loadedFeeds.contains(feedKey)) return;
+
+    final context = key.currentContext;
+    if (context == null) return;
+
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final position = box.localToGlobal(Offset.zero).dy;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Trigger when section is near viewport
+    if (position < screenHeight * 1.3) {
+      _loadedFeeds.add(feedKey);
+      final prd = context.read<ProductProvider>();
+      prd.loadFeed(feedKey);
+      debugPrint("Lazy loaded: $feedKey");
+    }
+  }
+
+  void _loadFeed(String key, ProductProvider prd) {
+    if (_loadedFeeds.contains(key)) return;
+    _loadedFeeds.add(key);
+    prd.loadFeed(key);
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildHorizontalBrandList() {
+    return Consumer<BrandsProvider>(builder: (context, brands, _) {
+      final recent = brands.store;
+      return SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(left: 22),
+        child: Row(
+          children: recent!.map((brand) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: GestureDetector(
+                // onTap: () => Get.to(() =>  ProductDetailedDescription()),
+                child: curated_brand_widget(
+                  size: 135,
+
+                  networkImg: brand.logoUrl,
+                  title: brand.name,
+                  // desc: brand.,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildProductSection({
+    required String feedKey,
+    required String title,
+    String? iconAsset,
+    GlobalKey? key,
+  }) {
+    final isLoaded = _loadedFeeds.contains(feedKey);
+
+    return Container(
+      key: key ?? GlobalKey(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+            child: row_widget(
+              title: title,
+              texSize: 20,
+              weight: FontWeight.bold,
+              icon: iconAsset,
+              isIconRight: true,
+            ),
+          ),
+          SizedBox(
+            height: 180,
+            child: Consumer<ProductProvider>(
+              builder: (context, prd, _) {
+                final products = prd.productsFor(feedKey) ?? [];
+
+                if (products.isEmpty) {
+                  return _SkeletonProductRow();
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.only(left: 22),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                  itemBuilder: (_, index) {
+                    final p = products[index];
+                    return GestureDetector(
+                      onTap: () => Get.to(() => ProductDetailedDescription(
+                            product: p,
+                          )),
+                      child: curated_brand_widget(
+                        size: 135,
+                        radius: 20,
+                        fit: BoxFit.cover,
+                        networkImg: p.image?.first,
+                        title: p.title ?? "Product",
+                        desc: "@${p.owner?.username ?? 'user'}",
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _SkeletonProductRow() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.separated(
+        padding: const EdgeInsets.only(left: 22),
+        scrollDirection: Axis.horizontal,
+        itemCount: 8,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        itemBuilder: (_, __) => Container(
+          width: 135,
+          height: 200,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 50,
-            ),
+            const SizedBox(height: 50),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Image.asset(
-                Assets.imagesRivalalogo,
-                height: 33,
-                width: 148,
-              ),
+              child:
+                  Image.asset(Assets.imagesRivalalogo, height: 33, width: 148),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
@@ -93,17 +233,16 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 filledColor: ktransparent,
                 contentvPad: 6.5,
                 radius: 45,
-                prefixIcon: Image.asset(
-                  Assets.imagesSearch,
-                  width: 15,
-                ),
+                prefixIcon: Image.asset(Assets.imagesSearch, width: 15),
                 readOnly: true,
                 ontapp: () {
-                      Navigator.of(context).push(CustomPageRoute(page:SearchDiscoveryProducts()),);
-                  
+                  Navigator.of(context).push(
+                      CustomPageRoute(page: const SearchDiscoveryProducts()));
                 },
               ),
             ),
+
+            // Recent Brands
             MyText(
               text: 'Recent Brands',
               size: 20,
@@ -112,61 +251,21 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               paddingLeft: 22,
               paddingBottom: 10,
             ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          img: brand["image"]!,
-                          title: brand["title"]!,
-                          desc: brand["subtitle"]!,
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
+            _buildHorizontalBrandList(),
+
+            // Recent Products
+            Consumer<ProductProvider>(
+              builder: (context, prd, _) {
+                final products = prd.productsFor("recent") ?? [];
+                if (products.isEmpty) return const SizedBox.shrink();
+                return _buildProductSection(
+                  feedKey: "recent",
+                  title: "Recent Products",
+                );
+              },
             ),
-            MyText(
-              text: 'Recent Products',
-              size: 20,
-              weight: FontWeight.bold,
-              color: kblack2,
-              paddingLeft: 22,
-              paddingTop: 15,
-              paddingBottom: 10,
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesNutrition2,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
+
+            // Recent Creators
             MyText(
               text: 'Recent Creators',
               size: 20,
@@ -177,101 +276,47 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               paddingBottom: 10,
             ),
             SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 22),
               child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 100,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesDummyimage2,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
+                children: List.generate(
+                    8,
+                    (_) => const Padding(
+                          padding: EdgeInsets.only(right: 16),
+                          child: curated_brand_widget(
+                            size: 135,
+                            radius: 100,
+                            fit: BoxFit.cover,
+                            img: Assets.imagesDummyimage2,
+                            title: 'Cy Tidewell',
+                            desc: '@cytidewell',
+                          ),
+                        )),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+
+            // Lazy Loaded Sections with Skeletons
+            _buildProductSection(
+                feedKey: "high-earning",
+                title: "High Earning Products",
+                iconAsset: Assets.imagesEarned,
+                key: _feedKeys["high-earning"]),
+            _buildProductSection(
+                feedKey: "back-to-school",
+                title: "Back to School",
+                key: _feedKeys["back-to-school"]),
+            _buildProductSection(
+                feedKey: "trending",
+                title: "Trending Now",
+                iconAsset: Assets.imagesTrending,
+                key: _feedKeys["trending"]),
+
+            // Community Feed
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 22, vertical: 15),
               child: row_widget(
-                title: 'High Earning Products',
-                texSize: 20,
-                weight: FontWeight.bold,
-                icon: Assets.imagesEarned,
-                isIconRight: true,
-              ),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesEcuador,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              child: row_widget(
-                title: 'Back to School',
-                texSize: 20,
-                weight: FontWeight.bold,
-                icon: Assets.imagesSchool,
-                isIconRight: true,
-              ),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesNutrition2,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              child: row_widget(
-                title: 'Trending',
+                title: 'Community Feed',
                 texSize: 20,
                 weight: FontWeight.bold,
                 icon: Assets.imagesTrending,
@@ -279,132 +324,34 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               ),
             ),
             SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 22),
               child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesEcuador,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
+                children: List.generate(
+                    6,
+                    (_) => Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: GestureDetector(
+                            onTap: () => Get.to(() => const PostDisplay()),
+                            child: CommonImageView(
+                              imagePath: Assets.imagesDummyimage2,
+                              height: 330,
+                              width: 225,
+                              radius: 20,
+                            ),
+                          ),
+                        )),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              child: row_widget(
-                title: 'Community Feed ',
-                texSize: 20,
-                weight: FontWeight.bold,
-                icon: Assets.imagesTrending,
-                isIconRight: true,
-              ),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        CommonImageView(
-                          imagePath: Assets.imagesDummyimage2,
-                          height: 330,
-                          width: 225,
-                          radius: 20,
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              child: row_widget(
-                title: 'Picks for You',
-                texSize: 20,
-                weight: FontWeight.bold,
-                icon: Assets.imagesProfileicon,
-                isIconRight: true,
-              ),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesNutrition2,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              child: row_widget(
-                title: 'Local Products',
-                texSize: 20,
-                weight: FontWeight.bold,
-                icon: Assets.imagesLocal,
-                isIconRight: true,
-              ),
-            ),
-            SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(brands.length, (index) {
-                  final brand = brands[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: Column(
-                      children: [
-                        curated_brand_widget(
-                          size: 135,
-                          radius: 20,
-                          fit: BoxFit.cover,
-                          img: Assets.imagesEcuador,
-                          title: 'Cy tidewell',
-                          desc: '@cytidwell',
-                        )
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-            SizedBox(
-              height: 120,
-            )
+            _buildProductSection(
+                feedKey: "for-you",
+                title: "For You",
+                key: _feedKeys["for-you"]),
+            _buildProductSection(
+                feedKey: "local-product",
+                title: "Local Products",
+                key: _feedKeys["local-product"]),
           ],
         ),
       ),

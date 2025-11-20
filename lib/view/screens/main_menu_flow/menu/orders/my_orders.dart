@@ -9,7 +9,8 @@ import 'package:rivala/view/widgets/main_menu_widgets/subscription_manage_widget
 import 'package:rivala/view/widgets/my_text_field.dart';
 
 class MyOrders extends StatefulWidget {
-  const MyOrders({super.key});
+  String? orderId;
+  MyOrders({super.key, this.orderId});
 
   @override
   State<MyOrders> createState() => _MyOrdersState();

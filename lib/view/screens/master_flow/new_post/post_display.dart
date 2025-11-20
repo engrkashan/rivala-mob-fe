@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/store_model.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_share.dart';
+import 'package:rivala/view/screens/master_store_flow/report_iisue.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/add_product_instore.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/multiple_product_post_veiw.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
-import 'package:rivala/view/screens/master_store_flow/report_iisue.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -16,10 +16,14 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/slider_button.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../../../models/product_model.dart';
+
 class PostDisplay extends StatefulWidget {
   final bool? isDiscount;
   final VoidCallback? ontap;
-  const PostDisplay({super.key, this.isDiscount = false, this.ontap});
+  final ProductModel? product;
+  const PostDisplay(
+      {super.key, this.isDiscount = false, this.ontap, this.product});
 
   @override
   State<PostDisplay> createState() => _PostDisplayState();
@@ -37,6 +41,7 @@ class _PostDisplayState extends State<PostDisplay> {
 
   @override
   Widget build(BuildContext context) {
+    final prd = widget.product;
     return Scaffold(
       body: Stack(
         children: [
@@ -48,14 +53,14 @@ class _PostDisplayState extends State<PostDisplay> {
                 currentPage = index;
               });
             },
-            itemCount: imageList.length,
+            itemCount: prd?.image?.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Get.to(() => ProductDetailedDescription());
+                  // Get.to(() => ProductDetailedDescription());
                 },
                 child: CommonImageView(
-                  imagePath: imageList[index],
+                  url: prd?.image?[index],
                   width: Get.width,
                   height: Get.height,
                 ),
@@ -63,15 +68,14 @@ class _PostDisplayState extends State<PostDisplay> {
             },
           ),
 
-
           Positioned(
-            bottom:20,
+            bottom: 20,
             left: 0,
             right: 0,
             child: Center(
               child: SmoothPageIndicator(
                 controller: _pageController,
-                count: imageList.length,
+                count: prd?.image?.length ?? 0,
                 effect: WormEffect(
                   dotHeight: 8,
                   dotWidth: 8,
@@ -89,6 +93,7 @@ class _PostDisplayState extends State<PostDisplay> {
               children: [
                 image_appbar(
                   ontap: widget.ontap,
+                  store: prd?.store ?? StoreModel(),
                 ),
                 const Spacer(),
                 if (widget.isDiscount == true)
@@ -162,7 +167,6 @@ class _PostDisplayState extends State<PostDisplay> {
                     ],
                   ),
                 ),
-                
               ],
             ),
           )
@@ -175,24 +179,27 @@ class _PostDisplayState extends State<PostDisplay> {
 class image_appbar extends StatelessWidget {
   final String? title;
   final VoidCallback? ontap;
+  final StoreModel? store;
   const image_appbar({
     super.key,
     this.title,
     this.ontap,
+    this.store,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Image.asset(
-          Assets.imagesApolo,
-          width: 54,
+        CommonImageView(
+          url: store?.logoUrl ?? '',
           height: 54,
+          width: 54,
+          radius: 50,
         ),
         Expanded(
           child: MyText(
-            text: '@apollo.and.sage',
+            text: '@${store?.name}',
             color: kwhite,
             useCustomFont: true,
             size: 16,
@@ -208,10 +215,9 @@ class image_appbar extends StatelessWidget {
           ),
         ),
         Bounce_widget(
-          ontap: 
-              () {
-                Get.to(() => ReportIisue());
-              },
+          ontap: () {
+            Get.to(() => ReportIisue());
+          },
           widget: Image.asset(
             Assets.imagesCart,
             width: 54,

@@ -6,12 +6,15 @@ import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 
+import '../../../models/store_model.dart';
+
 class ImageLayoutWidget extends StatelessWidget {
   final Widget? bodyWidget, buttonWidget;
   final double? vpad;
   final String? buttonText;
   final VoidCallback? ontap;
   final bool? button2;
+  final StoreModel? store;
   const ImageLayoutWidget(
       {super.key,
       this.bodyWidget,
@@ -19,7 +22,8 @@ class ImageLayoutWidget extends StatelessWidget {
       this.buttonText,
       this.ontap,
       this.vpad,
-      this.button2});
+      this.button2,
+      this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,9 @@ class ImageLayoutWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-          child: image_appbar(),
+          child: image_appbar(
+            store: store ?? StoreModel(),
+          ),
         ),
         Expanded(
           child: Container(

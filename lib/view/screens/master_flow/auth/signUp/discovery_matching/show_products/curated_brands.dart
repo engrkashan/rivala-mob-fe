@@ -112,22 +112,32 @@ class _CuratedBrandsState extends State<CuratedBrands> {
 
 //
 class curated_brand_widget extends StatelessWidget {
-  final String? img, title, desc;
-  final double? size,radius;
+  final String? img, title, desc, networkImg;
+  final double? size, radius;
   final bool? useCustomFont;
   final BoxFit? fit;
-  const curated_brand_widget({super.key, this.img, this.title, this.desc, this.useCustomFont=false, this.size, this.radius, this.fit});
+  const curated_brand_widget(
+      {super.key,
+      this.img,
+      this.title,
+      this.desc,
+      this.useCustomFont = false,
+      this.size,
+      this.radius,
+      this.fit,
+      this.networkImg});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CommonImageView(
-          imagePath: img ?? Assets.imagesNutrition,
-          width:size?? 77,
-          height:size?? 77,
-          fit:fit?? BoxFit.contain,
-          radius:radius?? 100,
+          imagePath: img,
+          url: networkImg,
+          width: size ?? 77,
+          height: size ?? 77,
+          fit: fit ?? BoxFit.contain,
+          radius: radius ?? 100,
         ),
         const SizedBox(height: 10),
         TwoTextedColumn(

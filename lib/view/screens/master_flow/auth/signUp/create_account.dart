@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/verify_account.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+
+import '../../splash/onboarding.dart';
 
 class MasterCreateAccount extends StatefulWidget {
   const MasterCreateAccount({super.key});
@@ -18,10 +21,14 @@ class MasterCreateAccount extends StatefulWidget {
 }
 
 class _MasterCreateAccountState extends State<MasterCreateAccount> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final _phoneCon = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: simpleAppBar(context: context,),
+        appBar: simpleAppBar(
+          context: context,
+        ),
         backgroundColor: kwhite,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,19 +93,32 @@ class _MasterCreateAccountState extends State<MasterCreateAccount> {
                   SizedBox(
                     height: 30,
                   ),
-                  MyTextField(
-                    hint: 'Enter Phone Number',
-                    useOutlinedBorder: true,
-                    iscenter: true,
-                    radius: 50,
-                  ),
-                  MyText(
-                    text: 'We will send you a one time code via SMS',
-                    paddingTop: 15,
-                    textAlign: TextAlign.center,
-                    color: ktertiary,
-                    size: 14,
-                  ),
+
+                  Form(
+                    key: formKey,
+                    child: MyTextField(
+                      controller: _phoneCon,
+                      hint: 'Enter Phone Number',
+                      useOutlinedBorder: true,
+                      iscenter: true,
+                      radius: 50,
+                      keyboardType: TextInputType.numberWithOptions(),
+                      validator: (val) {
+                        if (val != null && val.isEmpty) {
+                          return "Phone number cannot be null";
+                        }
+                        return null;
+                      },
+                    ),
+                  )
+
+                  // MyText(
+                  //   text: 'We will send you a one time code via SMS',
+                  //   paddingTop: 15,
+                  //   textAlign: TextAlign.center,
+                  //   color: ktertiary,
+                  //   size: 14,
+                  // ),
                 ],
               ),
             ),
@@ -117,13 +137,18 @@ class _MasterCreateAccountState extends State<MasterCreateAccount> {
                         child: MyButton(
                       buttonText: 'Continue',
                       onTap: () {
-                        Get.to(() => MasterVerifyAccount());
+                        if (formKey.currentState!.validate()) {
+                          context
+                              .read<AuthProvider>()
+                              .setPhone(_phoneCon.text.trim());
+                          Get.to(() => MasterOnboarding());
+                        }
                       },
                     )),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ));
   }

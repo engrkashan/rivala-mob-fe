@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
@@ -7,41 +9,38 @@ import 'package:rivala/view/screens/main_menu_flow/menu/main_menu.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_details.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/main_profile.dart';
-
-
-import 'dart:developer';
-
 import 'package:rivala/view/widgets/image_picker_bottom_sheet.dart';
 import 'package:rivala/view/widgets/image_picker_bottom_sheet_2.dart';
-
 
 const posts = '/posts';
 const chats = '/chats';
 const discover = '/discover';
 const storeMenu = '/storeMenu';
-const mainMenu='/mainMenu';
+const mainMenu = '/mainMenu';
 final navigatorKeys = {
-    posts: GlobalKey<NavigatorState>(),
-    chats: GlobalKey<NavigatorState>(),
-    discover: GlobalKey<NavigatorState>(),
-    storeMenu: GlobalKey<NavigatorState>(),
-    mainMenu: GlobalKey<NavigatorState>(),
+  posts: GlobalKey<NavigatorState>(),
+  chats: GlobalKey<NavigatorState>(),
+  discover: GlobalKey<NavigatorState>(),
+  storeMenu: GlobalKey<NavigatorState>(),
+  mainMenu: GlobalKey<NavigatorState>(),
 };
 void resetNavigatorKeys() {
-    navigatorKeys[posts] = GlobalKey<NavigatorState>();
-    navigatorKeys[chats] = GlobalKey<NavigatorState>();
-        navigatorKeys[discover] = GlobalKey<NavigatorState>();
-    navigatorKeys[storeMenu] = GlobalKey<NavigatorState>();
-    navigatorKeys[mainMenu] = GlobalKey<NavigatorState>();
+  navigatorKeys[posts] = GlobalKey<NavigatorState>();
+  navigatorKeys[chats] = GlobalKey<NavigatorState>();
+  navigatorKeys[discover] = GlobalKey<NavigatorState>();
+  navigatorKeys[storeMenu] = GlobalKey<NavigatorState>();
+  navigatorKeys[mainMenu] = GlobalKey<NavigatorState>();
 }
+
 class BottomNavBarController extends GetxController {
   static final BottomNavBarController instance =
       Get.find<BottomNavBarController>();
-        final controller = Get.put(ImagePickerController());
+  final controller = Get.put(ImagePickerController());
   RxBool isHide = false.obs;
   void onHide() {
     isHide.value = !isHide.value;
   }
+
   // static const COMMUNITY = '/community';
   // static const FAST = '/fast';
   // static const posts = '/posts';
@@ -50,7 +49,6 @@ class BottomNavBarController extends GetxController {
   RxInt currentIndex = 2.obs;
   RxString currentRoute = discover.obs;
   Map<String, GlobalKey<NavigatorState>> navigatorKeys = {
-
     posts: GlobalKey<NavigatorState>(),
     chats: GlobalKey<NavigatorState>(),
     discover: GlobalKey<NavigatorState>(),
@@ -58,91 +56,88 @@ class BottomNavBarController extends GetxController {
     mainMenu: GlobalKey<NavigatorState>(),
   };
   void resetNavigatorKeys() {
-       navigatorKeys[posts] = GlobalKey<NavigatorState>();
+    navigatorKeys[posts] = GlobalKey<NavigatorState>();
     navigatorKeys[chats] = GlobalKey<NavigatorState>();
-        navigatorKeys[discover] = GlobalKey<NavigatorState>();
+    navigatorKeys[discover] = GlobalKey<NavigatorState>();
     navigatorKeys[storeMenu] = GlobalKey<NavigatorState>();
     navigatorKeys[mainMenu] = GlobalKey<NavigatorState>();
   }
-  List<String> pageRoutes = [
-    posts,
-    chats,
-  discover,
-   storeMenu,
-   mainMenu
-  ];
-  void getCurrentScreen(String currentPage, int index,BuildContext context) async {
+
+  List<String> pageRoutes = [posts, chats, discover, storeMenu, mainMenu];
+  void getCurrentScreen(
+      String currentPage, int index, BuildContext context) async {
     try {
-       if (index == 0) {
-   showModalBottomSheet(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      builder: (_) {
-                        return ImagePickerBottomSheet(
-                          onCameraPick: () async {
-                            Get.back();
-                            showModalBottomSheet(
-                              context: context,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              builder: (_) {
-                                return ImagePickerBottomSheet2(
-                                  onCameraPick: () async {
-                                    Get.back();
-                                    controller.pickImageFromCamera();
-                                  },
-                                  onGalleryPick: () async {
-                                    Get.back();
-                                    controller.pickMultipleMedia();
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          onGalleryPick: () async {
-                            Get.back();
-                            showModalBottomSheet(
-                              context: context,
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              builder: (_) {
-                                return ImagePickerBottomSheet2(
-                                  onCameraPick: () async {
-                                    Get.back();
-                                    controller.pickVideoAndGenerateThumbnail(
-                                        fromCamera: true);
-                                  },
-                                  onGalleryPick: () async {
-                                    Get.back();
-                                    controller.pickVideoAndGenerateThumbnail(
-                                        fromCamera: false);
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        );
+      if (index == 0) {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          builder: (_) {
+            return ImagePickerBottomSheet(
+              onCameraPick: () async {
+                Get.back();
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  builder: (_) {
+                    return ImagePickerBottomSheet2(
+                      onCameraPick: () async {
+                        Get.back();
+                        controller.pickImageFromCamera();
+                      },
+                      onGalleryPick: () async {
+                        Get.back();
+                        controller.pickMultipleMedia();
                       },
                     );
-      return;
-    }
+                  },
+                );
+              },
+              onGalleryPick: () async {
+                Get.back();
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  builder: (_) {
+                    return ImagePickerBottomSheet2(
+                      onCameraPick: () async {
+                        Get.back();
+                        controller.pickVideoAndGenerateThumbnail(
+                            fromCamera: true);
+                      },
+                      onGalleryPick: () async {
+                        Get.back();
+                        controller.pickVideoAndGenerateThumbnail(
+                            fromCamera: false);
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+        return;
+      }
 
-    if (currentPage == currentRoute.value) {
-      navigatorKeys[currentPage]!.currentState!.popUntil(
-            (route) => route.isFirst,
-          );
-    } else {
-      currentIndex.value = index;
-      currentRoute.value = pageRoutes[index];
-    }
-      
+      if (currentPage == currentRoute.value) {
+        navigatorKeys[currentPage]!.currentState!.popUntil(
+              (route) => route.isFirst,
+            );
+      } else {
+        currentIndex.value = index;
+        currentRoute.value = pageRoutes[index];
+      }
+
       update();
     } catch (e) {
       log("Error in navigation: $e");
       // Optionally show an error dialog or message to the user
     }
   }
+
   // Future<void> handlePageChange(int index) async {
   //   if (index == 2) {
   //     showLoadingDialog(); // Assuming this function encapsulates the dialog logic
@@ -180,15 +175,15 @@ class BottomNavBarController extends GetxController {
       return false;
     } else {
       if (currentIndex.value != 2) {
-        getCurrentScreen(discover, 2,context);
+        getCurrentScreen(discover, 2, context);
         return false;
       }
     }
 
     return true;
   }
-
 }
+
 class PageNavigator extends StatelessWidget {
   final GlobalKey<NavigatorState> navigatorKey;
   final String page;
@@ -200,7 +195,7 @@ class PageNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? child;
-       if (page == posts)
+    if (page == posts)
       child = GradientSuccessScreen(
         hasSkip: false,
       ); // this will never be shown now, since we use Get.to for posts
@@ -213,7 +208,7 @@ class PageNavigator extends StatelessWidget {
     else if (page == mainMenu)
       child = const MainMenu();
     else
-      child = const PostDetails(); // fallback
+      child = PostDetails(); // fallback
     return Navigator(
       key: navigatorKey,
       onGenerateRoute: (settings) {

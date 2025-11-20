@@ -7,7 +7,6 @@ import 'package:rivala/view/screens/main_menu_flow/menu/orders/cancel_order.dart
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/replace_order.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/return_order.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/order_management.dart/fulfill_order.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
@@ -18,13 +17,15 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 class my_order_container extends StatefulWidget {
   final String? date, amount, savedAmount;
   final int? delay;
-final bool? hasfulfuill,isfilled;
+  final bool? hasfulfuill, isfilled;
   const my_order_container({
     super.key,
     this.date,
     this.amount,
     this.savedAmount,
-    this.delay, this.hasfulfuill=false, this.isfilled=false,
+    this.delay,
+    this.hasfulfuill = false,
+    this.isfilled = false,
   });
 
   @override
@@ -104,27 +105,27 @@ class _my_order_containerState extends State<my_order_container> {
                 )
               ],
             ),
-              if(widget.hasfulfuill==true)
-            Row(
-              children: [
-                MyText(
-                  text: 'CUSTOMER: ',
-                  size: 11,
-                  weight: FontWeight.w500,
-                ),
-                CommonImageView(
-                  imagePath: Assets.imagesUser,
-                  width: 15,
-                  height: 15,
-                ),
-                MyText(
-                  paddingLeft: 10,
-                  text: 'Cy Tidwell',
-                  size: 11,
-                  weight: FontWeight.w400,
-                )
-              ],
-            ),
+            if (widget.hasfulfuill == true)
+              Row(
+                children: [
+                  MyText(
+                    text: 'CUSTOMER: ',
+                    size: 11,
+                    weight: FontWeight.w500,
+                  ),
+                  CommonImageView(
+                    imagePath: Assets.imagesUser,
+                    width: 15,
+                    height: 15,
+                  ),
+                  MyText(
+                    paddingLeft: 10,
+                    text: 'Cy Tidwell',
+                    size: 11,
+                    weight: FontWeight.w400,
+                  )
+                ],
+              ),
             MyText(
               text: 'PRODUCT(S):',
               size: 11,
@@ -143,121 +144,126 @@ class _my_order_containerState extends State<my_order_container> {
                   child: subscription_sub_widget(
                     hasRadio: true,
                     ontap: () {
-                      Get.to(() => ProductDetailedDescription());
+                      // Get.to(() => ProductDetailedDescription());
                     },
                   ),
                 );
               },
             ),
-           if (widget.isfilled==false)
-            MyText(
-              text: 'Manage Your Order',
-              color: kblack,
-              size: 11,
-              paddingLeft: 30,
-              paddingBottom: 8,
-              paddingTop: 15,
-            ),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal:(widget.isfilled==true)?0: 30),
-              child:(widget.isfilled==true)?Row(
-                children: [   Bounce_widget(
-                    ontap: () {
-                      Get.to(() => ReturnOrder());
-                    },
-                    widget: CustomeContainer(
-                      radius: 8,
-                      vpad: 6,
-                      hpad: 5,
-                      color: ktertiary,
-                      widget: MyText(
-                        text: 'Mark as Fulfilled',
-                        size: 9,
-                        color: kwhite,
-                      ),
-                    ),
-                  ),],
-              ): Row(
-                children: [
-                  //for each ontap here, first there will be an iphone popup and these screens
-
-                  Bounce_widget(
-                    ontap: () {
-                      Get.to(() => ReturnOrder());
-                    },
-                    widget: CustomeContainer(
-                      radius: 8,
-                      vpad: 6,
-                      hpad: 5,
-                      color: ktertiary,
-                      widget: MyText(
-                        text: 'Return',
-                        size: 9,
-                        color: kwhite,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Bounce_widget(
-                    ontap: () {
-                      Get.to(() => CancelOrder());
-                    },
-                    widget: CustomeContainer(
-                      radius: 8,
-                      vpad: 6,
-                      hpad: 5,
-                      color: ktertiary,
-                      widget: MyText(
-                        text: 'Cancel',
-                        size: 9,
-                        color: kwhite,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Bounce_widget(
-                    ontap: () {
-                      Get.to(() => ReplaceOrder());
-                    },
-                    widget: CustomeContainer(
-                      radius: 8,
-                      vpad: 6,
-                      hpad: 5,
-                      color: ktertiary,
-                      widget: MyText(
-                        text: 'Replace',
-                        size: 9,
-                        color: kwhite,
-                      ),
-                    ),
-                  ),
-                  if(widget.hasfulfuill==true)...{
-                    SizedBox(
-                    width: 10,
-                  ),
-                  Bounce_widget(
-                    ontap: () {
-                     Get.to(() => FulfillOrder());
-                    },
-                    widget: CustomeContainer(
-                      radius: 8,
-                      vpad: 6,
-                      hpad: 5,
-                      color: ktertiary,
-                      widget: MyText(
-                        text: 'Fulfill',
-                        size: 9,
-                        color: kwhite,
-                      ),
-                    ),
-                  ),
-                  }
-                ],
+            if (widget.isfilled == false)
+              MyText(
+                text: 'Manage Your Order',
+                color: kblack,
+                size: 11,
+                paddingLeft: 30,
+                paddingBottom: 8,
+                paddingTop: 15,
               ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: (widget.isfilled == true) ? 0 : 30),
+              child: (widget.isfilled == true)
+                  ? Row(
+                      children: [
+                        Bounce_widget(
+                          ontap: () {
+                            Get.to(() => ReturnOrder());
+                          },
+                          widget: CustomeContainer(
+                            radius: 8,
+                            vpad: 6,
+                            hpad: 5,
+                            color: ktertiary,
+                            widget: MyText(
+                              text: 'Mark as Fulfilled',
+                              size: 9,
+                              color: kwhite,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        //for each ontap here, first there will be an iphone popup and these screens
+
+                        Bounce_widget(
+                          ontap: () {
+                            Get.to(() => ReturnOrder());
+                          },
+                          widget: CustomeContainer(
+                            radius: 8,
+                            vpad: 6,
+                            hpad: 5,
+                            color: ktertiary,
+                            widget: MyText(
+                              text: 'Return',
+                              size: 9,
+                              color: kwhite,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Bounce_widget(
+                          ontap: () {
+                            Get.to(() => CancelOrder());
+                          },
+                          widget: CustomeContainer(
+                            radius: 8,
+                            vpad: 6,
+                            hpad: 5,
+                            color: ktertiary,
+                            widget: MyText(
+                              text: 'Cancel',
+                              size: 9,
+                              color: kwhite,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Bounce_widget(
+                          ontap: () {
+                            Get.to(() => ReplaceOrder());
+                          },
+                          widget: CustomeContainer(
+                            radius: 8,
+                            vpad: 6,
+                            hpad: 5,
+                            color: ktertiary,
+                            widget: MyText(
+                              text: 'Replace',
+                              size: 9,
+                              color: kwhite,
+                            ),
+                          ),
+                        ),
+                        if (widget.hasfulfuill == true) ...{
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Bounce_widget(
+                            ontap: () {
+                              Get.to(() => FulfillOrder());
+                            },
+                            widget: CustomeContainer(
+                              radius: 8,
+                              vpad: 6,
+                              hpad: 5,
+                              color: ktertiary,
+                              widget: MyText(
+                                text: 'Fulfill',
+                                size: 9,
+                                color: kwhite,
+                              ),
+                            ),
+                          ),
+                        }
+                      ],
+                    ),
             )
           ],
         ),

@@ -1,0 +1,36 @@
+import 'package:rivala/config/network/api_client.dart';
+import 'package:rivala/models/product_model.dart';
+
+import '../../config/network/endpoints.dart';
+
+class ProductsRepo {
+  ApiClient api = ApiClient();
+
+  Future<List<ProductModel>> getProductsFeed(String type) async {
+    final response =
+        await api.getResponse(endpoints: Endpoints.productsFeed, query: {
+      'type': type,
+    });
+
+    final list = response['products'] as List;
+
+    return list.map((item) => ProductModel.fromJson(item)).toList();
+  }
+
+  Future<List<ProductModel>> getForYouPrd(String id) async {
+    final response =
+        await api.getResponse(endpoints: Endpoints.productRecommendations(id));
+
+    final list = response['products'] as List;
+    return list.map((item) => ProductModel.fromJson(item)).toList();
+  }
+
+  Future<List<ProductReview>> getPrdReview(String id) async {
+    final response =
+        await api.getResponse(endpoints: Endpoints.productReview(id));
+
+    final list = response['reviews'] as List;
+
+    return list.map((item) => ProductReview.fromJson(item)).toList();
+  }
+}

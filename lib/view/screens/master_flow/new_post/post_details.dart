@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
+import 'package:rivala/models/product_model.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_location/add_location.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_promo/start_new_promo.dart';
@@ -14,7 +14,6 @@ import 'package:rivala/view/screens/master_flow/new_post/post_expiry/post_expira
 import 'package:rivala/view/screens/master_flow/new_post/post_tags.dart';
 import 'package:rivala/view/screens/master_flow/new_post/tag_collection/tag_collection.dart';
 import 'package:rivala/view/screens/master_flow/new_post/video_play_screen.dart';
-import 'package:rivala/view/screens/persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -25,7 +24,8 @@ import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/post_detail_widget.dart';
 
 class PostDetails extends StatefulWidget {
-  const PostDetails({super.key});
+  ProductModel? product;
+  PostDetails({super.key, this.product});
 
   @override
   State<PostDetails> createState() => _PostDetailsState();
@@ -192,8 +192,8 @@ class _PostDetailsState extends State<PostDetails> {
                                   Get.dialog(
                                     const Center(
                                         child: CircularProgressIndicator(
-                                          color: kblack,
-                                        )),
+                                      color: kblack,
+                                    )),
                                     barrierDismissible: false,
                                   );
 

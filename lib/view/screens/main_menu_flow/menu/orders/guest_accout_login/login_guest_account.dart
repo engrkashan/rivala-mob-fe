@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/guest_accout_login/send_security_code.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/orders/my_orders.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
@@ -94,6 +94,17 @@ class _LoginGuestAccountState extends State<LoginGuestAccount> {
                     bordercolor: ktransparent,
                     filledColor: kblack.withOpacity(0.06),
                   )
+                },
+                if (selectedIndex == 1) ...{
+                  SizedBox(
+                    height: 25,
+                  ),
+                  MyTextField(
+                    hint: 'Enter Order Number',
+                    label: 'Order Number',
+                    bordercolor: ktransparent,
+                    filledColor: kblack.withOpacity(0.06),
+                  )
                 }
               ],
             ),
@@ -106,6 +117,19 @@ class _LoginGuestAccountState extends State<LoginGuestAccount> {
               onTap: () {
                 Navigator.of(context).push(
                   CustomPageRoute(page: EnterSecurityCode()),
+                );
+                // Get.to(()=>EnterSecurityCode(),
+                // );
+              },
+            ),
+          if (selectedIndex == 1)
+            MyButton(
+              buttonText: 'Check Order',
+              mhoriz: 22,
+              mBottom: Platform.isIOS ? 140 : 120, //120,
+              onTap: () {
+                Navigator.of(context).push(
+                  CustomPageRoute(page: MyOrders()),
                 );
                 // Get.to(()=>EnterSecurityCode(),
                 // );
