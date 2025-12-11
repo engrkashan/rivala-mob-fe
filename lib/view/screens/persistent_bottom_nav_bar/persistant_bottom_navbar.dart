@@ -10,9 +10,7 @@ import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 
 class PersistentBottomNavBar extends StatefulWidget {
-    PersistentBottomNavBar({super.key}) {
-    Get.put(BottomNavBarController()); 
-  }
+  const PersistentBottomNavBar({super.key});
 
   @override
   State<PersistentBottomNavBar> createState() => _BottomNavBarState();
@@ -72,11 +70,12 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
   bool isAlertDialogueVisible = false;
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use
-    return WillPopScope(
-      onWillPop: () async {
-        bool value = await navBarController.onBackTap(context);
-        return value;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (!didPop) {
+          await navBarController.onBackTap(context);
+        }
       },
       child: Scaffold(
         extendBody: true,
@@ -84,9 +83,7 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
         extendBodyBehindAppBar: true,
         body: Stack(
           children: [
-            navBarController.buildOffStageNavigator(
-             posts
-            ),
+            navBarController.buildOffStageNavigator(posts),
             navBarController.buildOffStageNavigator(
               chats,
             ),
@@ -180,7 +177,7 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
 
   void _onItemTapped(int index) {
     navBarController.getCurrentScreen(
-        navBarController.pageRoutes[index], index,context);
+        navBarController.pageRoutes[index], index, context);
   }
 
   Widget _buildFloatingActionButton() {
@@ -220,6 +217,3 @@ class FixedCenterDockedFabLocation extends StandardFabLocation
     return super.getOffsetY(scaffoldGeometry, adjustment);
   }
 }
-
-
-

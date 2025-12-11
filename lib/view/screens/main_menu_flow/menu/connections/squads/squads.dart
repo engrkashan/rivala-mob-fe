@@ -1,21 +1,21 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/connections/squads/create_new_squad.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/connections/squads/squad_detail.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/manuall_links/create_new_link.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/image_stack.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+
+import '../../../../../../controllers/providers/squads_provider.dart';
+import '../../../../../../models/squad_model.dart';
 
 class Squads extends StatefulWidget {
   const Squads({super.key});
@@ -29,62 +29,87 @@ class _SquadsState extends State<Squads> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: kwhite,
-        appBar: simpleAppBar(context: context,title: 'Squads', centerTitle: true),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        appBar:
+            simpleAppBar(context: context, title: 'Squads', centerTitle: true),
+        body: Stack(
           children: [
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  row_widget(
-                    onTap: () {
-                      Get.to(()=>CreateNewSquad());
-                    },
-                    icon: Assets.imagesAdd3,
-                    title: '  Start new squad',
-                  ),
-                  SizedBox(
-                    height: 25,
-                  ),
-                  MyTextField(
-                    hint: 'Search squads',
-                    prefixIcon: Image.asset(
-                      Assets.imagesSearch,
-                      width: 12,
-                    ),
-                    contentvPad: 5,
-                  ),
-                  ListView.builder(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 15),
-                        child: squad_container(
-                          delay: (index * 1) + 200,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 22),
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      row_widget(
+                        onTap: () {
+                          Get.to(() => CreateNewSquad());
+                        },
+                        icon: Assets.imagesAdd3,
+                        title: '  Start new squad',
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      MyTextField(
+                        hint: 'Search squads',
+                        prefixIcon: Image.asset(
+                          Assets.imagesSearch,
+                          width: 12,
                         ),
-                      );
-                    },
+                        contentvPad: 5,
+                      ),
+                      Consumer<SquadProvider>(builder: (context, squad, _) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: squad.filteredSquads.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 15),
+                              child: squad_container(
+                                delay: (index * 1) + 200,
+                                squad: squad.filteredSquads[index],
+                              ),
+                            );
+                          },
+                        );
+                      }),
+                      SizedBox(
+                        height: 50,
+                      )
+                    ],
                   ),
-                  SizedBox(
-                    height: 50,
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
+            if (context.read<SquadProvider>().isLoading)
+              Positioned.fill(
+                  child: Container(
+                color: kblack.withOpacity(0.3),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ))
           ],
         ));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SquadProvider>().getSquads();
+    });
   }
 }
 
 class squad_container extends StatefulWidget {
   final String? date, amount, savedAmount;
   final int? delay;
+  final SquadModel? squad;
 
   const squad_container({
     super.key,
@@ -92,6 +117,7 @@ class squad_container extends StatefulWidget {
     this.amount,
     this.savedAmount,
     this.delay,
+    this.squad,
   });
 
   @override
@@ -103,9 +129,18 @@ class _squad_containerState extends State<squad_container> {
 
   @override
   Widget build(BuildContext context) {
+    final squad = widget.squad;
+    final imageUrl = squad?.members
+            ?.map((e) => e.avatarUrl)
+            .where((url) => url != null)
+            .cast<String>()
+            .toList() ??
+        [];
     return Bounce_widget(
       ontap: () {
-        Get.to(() => SquadDetail());
+        Get.to(() => SquadDetail(
+              squadId: squad!.id!,
+            ));
       },
       widget: Animate(
         effects: [
@@ -123,7 +158,7 @@ class _squad_containerState extends State<squad_container> {
                 children: [
                   Expanded(
                     child: MyText(
-                      text: 'Weekend Warriors',
+                      text: squad?.name ?? 'Squad Name',
                       size: 13,
                       weight: FontWeight.w500,
                     ),
@@ -142,7 +177,7 @@ class _squad_containerState extends State<squad_container> {
               row_widget(
                 icon: Assets.imagesAlert2,
                 iconSize: 12,
-                title: 'Inactive',
+                title: squad?.status ?? 'InActive',
                 textColor: kred,
                 fontstyle: FontStyle.italic,
               ),
@@ -155,45 +190,19 @@ class _squad_containerState extends State<squad_container> {
                 weight: FontWeight.w500,
               ),
               MyText(
-                text:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+                text: squad?.description ??
+                    'This is a brief description of the squad. It provides an overview of the squad\'s purpose and objectives.',
                 size: 11,
                 weight: FontWeight.w500,
                 paddingBottom: 10,
                 paddingTop: 0,
               ),
-              StackedImagesWidget(),
+              StackedImagesWidget(
+                urlImages: imageUrl,
+              ),
               if (isActive) ...{
                 SizedBox(
                   height: 10,
-                ),
-                Row(
-                  children: [
-                    buttonContainer(
-                      text: 'Leave Squad',
-                      bgColor: korange,
-                      radius: 5,
-                      vPadding: 4,
-                      textsize: 11,
-                      txtColor: kblack,
-                        weight: FontWeight.normal,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    buttonContainer(
-                      text: 'Delete Squad',
-                      bgColor: kred,
-                      radius: 5,
-                      vPadding: 4,
-                      textsize: 11,
-                      txtColor: kblack,
-                        weight: FontWeight.normal,
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 15,
                 ),
                 MyText(
                   text: '> Edit squad',

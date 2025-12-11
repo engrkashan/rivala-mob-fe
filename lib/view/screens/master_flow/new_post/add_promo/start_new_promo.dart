@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/promo_provider.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/master_flow/new_post/add_promo/add_criteria.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
@@ -23,21 +24,30 @@ class StartNewPromo extends StatefulWidget {
 class _StartNewPromoState extends State<StartNewPromo> {
   int selectedIndex = 1; // 0 for Creators, 1 for Sellers
 
+  final title = TextEditingController();
+  final description = TextEditingController();
+  final startDate = TextEditingController();
+  final endDate = TextEditingController();
+  String status = "Live";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      appBar:
-          simpleAppBar(context: context,title: 'Start New Promo', centerTitle: true, actions: [
-        Bounce_widget(
-          widget: Image.asset(
-            Assets.imagesClose,
-            width: 18,
-            height: 18,
-          ),
-        ),
-        const SizedBox(width: 12),
-      ]),
+      appBar: simpleAppBar(
+          context: context,
+          title: 'Start New Promo',
+          centerTitle: true,
+          actions: [
+            Bounce_widget(
+              widget: Image.asset(
+                Assets.imagesClose,
+                width: 18,
+                height: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ]),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -68,9 +78,12 @@ class _StartNewPromoState extends State<StartNewPromo> {
                           });
                         },
                         widget: CustomeContainer(
-                          borderColor:
-                              selectedIndex == 0 ? ktransparent :widget.color?? kgreen,
-                          color: selectedIndex == 0 ?widget.color?? kblue : ktransparent,
+                          borderColor: selectedIndex == 0
+                              ? ktransparent
+                              : widget.color ?? kgreen,
+                          color: selectedIndex == 0
+                              ? widget.color ?? kblue
+                              : ktransparent,
                           radius: 15,
                           widget: Column(
                             children: [
@@ -100,9 +113,12 @@ class _StartNewPromoState extends State<StartNewPromo> {
                           });
                         },
                         widget: CustomeContainer(
-                          borderColor:
-                              selectedIndex == 1 ? ktransparent :widget.color?? kgreen,
-                          color: selectedIndex == 1 ?widget.color?? kblue : ktransparent,
+                          borderColor: selectedIndex == 1
+                              ? ktransparent
+                              : widget.color ?? kgreen,
+                          color: selectedIndex == 1
+                              ? widget.color ?? kblue
+                              : ktransparent,
                           radius: 15,
                           widget: Column(
                             children: [
@@ -128,6 +144,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
 
                 const SizedBox(height: 34),
                 MyTextField(
+                  controller: title,
                   hint: 'Black Friday',
                   label: 'Promo Name',
                   suffixIcon: Image.asset(
@@ -141,6 +158,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   bordercolor: ktransparent,
                 ),
                 MyTextField(
+                  controller: description,
                   hint:
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
                   label: 'Description',
@@ -155,6 +173,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   bordercolor: ktransparent,
                 ),
                 MyTextField(
+                  controller: startDate,
                   hint: 'MM/DD/YYYY',
                   label: 'Start Date',
                   filledColor: kblack.withOpacity(0.05),
@@ -168,6 +187,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   bordercolor: ktransparent,
                 ),
                 MyTextField(
+                  controller: endDate,
                   hint: 'MM/DD/YYYY',
                   label: 'End Date',
                   filledColor: kblack.withOpacity(0.05),
@@ -184,8 +204,11 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   label: 'Status',
                   hint: 'Live',
                   items: ['Off', 'Paused', 'Live'],
-                  selectedValue: 'Live',
-                  onChanged: (e) {},
+                  selectedValue: status,
+                  onChanged: (e) {
+                    status = e;
+                    setState(() {});
+                  },
                 ),
                 MyText(
                   text: 'Criteria #1',
@@ -195,7 +218,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   paddingBottom: 15,
                 ),
                 Container(
-                  height: Get.height*0.2,
+                  height: Get.height * 0.2,
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -235,66 +258,66 @@ class _StartNewPromoState extends State<StartNewPromo> {
                       // Positioned(
                       //   left: 40,
                       //   child: Image.asset(Assets.imagesGradline,width: 4,height: 93,)),
-                         Positioned(
-                          top: 80,
-                          left: 0,
-                          right: 0,
-                           child: Row(
-                                             children: [
-                                               MyText(
-                                                 text: 'THEN',
-                                                 color: kblack,
-                                                 weight: FontWeight.w700,
-                                                 size: 10,
-                                                 paddingRight: 5,
-                                               ),
-                                               Image.asset(
-                                                 Assets.imagesThen,
-                                                 width: 34,
-                                                 height: 34,
-                                               ),
-                                               SizedBox(
-                                                 width: 12,
-                                               ),
-                                               Expanded(
-                                                 child: CustomeContainer(
-                            radius: 15,
-                            vpad: 10,
-                            hpad: 12,
-                            color: kblack.withOpacity(0.05),
-                            widget: MyText(
-                              text:
-                                  'Discount shipping by 20%',
-                              size: 14,
-                              color: ktertiary,
+                      Positioned(
+                        top: 80,
+                        left: 0,
+                        right: 0,
+                        child: Row(
+                          children: [
+                            MyText(
+                              text: 'THEN',
+                              color: kblack,
+                              weight: FontWeight.w700,
+                              size: 10,
+                              paddingRight: 5,
                             ),
-                                                 ),
-                                               )
-                                             ],
-                                           ),
-                         ),
+                            Image.asset(
+                              Assets.imagesThen,
+                              width: 34,
+                              height: 34,
+                            ),
+                            SizedBox(
+                              width: 12,
+                            ),
+                            Expanded(
+                              child: CustomeContainer(
+                                radius: 15,
+                                vpad: 10,
+                                hpad: 12,
+                                color: kblack.withOpacity(0.05),
+                                widget: MyText(
+                                  text: 'Discount shipping by 20%',
+                                  size: 14,
+                                  color: ktertiary,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
- 
-                MyText(
-                  text: '+ Add criteria',
-                  size: 12,
-                  color: kblue,
-                  onTap: () {
-                    Get.bottomSheet(AddCriteria(), isScrollControlled: true);
-                  },
-                ),
+                // MyText(
+                //   text: '+ Add criteria',
+                //   size: 12,
+                //   color: kblue,
+                //   onTap: () {
+                //     Get.bottomSheet(AddCriteria(), isScrollControlled: true);
+                //   },
+                // ),
                 const SizedBox(height: 50),
               ],
             ),
           ),
           MyButton(
-            buttonText:widget.buttonText?? 'Add & save promo',
+            buttonText: widget.buttonText ?? 'Add & save promo',
             mBottom: 30,
             mhoriz: 22,
-            onTap: () {
+            onTap: () async {
+              await context.read<PromoProvider>().uploadPromo(title.text,
+                  description.text, startDate.text, endDate.text, status);
               Get.back();
               // Get.to(() => StartNewPromoSuccess());
             },

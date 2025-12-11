@@ -33,4 +33,26 @@ class ProductsRepo {
 
     return list.map((item) => ProductReview.fromJson(item)).toList();
   }
+
+  // Future<List<ProductModel>> getSearchedProducts() async {
+  //   final response = await api.postResponse(
+  //     endpoints: Endpoints.searchProduct,
+  //   );
+  // }
+
+  Future<List<ProductModel>> getMyProducts() async {
+    final response = await api.getResponse(endpoints: Endpoints.myProducts);
+
+    final list = response['products'] as List;
+
+    return list.map((item) => ProductModel.fromJson(item)).toList();
+  }
+
+  Future<List<ProductModel>> getAllProducts() async {
+    final response = await api.getResponse(endpoints: Endpoints.products);
+
+    final list = response['products'] as List;
+
+    return list.map((item) => ProductModel.fromJson(item)).toList();
+  }
 }

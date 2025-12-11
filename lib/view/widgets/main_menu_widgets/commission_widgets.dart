@@ -9,6 +9,8 @@ import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 
+import '../../../models/product_model.dart';
+
 class order_number_detail_container extends StatefulWidget {
   final String? date, amount, savedAmount;
   final int? delay;
@@ -160,30 +162,40 @@ class _order_number_detail_containerState
                           ],
                         ),
                         Row(
-                      children: [
-                        SizedBox(width: 24,),
-                        CommonImageView(imagePath: Assets.imagesGradline,height: 25,),
-                      ],
-                    ),
-                          ListView.separated(
-                            padding: EdgeInsets.only(top: 0),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 0),
-                      child: order_detail_row()
-                    );
-                  }, separatorBuilder: (BuildContext context, int index) { 
-                    return Row(
-                      children: [
-                        SizedBox(width: 24,),
-                        CommonImageView(imagePath: Assets.imagesGradline,height: 25,),
-                      ],
-                    );
-                   },
-                ),
+                          children: [
+                            SizedBox(
+                              width: 24,
+                            ),
+                            CommonImageView(
+                              imagePath: Assets.imagesGradline,
+                              height: 25,
+                            ),
+                          ],
+                        ),
+                        ListView.separated(
+                          padding: EdgeInsets.only(top: 0),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: 3,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                                padding: const EdgeInsets.only(bottom: 0),
+                                child: order_detail_row());
+                          },
+                          separatorBuilder: (BuildContext context, int index) {
+                            return Row(
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                ),
+                                CommonImageView(
+                                  imagePath: Assets.imagesGradline,
+                                  height: 25,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ],
                     ),
                   );
@@ -198,20 +210,24 @@ class _order_number_detail_containerState
 }
 
 class horizontal_img_list extends StatelessWidget {
+  final List<ProductModel>? product;
   const horizontal_img_list({
     super.key,
+    this.product,
   });
 
   @override
   Widget build(BuildContext context) {
+    final totalImages = product!.length - 3;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         ...List.generate(
-            3,
+            product?.length ?? 0,
             (index) => Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: store_image_stack(
+                    url: product?[index].image?[0] ?? "",
                     width: 45,
                     height: 45,
                     iconSize: 15,
@@ -220,22 +236,22 @@ class horizontal_img_list extends StatelessWidget {
                     showShadow: false,
                   ),
                 )),
-        DottedBorder(
-          borderType: BorderType.RRect,
-          padding:
-              const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-          radius: const Radius.circular(8),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: MyText(
-                text: '+ 4 more',
-                size: 9,
-                onTap: () {},
+        if (totalImages > 0)
+          DottedBorder(
+            borderType: BorderType.RRect,
+            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+            radius: const Radius.circular(8),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: MyText(
+                  text: '+ $totalImages more',
+                  size: 9,
+                  onTap: () {},
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -253,7 +269,7 @@ class order_detail_row extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left:12),
+      padding: const EdgeInsets.only(left: 12),
       child: Row(
         children: [
           store_image_stack(

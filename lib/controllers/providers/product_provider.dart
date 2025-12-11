@@ -7,7 +7,7 @@ class ProductProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _error;
-  List<ProductModel>? _forYouPrd;
+  List<ProductModel>? _prds;
   // Stores all product lists by type
   final Map<String, List<ProductModel>> _productsByType = {};
 
@@ -18,7 +18,10 @@ class ProductProvider extends ChangeNotifier {
 
   List<ProductReview>? get prdReviews => _prdReviews;
   List<ProductModel>? productsFor(String type) => _productsByType[type];
-  List<ProductModel>? get forYouPrd => _forYouPrd;
+  List<ProductModel>? get prds => _prds;
+
+  List<ProductModel>? _filteredPrds;
+  List<ProductModel>? get filteredPrds => _filteredPrds;
 
   void setLoading(bool value) {
     _isLoading = value;
@@ -43,26 +46,78 @@ class ProductProvider extends ChangeNotifier {
   Future<void> loadForYou(String id) async {
     setLoading(true);
     try {
-      _forYouPrd = await _productRepo.getForYouPrd(id);
+      _prds = await _productRepo.getForYouPrd(id);
       _error = null;
     } catch (e) {
       _error = e.toString();
-      _forYouPrd = [];
+      _prds = [];
     } finally {
       setLoading(false);
     }
   }
 
-  Future<void> loadPrdreviews(String id) async {
+  Future<void> loadPrdReviews(String id) async {
     setLoading(true);
     try {
       _prdReviews = await _productRepo.getPrdReview(id);
       _error = null;
     } catch (e) {
       _error = e.toString();
-      _forYouPrd = [];
+      _prds = [];
     } finally {
       setLoading(false);
     }
+  }
+
+  Future<void> loadCurrentProducts() async {
+    setLoading(true);
+    try {
+      _prds = await _productRepo.getMyProducts();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _prds = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  List<ProductModel> selectedMembers = [];
+
+  void toggleMember(ProductModel prd) {
+    if (selectedMembers.any((m) => m.id == prd.id)) {
+      selectedMembers.removeWhere((m) => m.id == prd.id);
+    } else {
+      selectedMembers.add(prd);
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadAllProducts() async {
+    setLoading(true);
+    try {
+      final allProducts = await _productRepo.getAllProducts();
+      _prds = allProducts;
+      _filteredPrds = List.from(allProducts); // always copy
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _prds = [];
+      _filteredPrds = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  void searchProducts(String query) {
+    if (query.isEmpty) {
+      _filteredPrds = _prds;
+    } else {
+      _filteredPrds = _prds!
+          .where((squad) =>
+              squad.title!.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners();
   }
 }

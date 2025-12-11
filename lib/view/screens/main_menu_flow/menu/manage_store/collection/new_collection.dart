@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/collections_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_promo/search_criteria_products.dart';
 import 'package:rivala/view/widgets/appbar.dart';
@@ -8,8 +10,14 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../../../../models/product_model.dart';
+
 class NewCollection extends StatelessWidget {
-  const NewCollection({super.key});
+  NewCollection({super.key});
+
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final List<ProductModel> products = [];
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +40,14 @@ class NewCollection extends StatelessWidget {
             height: 20,
           ),
           MyTextField(
+              controller: nameController,
               hint: 'Size',
               label: 'Collection Name',
               bordercolor: ktransparent,
               filledColor: kgrey2,
               delay: 150),
           MyTextField(
+            controller: descriptionController,
             hint:
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
             label: 'Collection Description',
@@ -53,18 +63,24 @@ class NewCollection extends StatelessWidget {
             size: 12,
             paddingTop: 10,
             paddingBottom: 35,
-            onTap: (){
-             Get.bottomSheet(SearchCriteriaProducts(
-              title: 'Add Products',
-                            hasCheckbox: false,
-                          ),isScrollControlled: true);
+            onTap: () {
+              Get.bottomSheet(
+                  SearchCriteriaProducts(
+                    title: 'Add Products',
+                    hasCheckbox: false,
+                  ),
+                  isScrollControlled: true);
             },
           ),
           MyButton(
             buttonText: 'Save collection',
             mBottom: 30,
-            onTap: () {
-                  Get.back();
+            onTap: () async {
+              await context.read<CollectionProvider>().setCollection(
+                  nameController.text.trim(),
+                  descriptionController.text,
+                  context);
+              Get.back();
             },
           )
         ],

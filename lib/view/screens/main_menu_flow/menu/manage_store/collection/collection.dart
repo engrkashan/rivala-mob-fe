@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
@@ -11,6 +12,9 @@ import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/commission_widgets.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+
+import '../../../../../../controllers/providers/collections_provider.dart';
+import '../../../../../../models/collection_model.dart';
 
 class CollectionMain extends StatefulWidget {
   const CollectionMain({super.key});
@@ -47,17 +51,27 @@ class _CollectionMainState extends State<CollectionMain> {
                   SizedBox(
                     height: 20,
                   ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 25),
-                        child: collection_container(),
-                      );
-                    },
-                  ),
+                  Consumer<CollectionProvider>(builder: (context, ref, _) {
+                    print(ref.allCollections.length);
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: ref.allCollections.length,
+                      itemBuilder: (context, index) {
+                        if (ref.isLoading) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 25),
+                          child: collection_container(
+                            model: ref.allCollections[index],
+                          ),
+                        );
+                      },
+                    );
+                  }),
                   SizedBox(
                     height: 80,
                   )
@@ -67,11 +81,21 @@ class _CollectionMainState extends State<CollectionMain> {
           ],
         ));
   }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CollectionProvider>().loadAllCollections();
+    });
+  }
 }
 
 class collection_container extends StatelessWidget {
+  final CollectionModel? model;
   const collection_container({
     super.key,
+    this.model,
   });
 
   @override
@@ -86,13 +110,15 @@ class collection_container extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MyText(
-            text: 'Hiking Essentials',
+            text: model?.name ?? "",
             color: kblack,
             weight: FontWeight.w500,
             size: 15,
             paddingBottom: 20,
           ),
-          horizontal_img_list(),
+          horizontal_img_list(
+            product: model?.products ?? [],
+          ),
           MyText(
             text: '> Manage collection',
             color: kblue,
@@ -102,13 +128,21 @@ class collection_container extends StatelessWidget {
             paddingBottom: 10,
             onTap: () {
               Navigator.of(context).push(
-                CustomPageRoute(page: ManageCollection()),
+                CustomPageRoute(
+                    page: ManageCollection(
+                  collection: model!,
+                )),
               );
             },
           ),
           Row(
             children: [
               buttonContainer(
+                onTap: () {
+                  context
+                      .read<CollectionProvider>()
+                      .deleteCollection(model!.id!);
+                },
                 text: 'Delete Collection',
                 bgColor: kred,
                 radius: 5,

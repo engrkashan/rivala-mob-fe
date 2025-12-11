@@ -2,11 +2,9 @@ import 'package:rivala/config/network/endpoints.dart';
 import 'package:rivala/models/store_model.dart';
 
 import '../../config/network/api_client.dart';
-import '../../config/network/session.dart';
 
 class BrandsRepo {
   final ApiClient api = ApiClient();
-  Session session = Session();
 
   Future<List<StoreModel>> getRecentStore() async {
     final response = await api.getResponse(endpoints: Endpoints.recentStores);
@@ -21,6 +19,18 @@ class BrandsRepo {
 
     final store = response['store'];
 
-    return store;
+    return StoreModel.fromJson(store);
+  }
+
+  Future<List<StoreModel>> getAllStores() async {
+    final response = await api.getResponse(endpoints: Endpoints.stores);
+
+    final list = response['stores'] as List;
+
+    return list.map((item) => StoreModel.fromJson(item)).toList();
+  }
+
+  Future<void> updateStore(StoreModel store) async {
+    final res = api.patchResponse(endpoint: Endpoints.stores, data: store);
   }
 }

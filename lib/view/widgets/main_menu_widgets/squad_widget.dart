@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/main.dart';
@@ -12,14 +13,21 @@ import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../models/product_model.dart';
+import '../../../models/store_model.dart';
+import '../../../models/user_model.dart';
+import '../../screens/main_menu_flow/menu/connections/squads/add_squad_members.dart';
+
 class squad_members_container extends StatefulWidget {
   final String? commission;
   final int? delay;
+  final List<UserModel>? members;
 
   const squad_members_container({
     super.key,
     this.delay,
     this.commission,
+    this.members,
   });
 
   @override
@@ -62,13 +70,15 @@ class _squad_members_containerState extends State<squad_members_container> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
+              itemCount: widget.members?.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: squad_members_row(
                     owner: index == 0 ? true : false,
                     admin: index == 2 ? true : false,
+                    title: widget.members?[index].name,
+                    img: widget.members?[index].avatarUrl,
                   ),
                 );
               },
@@ -81,6 +91,16 @@ class _squad_members_containerState extends State<squad_members_container> {
               size: 12,
               color: kblue,
               weight: FontWeight.w500,
+              onTap: () {
+                Get.bottomSheet(
+                  AddSquadMembers(
+                    isLimit: true,
+                    isProduct: false,
+                    isBrand: false,
+                  ),
+                  isScrollControlled: true,
+                );
+              },
             ),
           ],
         ),
@@ -162,11 +182,15 @@ class squad_seller extends StatefulWidget {
   final String? commission;
   final int? delay;
   final bool? isProduct;
+  final List<StoreModel>? store;
+  final List<ProductModel>? products;
   const squad_seller({
     super.key,
     this.delay,
     this.commission,
     this.isProduct = false,
+    this.store,
+    this.products,
   });
 
   @override
@@ -216,25 +240,40 @@ class _squad_sellerState extends State<squad_seller> {
               weight: FontWeight.w400,
               paddingBottom: 15,
             ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: squad_seller_row());
-              },
-            ),
+            if (widget.isProduct == false)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.store?.length ?? 0,
+                itemBuilder: (context, index) {
+                  return Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: squad_seller_row(
+                        store: widget.store?[index],
+                      ));
+                },
+              ),
+            if (widget.isProduct == true)
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.products?.length ?? 0,
+                itemBuilder: (context, index) {
+                  return Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child:
+                          squad_seller_row(product: widget.products?[index]));
+                },
+              ),
             // SizedBox(
             //   height: 15,
             // ),
-            MyText(
-              text: widget.isProduct == true ? '+ Add product' : '+ Add Brand',
-              size: 12,
-              color: kblue,
-              weight: FontWeight.w500,
-            ),
+            // MyText(
+            //   text: widget.isProduct == true ? '+ Add product' : '+ Add Brand',
+            //   size: 12,
+            //   color: kblue,
+            //   weight: FontWeight.w500,
+            // ),
           ],
         ),
       ),
@@ -244,7 +283,9 @@ class _squad_sellerState extends State<squad_seller> {
 
 //squad seller row
 class squad_seller_row extends StatefulWidget {
-  const squad_seller_row({super.key});
+  final StoreModel? store;
+  final ProductModel? product;
+  const squad_seller_row({super.key, this.store, this.product});
 
   @override
   State<squad_seller_row> createState() => _squad_seller_rowState();
@@ -254,10 +295,14 @@ class _squad_seller_rowState extends State<squad_seller_row> {
   bool isActive2 = false;
   @override
   Widget build(BuildContext context) {
+    final bool isProduct = widget.product != null;
     return Row(
       children: [
         CommonImageView(
-          imagePath: Assets.imagesNutrition2,
+          url: isProduct ? widget.product?.image?.first : widget.store?.logoUrl,
+          imagePath: isProduct
+              ? Assets.imagesNutrition2 // fallback if product has no image
+              : widget.store?.logoUrl ?? Assets.imagesNutrition2,
           radius: 8,
           height: 44,
           width: 44,
@@ -274,7 +319,9 @@ class _squad_seller_rowState extends State<squad_seller_row> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText(
-                      text: 'Nutrition Rescue',
+                      text: isProduct
+                          ? (widget.product?.title ?? '')
+                          : (widget.store?.name ?? ''),
                       size: 15,
                       weight: FontWeight.w500,
                     ),

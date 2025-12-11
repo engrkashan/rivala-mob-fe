@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/link_provider.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/import_linktree/import_linktree.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/import_linktree/import_linktree_email.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/link_success.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/manuall_links/indiviual_link.dart';
@@ -16,6 +17,8 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/switch_button.dart';
 
+import '../../../../../../../models/link_model.dart';
+
 class CreateNewLink extends StatefulWidget {
   final String? title;
   final bool? hasAddOpt, hasDelete;
@@ -27,12 +30,6 @@ class CreateNewLink extends StatefulWidget {
 }
 
 class _IndiviualLinkState extends State<CreateNewLink> {
-  List<Map<String, String>> linkItems = [
-    {"title": "Instagram", "link": "instagram.com/austinlarsen27"},
-    {"title": "TikTok", "link": "tiktok.com/austinlarsen"},
-    {"title": "Shopify", "link": "rivala.com/shop"},
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,19 +78,25 @@ class _IndiviualLinkState extends State<CreateNewLink> {
                       ],
                     ),
                   ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: linkItems.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: add_link_container(
-                        title: linkItems[index]["title"]!,
-                        link: linkItems[index]["link"]!,
-                        delay: (index + 1) * 200,
-                        isDelete: widget.hasDelete,
-                      ),
+                Consumer<LinkProvider>(
+                  builder: (context, ref, _) {
+                    final linkItems = ref.links;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: linkItems.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: add_link_container(
+                            title: linkItems[index].name,
+                            link: linkItems[index].url,
+                            delay: (index + 1) * 200,
+                            isDelete: widget.hasDelete,
+                            linkModel: linkItems[index],
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -127,6 +130,12 @@ class _IndiviualLinkState extends State<CreateNewLink> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<LinkProvider>().loadLinks(context);
+  }
 }
 
 class add_link_container extends StatelessWidget {
@@ -136,6 +145,8 @@ class add_link_container extends StatelessWidget {
   final VoidCallback? onEditTap;
   final double? text1Size, text2Size;
   final int? maxlines;
+  final Widget? leadingWidget;
+  final LinkModel? linkModel;
   const add_link_container({
     super.key,
     this.delay,
@@ -149,6 +160,8 @@ class add_link_container extends StatelessWidget {
     this.text2Size,
     this.maxlines,
     this.isDelete = false,
+    this.leadingWidget,
+    this.linkModel,
   });
 
   @override
@@ -198,18 +211,24 @@ class add_link_container extends StatelessWidget {
                           textOverflow: TextOverflow.ellipsis,
                           color: kblack),
                       if (isRadio == false || isMainMenu == true)
-                        Bounce_widget(
-                          ontap: onEditTap ??
-                              () {
-                                Get.to(() => IndiviualLink());
-                              },
-                          widget: MyText(
-                            paddingTop: 20,
-                            text: editButtontext ?? '> Edit link',
-                            size: 12,
-                            paddingBottom: 8,
-                            weight: FontWeight.w500,
-                            color: kblue,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Wrap(
+                            children: [
+                              leadingWidget ?? const SizedBox(),
+                              Bounce_widget(
+                                ontap: onEditTap ??
+                                    () => Get.to(() => IndiviualLink(
+                                          link: linkModel,
+                                        )),
+                                widget: MyText(
+                                  text: editButtontext ?? '> Edit link',
+                                  size: 12,
+                                  weight: FontWeight.w500,
+                                  color: kblue,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       if (isDelete == true)

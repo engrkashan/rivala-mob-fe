@@ -9,11 +9,13 @@ import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import 'package:rivala/models/store_model.dart';
 //header image container
 
 class HeaderImageStack extends StatelessWidget {
   final bool? showContent;
-  const HeaderImageStack({super.key, this.showContent = true});
+  final StoreModel? store;
+  const HeaderImageStack({super.key, this.showContent = true, this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +28,11 @@ class HeaderImageStack extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           child: CommonImageView(
-            imagePath: Assets.imagesDummyImg,
+            imagePath: Assets.imagesDummyImg, // Maybe store cover image?
+            url: store?.logoUrl, // Assuming StoreModel has coverUrl or similar
             width: Get.width,
+            height: 300, // Fixed height for cover
+            fit: BoxFit.cover,
           ),
         ),
 
@@ -42,6 +47,7 @@ class HeaderImageStack extends StatelessWidget {
               // Profile Image
               CommonImageView(
                 imagePath: Assets.imagesProfileapolo,
+                url: store?.logoUrl,
                 width: 80,
                 height: 80,
                 radius: 100,
@@ -49,7 +55,7 @@ class HeaderImageStack extends StatelessWidget {
 
               // Profile Name
               MyText(
-                text: 'Apollo & Sage',
+                text: store?.name ?? 'Apollo & Sage',
                 color: kwhite,
                 size: 22,
                 weight: FontWeight.bold,
@@ -59,7 +65,7 @@ class HeaderImageStack extends StatelessWidget {
 
               // Likes & Username
               MyText(
-                text: '@apollo.and.sage  ·  2,486 Likes',
+                text: '@${store?.owner?.username ?? "apollo.and.sage"} ',
                 color: kwhite,
                 size: 12,
                 weight: FontWeight.w400,
@@ -70,7 +76,7 @@ class HeaderImageStack extends StatelessWidget {
                 // Description
                 MyText(
                   paddingTop: 15,
-                  text:
+                  text: store?.owner?.bio ??
                       'Australian designed swimwear.\nWorldwide shipping. Ethically made.',
                   color: kwhite,
                   size: 12,
@@ -88,7 +94,7 @@ class HeaderImageStack extends StatelessWidget {
                     children: [
                       Expanded(
                         child: buttonContainer(
-                          text: '245   Followers',
+                          text: '  Followers',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,
                           textsize: 11,
@@ -100,7 +106,7 @@ class HeaderImageStack extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: buttonContainer(
-                          text: '143   Following',
+                          text: '  Following',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,
                           textsize: 11,

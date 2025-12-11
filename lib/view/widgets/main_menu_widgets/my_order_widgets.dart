@@ -8,16 +8,18 @@ import 'package:rivala/view/screens/main_menu_flow/menu/orders/replace_order.dar
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/return_order.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/order_management.dart/fulfill_order.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/subscription_manage_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../models/order_model.dart';
+
 class my_order_container extends StatefulWidget {
   final String? date, amount, savedAmount;
   final int? delay;
   final bool? hasfulfuill, isfilled;
+  final OrderModel? order;
   const my_order_container({
     super.key,
     this.date,
@@ -26,6 +28,7 @@ class my_order_container extends StatefulWidget {
     this.delay,
     this.hasfulfuill = false,
     this.isfilled = false,
+    this.order,
   });
 
   @override
@@ -37,6 +40,7 @@ class _my_order_containerState extends State<my_order_container> {
 
   @override
   Widget build(BuildContext context) {
+    final order = widget.order;
     return Animate(
       effects: [MoveEffect(delay: Duration(milliseconds: widget.delay ?? 100))],
       child: CustomeContainer(
@@ -51,7 +55,8 @@ class _my_order_containerState extends State<my_order_container> {
               children: [
                 Expanded(
                   child: MyText(
-                    text: widget.date ?? 'Sep. 15, 2025',
+                    text:
+                        "${order?.createdAt?.month}, ${order?.createdAt?.day}, ${order?.createdAt?.year}",
                     size: 13,
                     weight: FontWeight.w400,
                   ),
@@ -70,7 +75,7 @@ class _my_order_containerState extends State<my_order_container> {
             row_widget(
               icon: Assets.imagesTruck,
               iconSize: 12,
-              title: 'Shipped',
+              title: order?.status,
               textColor: kgreen,
               fontstyle: FontStyle.italic,
             ),
@@ -85,7 +90,7 @@ class _my_order_containerState extends State<my_order_container> {
                   weight: FontWeight.w500,
                 ),
                 MyText(
-                  text: widget.amount ?? '\$5,000.00',
+                  text: order?.ordersItem?[0].price.toString() ?? '\$5,000.00',
                   size: 11,
                   weight: FontWeight.w400,
                 )
@@ -99,45 +104,45 @@ class _my_order_containerState extends State<my_order_container> {
                   weight: FontWeight.w500,
                 ),
                 MyText(
-                  text: widget.amount ?? '2249821585154',
+                  text: order?.id ?? '2249821585154',
                   size: 11,
                   weight: FontWeight.w400,
                 )
               ],
             ),
             if (widget.hasfulfuill == true)
-              Row(
-                children: [
-                  MyText(
-                    text: 'CUSTOMER: ',
-                    size: 11,
-                    weight: FontWeight.w500,
-                  ),
-                  CommonImageView(
-                    imagePath: Assets.imagesUser,
-                    width: 15,
-                    height: 15,
-                  ),
-                  MyText(
-                    paddingLeft: 10,
-                    text: 'Cy Tidwell',
-                    size: 11,
-                    weight: FontWeight.w400,
-                  )
-                ],
+              // Row(
+              //   children: [
+              //     MyText(
+              //       text: 'CUSTOMER: ',
+              //       size: 11,
+              //       weight: FontWeight.w500,
+              //     ),
+              //     CommonImageView(
+              //       imagePath: Assets.imagesUser,
+              //       width: 15,
+              //       height: 15,
+              //     ),
+              //     MyText(
+              //       paddingLeft: 10,
+              //       text: order?.,
+              //       size: 11,
+              //       weight: FontWeight.w400,
+              //     )
+              //   ],
+              // ),
+              MyText(
+                text: 'PRODUCT(S):',
+                size: 11,
+                weight: FontWeight.w500,
+                paddingBottom: 10,
+                paddingTop: 0,
               ),
-            MyText(
-              text: 'PRODUCT(S):',
-              size: 11,
-              weight: FontWeight.w500,
-              paddingBottom: 10,
-              paddingTop: 0,
-            ),
             ListView.builder(
               padding: EdgeInsets.all(0),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
+              itemCount: order?.products?.length ?? 0,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),

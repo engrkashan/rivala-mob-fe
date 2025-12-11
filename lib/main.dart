@@ -8,15 +8,33 @@ import 'package:rivala/controllers/font_controller.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
 import 'package:rivala/controllers/navbar_controller.dart';
 import 'package:rivala/controllers/providers/brands_provider.dart';
+import 'package:rivala/controllers/providers/chat_provider.dart';
+import 'package:rivala/controllers/providers/link_provider.dart';
+import 'package:rivala/controllers/providers/order_provider.dart';
+import 'package:rivala/controllers/providers/post_provider.dart';
 import 'package:rivala/controllers/providers/product_provider.dart';
+import 'package:rivala/controllers/providers/promo_provider.dart';
+import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
-import 'package:rivala/controllers/providers/user/user_provider.dart';
 import 'package:rivala/controllers/repos/auth_repo.dart';
 import 'package:rivala/font_customisation/font_customization.dart';
 import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
 import 'package:rivala/view/screens/persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 
+import 'controllers/providers/buyer_provider.dart';
+import 'controllers/providers/categories_provider.dart';
+import 'controllers/providers/collections_provider.dart';
+import 'controllers/providers/follow_provider.dart';
+import 'controllers/providers/fulfillment.dart';
+import 'controllers/providers/hero_section_provider.dart';
+import 'controllers/providers/interests_provider.dart';
 import 'controllers/providers/media_provider.dart';
+import 'controllers/providers/notification_provider.dart';
+import 'controllers/providers/pages_provider.dart';
+import 'controllers/providers/payment_methods_provider.dart';
+import 'controllers/providers/reports_provider.dart';
+import 'controllers/providers/squads_provider.dart';
+import 'controllers/providers/user/seller_provider.dart';
 import 'controllers/repos/media_repo.dart';
 
 void main() async {
@@ -30,10 +48,29 @@ void main() async {
   runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MediaProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
-        ChangeNotifierProvider(create: (_) => BrandsProvider())
+        ChangeNotifierProvider(create: (_) => BrandsProvider()),
+        ChangeNotifierProvider(create: (_) => PostProvider()),
+        ChangeNotifierProvider(create: (_) => FollowProvider()),
+        ChangeNotifierProvider(create: (_) => SquadProvider()),
+        ChangeNotifierProvider(create: (_) => SellerProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => CollectionProvider()),
+        ChangeNotifierProvider(create: (_) => LinkProvider()),
+        ChangeNotifierProvider(create: (_) => PromoProvider()),
+        // New Providers
+        ChangeNotifierProvider(create: (_) => CategoriesProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => InterestsProvider()),
+        ChangeNotifierProvider(create: (_) => BuyerProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentMethodsProvider()),
+        ChangeNotifierProvider(create: (_) => ReportsProvider()),
+        ChangeNotifierProvider(create: (_) => PagesProvider()),
+        ChangeNotifierProvider(create: (_) => HeroSectionProvider()),
+        ChangeNotifierProvider(create: (_) => fulfillmentPro()),
       ],
       child: MyApp(
         token: token,
@@ -64,6 +101,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        home: token != null ? PersistentBottomNavBar() : MasterSignIn());
+        home: token != null
+            ? const PersistentBottomNavBar()
+            : const MasterSignIn());
   }
 }

@@ -1,15 +1,20 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/media_provider.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/customize_theme_grad_screen.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-import 'package:rivala/view/widgets/button_container.dart';
+import 'package:rivala/view/widgets/color_converter.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+
+import '../../../../../controllers/providers/theme_provider.dart';
 import '../../../../../generated/assets.dart';
+import '../../../../../models/theme_model.dart';
 
 class SelectTheme extends StatefulWidget {
   final String? title, buttonText;
@@ -26,10 +31,20 @@ class _SelectThemeState extends State<SelectTheme> {
       CarouselSliderController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ThemeProvider>().loadAllThemes();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      appBar: simpleAppBar(context: context,
+      appBar: simpleAppBar(
+          context: context,
           title: widget.title ?? 'Select Your Theme',
           centerTitle: true,
           actions: [
@@ -49,65 +64,82 @@ class _SelectThemeState extends State<SelectTheme> {
             color: kgrey2,
           ),
           Expanded(
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                SizedBox(
-                  height: 20,
-                ),
-                CarouselSlider.builder(
-                  carouselController: _carouselController,
-                  options: CarouselOptions(
-                    autoPlay: true,
-                    autoPlayAnimationDuration: Duration(milliseconds: 300),
-                    height: Get.height,
-                    enlargeFactor: 0.1,
-                    viewportFraction: 0.7,
-                    enableInfiniteScroll: true,
-                    enlargeCenterPage: true,
-                    onPageChanged: (index, reason) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                  ),
-                  itemCount: 3,
-                  itemBuilder: (context, index, realIndex) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Column(
-                        children: [
-                          MyText(
-                            text: index == 0
-                                ? 'Apollo & Sage'
-                                : index == 1
-                                    ? 'Lunar & Nightfall'
-                                    : 'Solar & Ember',
-                            size: 16,
-                            weight: FontWeight.w600,
-                            color: kblack2,
-                            paddingBottom: 20,
-                          ),
-                          theme_stack_image(),
-                          SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+            child: Consumer<ThemeProvider>(
+              builder: (context, theme, _) {
+                final themes = theme.themes;
+                if (themes.isEmpty) {
+                  return Center(
+                      child:
+                          Text("No themes available")); // or a loading widget
+                }
+                if (theme.isLoading) {
+                  return CircularProgressIndicator();
+                }
+                return ListView(
+                  shrinkWrap: true,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    CarouselSlider.builder(
+                      carouselController: _carouselController,
+                      options: CarouselOptions(
+                        autoPlay: true,
+                        autoPlayAnimationDuration: Duration(milliseconds: 300),
+                        height: Get.height,
+                        enlargeFactor: 0.1,
+                        viewportFraction: 0.7,
+                        enableInfiniteScroll: true,
+                        enlargeCenterPage: true,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        },
+                      ),
+                      itemCount: themes.length,
+                      itemBuilder: (context, index, realIndex) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(
                             children: [
-                              color_picker(),
-                              SizedBox(width: 8),
-                              color_picker(bgColor: klightgrey),
-                              SizedBox(width: 8),
-                              color_picker(bgColor: kdarkgrey),
-                              SizedBox(width: 8),
-                              color_picker(bgColor: kblack),
+                              MyText(
+                                text: themes[index].name ?? "",
+                                size: 16,
+                                weight: FontWeight.w600,
+                                color: kblack2,
+                                paddingBottom: 20,
+                              ),
+                              theme_stack_image(
+                                theme: themes[index],
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  color_picker(),
+                                  SizedBox(width: 8),
+                                  color_picker(
+                                      bgColor: hexToColor(
+                                          themes[index].color1 ?? "")),
+                                  SizedBox(width: 8),
+                                  color_picker(
+                                      bgColor: hexToColor(
+                                          themes[index].color2 ?? "")),
+                                  SizedBox(width: 8),
+                                  color_picker(
+                                      bgColor: hexToColor(
+                                          themes[index].color2 ?? "")),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -130,6 +162,7 @@ class theme_stack_image extends StatelessWidget {
   final String? title, desc, image;
   final double? height, width;
   final bool? isedit;
+  final ThemeModel? theme;
   const theme_stack_image({
     super.key,
     this.title,
@@ -138,6 +171,7 @@ class theme_stack_image extends StatelessWidget {
     this.height,
     this.width,
     this.isedit = false,
+    this.theme,
   });
 
   @override
@@ -159,7 +193,9 @@ class theme_stack_image extends StatelessWidget {
                     ]
                   : []),
           child: CommonImageView(
-            imagePath: image ?? Assets.imagesDummyImg,
+            url: theme?.coverImage,
+            imagePath: theme?.coverImage ?? Assets.imagesDummyImg,
+            file: context.read<MediaProvider>().selectedImage,
             height: height ?? 400,
             width: width ?? 250,
             radius: 15,
@@ -170,26 +206,18 @@ class theme_stack_image extends StatelessWidget {
           child: Column(
             children: [
               MyText(
-                text: title ?? 'Headline',
+                text: theme?.name ?? 'Headline',
                 color: kwhite,
                 size: 32,
                 weight: FontWeight.bold,
                 paddingBottom: 5,
               ),
               MyText(
-                text: desc ?? 'Subheader',
+                text: theme?.bodyFont ?? 'Subheader',
                 color: kwhite,
                 size: 16,
                 weight: FontWeight.w400,
                 paddingBottom: 8,
-              ),
-              buttonContainer(
-                text: 'BUTTON',
-                bgColor: Color(0XFF404040),
-                txtColor: kwhite,
-                textsize: 11,
-                hPadding: 30,
-                vPadding: 7,
               ),
             ],
           ),
@@ -199,11 +227,15 @@ class theme_stack_image extends StatelessWidget {
               bottom: 10,
               right: 10,
               child: Bounce_widget(
+                  ontap: () async {
+                    await context.read<MediaProvider>().pickImage();
+                    await context.read<MediaProvider>().upload();
+                  },
                   widget: Image.asset(
-                Assets.imagesEdit3,
-                width: 39,
-                height: 39,
-              )))
+                    Assets.imagesEdit3,
+                    width: 39,
+                    height: 39,
+                  )))
       ],
     );
   }
@@ -215,16 +247,21 @@ class color_picker extends StatelessWidget {
   final double? size;
   final VoidCallback? ontapp;
   const color_picker(
-      {super.key, this.bgColor, this.showShadow = true, this.size, this.ontapp});
+      {super.key,
+      this.bgColor,
+      this.showShadow = true,
+      this.size,
+      this.ontapp});
 
   @override
   Widget build(BuildContext context) {
     RxBool isSelected = false.obs;
     return Obx(
       () => Bounce_widget(
-        ontap:ontapp?? () {
-          isSelected.value = !isSelected.value;
-        },
+        ontap: ontapp ??
+            () {
+              isSelected.value = !isSelected.value;
+            },
         widget: Container(
           decoration: BoxDecoration(
               shape: BoxShape.circle,

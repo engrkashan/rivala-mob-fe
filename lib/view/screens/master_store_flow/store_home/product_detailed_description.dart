@@ -44,7 +44,7 @@ class _ProductDetailedDescriptionState
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prdd = Provider.of<ProductProvider>(context, listen: false);
       await prdd.loadForYou(widget.product.id ?? "");
-      await prdd.loadPrdreviews(widget.product.id ?? "");
+      await prdd.loadPrdReviews(widget.product.id ?? "");
     });
   }
 
@@ -337,20 +337,19 @@ class _ProductDetailedDescriptionState
                       physics: BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
                       child: Row(
-                        children: List.generate(
-                            recommended.forYouPrd?.length ?? 0, (index) {
+                        children: List.generate(recommended.prds?.length ?? 0,
+                            (index) {
                           return Padding(
                             padding: const EdgeInsets.only(left: 22),
                             child: store_image_stack(
                               quickbut: true,
-                              url: recommended.forYouPrd?[index].image?.first,
-                              title: recommended.forYouPrd?[index].title,
-                              price: recommended.forYouPrd?[index].price
-                                  .toString(),
+                              url: recommended.prds?[index].image?.first,
+                              title: recommended.prds?[index].title,
+                              price: recommended.prds?[index].price.toString(),
                               singlePrice: true,
                               onTap: () {
                                 Get.to(() => PostDisplay(
-                                      product: recommended.forYouPrd?[index],
+                                      product: recommended.prds?[index],
                                     ));
                               },
                             ),

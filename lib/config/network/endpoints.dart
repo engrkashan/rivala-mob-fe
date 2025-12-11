@@ -59,7 +59,7 @@ class Endpoints {
 //   ========messages==========
   static const String messages = "/messages";
   static String messagesWithId(String id) => "/messages/$id";
-  static String messagesHistory = "/messages/history";
+  static const String messagesHistory = "/messages/history";
   static const String messagesUnread = "/messages/unread";
 
 //   =======Notifications================
@@ -166,7 +166,7 @@ class Endpoints {
   static String themeById(String id) => "/themes/$id";
   static const String currentStoreTheme = "/themes/current";
   static const String customTheme = "/themes/custom";
-  static const String allSellerThemes = "/themes/all";
+  static const String allSellerThemes = "/themes/my-themes";
 
 //   ============user==============
   static const String userProfile = "/user/profile";

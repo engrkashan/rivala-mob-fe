@@ -160,7 +160,7 @@ String? get selectedVideoThumbnail => selectedVideoData['thumbnail'] as String?;
   Future<void> pickImageFromCamera() async {
     final result = await _picker.pickImage(source: ImageSource.camera);
     if (result != null && result.path.isNotEmpty) {
-      final files = File(result.path!);
+      final files = File(result.path);
       selectedMedia.value = [files];
 
       // Filter only images for the filter screen

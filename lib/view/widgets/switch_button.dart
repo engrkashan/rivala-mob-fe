@@ -1,31 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:rivala/consts/app_colors.dart';
 
-
 class SwitchButton extends StatelessWidget {
   final bool? isActive;
-  final double? scale;
-  const SwitchButton({super.key, this.isActive, this.scale});
+  final ValueChanged<bool>? onChanged;
+  final double scale;
+
+  const SwitchButton({
+    super.key,
+    this.isActive,
+    this.onChanged,
+    this.scale = 0.9,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Transform.scale(
-scale:scale?? 0.9,
+      scale: scale,
       child: Switch(
-        value: isActive ?? false,
-        
-        onChanged: (w) {},
+        value: isActive ?? true,
+        onChanged: onChanged,
         inactiveTrackColor: kgrey4,
         trackOutlineColor: WidgetStateColor.transparent,
         inactiveThumbColor: kwhite,
         activeColor: kwhite,
         activeTrackColor: kgreen,
         thumbIcon: MaterialStateProperty.all(const Icon(null)),
-
       ),
     );
   }
 }
+
 //
 
 class SwitchButton2 extends StatelessWidget {

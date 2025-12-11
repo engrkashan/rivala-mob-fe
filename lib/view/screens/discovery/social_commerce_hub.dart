@@ -18,6 +18,7 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../controllers/providers/product_provider.dart';
+import '../../../controllers/providers/post_provider.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -49,6 +50,10 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
       if (!mounted) return;
       final prd = context.read<ProductProvider>();
       _loadFeed("recent", prd);
+
+      final pp = context.read<PostProvider>();
+      pp.loadCreators();
+      pp.loadDiscoverPosts();
     });
 
     _scrollController.addListener(_onScroll);
@@ -99,31 +104,49 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
   }
 
   Widget _buildHorizontalBrandList() {
-    return Consumer<BrandsProvider>(builder: (context, brands, _) {
-      final recent = brands.store;
-      return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.only(left: 22),
-        child: Row(
-          children: recent!.map((brand) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: GestureDetector(
-                // onTap: () => Get.to(() =>  ProductDetailedDescription()),
-                child: curated_brand_widget(
-                  size: 135,
+    return Consumer<BrandsProvider>(
+      builder: (context, brands, _) {
+        final recent = brands.store;
 
-                  networkImg: brand.logoUrl,
-                  title: brand.name,
-                  // desc: brand.,
+        if (recent == null) {
+          // Data is not loaded yet, show a loader or empty container
+          return SizedBox(
+            height: 150, // adjust based on your widget size
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (recent.isEmpty) {
+          // No brands available
+          return SizedBox(
+            height: 150,
+            child: Center(child: Text("No brands available")),
+          );
+        }
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(left: 22),
+          child: Row(
+            children: recent.map((brand) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: GestureDetector(
+                  // onTap: () => Get.to(() => ProductDetailedDescription()),
+                  child: curated_brand_widget(
+                    size: 135,
+                    networkImg:
+                        brand.logoUrl ?? '', // fallback if logoUrl is null
+                    title: brand.name ?? '', // fallback if name is null
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
-    });
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildProductSection({
@@ -174,7 +197,9 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                         size: 135,
                         radius: 20,
                         fit: BoxFit.cover,
-                        networkImg: p.image?.first,
+                        networkImg: (p.image?.isNotEmpty ?? false)
+                            ? p.image!.first
+                            : null,
                         title: p.title ?? "Product",
                         desc: "@${p.owner?.username ?? 'user'}",
                       ),
@@ -266,34 +291,46 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
             ),
 
             // Recent Creators
-            MyText(
-              text: 'Recent Creators',
-              size: 20,
-              weight: FontWeight.bold,
-              color: kblack2,
-              paddingLeft: 22,
-              paddingTop: 15,
-              paddingBottom: 10,
-            ),
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 22),
-              child: Row(
-                children: List.generate(
-                    8,
-                    (_) => const Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: curated_brand_widget(
-                            size: 135,
-                            radius: 100,
-                            fit: BoxFit.cover,
-                            img: Assets.imagesDummyimage2,
-                            title: 'Cy Tidewell',
-                            desc: '@cytidewell',
-                          ),
-                        )),
+            Padding(
+              padding: const EdgeInsets.only(top: 15, bottom: 10),
+              child: MyText(
+                text: 'Recent Creators',
+                size: 20,
+                weight: FontWeight.bold,
+                color: kblack2,
+                paddingLeft: 22,
               ),
+            ),
+            Consumer<PostProvider>(
+              builder: (context, postProvider, _) {
+                final creators = postProvider.creators ?? [];
+                if (creators.isEmpty) {
+                  return const SizedBox(
+                    height: 100,
+                    child: Center(child: CircularProgressIndicator()),
+                  ); // Or shimmer
+                }
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 22),
+                  child: Row(
+                    children: creators.map((user) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: curated_brand_widget(
+                          size: 135,
+                          radius: 100,
+                          fit: BoxFit.cover,
+                          networkImg: user.avatarUrl,
+                          title: user.name ?? 'User',
+                          desc: '@${user.username ?? 'user'}',
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
             ),
 
             // Lazy Loaded Sections with Skeletons
@@ -323,26 +360,44 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 isIconRight: true,
               ),
             ),
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(left: 22),
-              child: Row(
-                children: List.generate(
-                    6,
-                    (_) => Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: GestureDetector(
-                            onTap: () => Get.to(() => const PostDisplay()),
-                            child: CommonImageView(
-                              imagePath: Assets.imagesDummyimage2,
-                              height: 330,
-                              width: 225,
-                              radius: 20,
-                            ),
+            Consumer<PostProvider>(
+              builder: (context, postProvider, _) {
+                final posts = postProvider.posts;
+                if (posts.isEmpty) {
+                  return const SizedBox(
+                    height: 200,
+                    child: Center(child: Text("No posts found")),
+                  );
+                }
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 22),
+                  child: Row(
+                    children: posts.map((post) {
+                      final image =
+                          (post.media != null && post.media!.isNotEmpty)
+                              ? post.media!.first
+                              : null;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: GestureDetector(
+                          onTap: () => Get.to(() => PostDisplay(post: post)),
+                          child: CommonImageView(
+                            url: image, // Network image
+                            imagePath: image == null
+                                ? Assets.imagesDummyimage2
+                                : null, // Fallback
+                            height: 330,
+                            width: 225,
+                            radius: 20,
                           ),
-                        )),
-              ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
             ),
             _buildProductSection(
                 feedKey: "for-you",

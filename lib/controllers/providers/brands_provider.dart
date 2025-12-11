@@ -12,7 +12,24 @@ class BrandsProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? _error;
 
+  final List<StoreModel> _allStores = [];
+  List<StoreModel> get allStores => _allStores;
+
+  List<StoreModel> _filteredStores = [];
+  List<StoreModel> get filteredStores => _filteredStores;
+
   String? get error => _error;
+
+  List<StoreModel> selectedBrands = [];
+
+  void toggleBrand(StoreModel brand) {
+    if (selectedBrands.any((m) => m.id == brand.id)) {
+      selectedBrands.removeWhere((m) => m.id == brand.id);
+    } else {
+      selectedBrands.add(brand);
+    }
+    notifyListeners();
+  }
 
   void setLoading(bool val) {
     _isLoading = val;
@@ -41,6 +58,47 @@ class BrandsProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       _storeModel = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> loadAllBrands() async {
+    setLoading(true);
+    try {
+      final stores = await _brandsRepo.getAllStores();
+      _allStores.addAll(stores);
+      _filteredStores.clear();
+      _filteredStores.addAll(_allStores);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _allStores.clear();
+      _filteredStores.clear();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  void searchBrands(String query) {
+    if (query.isEmpty) {
+      _filteredStores = List.from(_allStores);
+    } else {
+      _filteredStores = _allStores
+          .where((squad) =>
+              squad.name!.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  Future<void> updateStore(StoreModel store) async {
+    setLoading(true);
+    try {
+      await _brandsRepo.updateStore(store);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
     } finally {
       setLoading(false);
     }

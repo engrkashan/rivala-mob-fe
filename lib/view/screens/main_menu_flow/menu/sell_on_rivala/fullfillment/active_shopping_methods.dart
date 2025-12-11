@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/pages/pages_aboutUs.dart';
@@ -8,6 +9,8 @@ import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/fullfillm
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
+
+import '../../../../../../controllers/providers/fulfillment.dart';
 
 class ActiveShoppingMethods extends StatefulWidget {
   const ActiveShoppingMethods({super.key});
@@ -52,13 +55,25 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
           ),
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<fulfillmentPro>().fetchProviders();
+    });
+  }
+
   int selectedIndex = -1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: kwhite,
-        appBar: simpleAppBar(context: context,
-            title: 'Active fulfillment providers', centerTitle: true, size: 16),
+        appBar: simpleAppBar(
+            context: context,
+            title: 'Active fulfillment providers',
+            centerTitle: true,
+            size: 16),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

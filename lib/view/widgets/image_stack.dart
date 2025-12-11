@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
-import 'package:rivala/consts/app_fonts.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
-import 'package:rivala/view/widgets/my_text_widget.dart';
 
 // ignore: must_be_immutable
 
@@ -19,6 +16,7 @@ List<String> images = [
   'https://images.unsplash.com/photo-1554151228-14d9def656e4?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=633&q=80',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80',
 ];
+
 class StackedImagesWidget extends StatelessWidget {
   final TextDirection direction;
   List<String> urlImages;
@@ -28,7 +26,7 @@ class StackedImagesWidget extends StatelessWidget {
   StackedImagesWidget(
       {Key? key,
       this.direction = TextDirection.ltr,
-      this.urlImages = const [], // Default images
+      this.urlImages = const [],
       this.size = 30,
       this.xShift = 20,
       this.outlineExtra,
@@ -37,54 +35,53 @@ class StackedImagesWidget extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    urlImages = images;
     final items = urlImages.map((urlImage) => buildImage(urlImage)).toList();
     return SizedBox(
       width: Get.width,
-      height: 35,      child: Stack(
-        children: List.generate(4, (index) {
+      height: 35,
+      child: Stack(
+        children: List.generate(items.length, (index) {
           final shift = index * xShift;
           return Positioned(
             left: direction == TextDirection.ltr ? shift : -shift,
             child:
-            //  index == 3
-            //     ? Container(
-            //         height: size,
-            //         width: size,
-            //         decoration: BoxDecoration(
-            //           shape: BoxShape.circle,
-            //             color: extracolor??kwhite,
-            //             border: Border.all(color: outlineExtra??kwhite)
-                        
-            //            ),
-            //         child: Center(
-            //           child: MyText(
-            //            /// paddingLeft: 8,
-            //           text:   '+${items.length - 4}', // Show the remaining number of images
-                     
-            //               color: textcolor ?? Colors.black,
-                     
-            //               size: 12,
-                          
-                   
-            //           ),
-            //         ),
-            //       )
-            //     :
-                 items[index],
+                //  index == 3
+                //     ? Container(
+                //         height: size,
+                //         width: size,
+                //         decoration: BoxDecoration(
+                //           shape: BoxShape.circle,
+                //             color: extracolor??kwhite,
+                //             border: Border.all(color: outlineExtra??kwhite)
+
+                //            ),
+                //         child: Center(
+                //           child: MyText(
+                //            /// paddingLeft: 8,
+                //           text:   '+${items.length - 4}', // Show the remaining number of images
+
+                //               color: textcolor ?? Colors.black,
+
+                //               size: 12,
+
+                //           ),
+                //         ),
+                //       )
+                //     :
+                items[index],
           );
         }),
       ),
     );
   }
+
   Widget buildImage(String urlImage) {
     final double borderSize = 0;
     return Container(
       padding: EdgeInsets.all(borderSize),
-        decoration: BoxDecoration(
+      decoration: BoxDecoration(
           shape: BoxShape.circle,
-    border: Border.all(color: kwhite,width: 1.4)
-        ),
+          border: Border.all(color: kwhite, width: 1.4)),
       child: CommonImageView(
         url: urlImage,
         fit: BoxFit.cover,

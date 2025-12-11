@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rivala/models/page_model.dart';
 import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
@@ -12,7 +13,8 @@ import 'package:rivala/view/widgets/store_widgets/fotter.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 
 class PagesAboutus extends StatefulWidget {
-  const PagesAboutus({super.key});
+  final PageModel? page;
+  const PagesAboutus({super.key, this.page});
 
   @override
   State<PagesAboutus> createState() => _PagesAboutusState();
@@ -85,22 +87,22 @@ class _PagesAboutusState extends State<PagesAboutus> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: kwhite,
-        appBar: simpleAppBar(context: context,
-          title: 'About Us',
-          centerTitle: true
-        ),
+        appBar: simpleAppBar(
+            context: context,
+            title: widget.page?.title ?? 'About Us',
+            centerTitle: true),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               //hedaer image stack
-      
+
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-            CustomDivider(),
+                    CustomDivider(),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 22),
                       child: ExpandedRow(
@@ -166,7 +168,7 @@ class _PagesAboutusState extends State<PagesAboutus> {
                       color: kheader,
                       size: 25,
                       weight: FontWeight.w600,
-                         paddingLeft: 22,
+                      paddingLeft: 22,
                       paddingRight: 22,
                       paddingBottom: 18,
                       useCustomFont: true,
@@ -252,7 +254,8 @@ class _PagesAboutusState extends State<PagesAboutus> {
                   ],
                 ),
               ),
- CustomDivider(),
+              CustomDivider(),
+
               ///SECTION
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 15),

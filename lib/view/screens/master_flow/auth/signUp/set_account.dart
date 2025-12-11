@@ -248,8 +248,10 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
 }
 
 class EditImgStack extends StatefulWidget {
+  final String? imageUrl;
   EditImgStack({
     super.key,
+    this.imageUrl,
   });
 
   @override
@@ -265,7 +267,9 @@ class _EditImgStackState extends State<EditImgStack> {
         clipBehavior: Clip.none,
         children: [
           CommonImageView(
-            url: media.selectedImage != null ? null : dummyImage,
+            url: media.selectedImage == null
+                ? (widget.imageUrl ?? dummyImage)
+                : null,
             file: media.selectedImage,
             width: 109,
             height: 109,

@@ -14,6 +14,9 @@ import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/circle_icon.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+import 'package:provider/provider.dart';
+import '../../../../controllers/providers/user/auth_provider.dart';
+import '../../../../view/widgets/common_image_view_widget.dart';
 
 class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
@@ -25,63 +28,72 @@ class MainMenu extends StatefulWidget {
 class _MainMenuState extends State<MainMenu> {
   int selectedIndex = -1;
 
- 
-
   @override
   Widget build(BuildContext context) {
-     List<Map<String, dynamic>> mainMenuItems = [
-    {
-      'text1': 'Shopping',
-      'text2': 'Effortlessly manage your purchases and subscriptions.',
-      'icon': Assets.imagesBag,
-      'delay': 100,
-      'ontap': () =>
-        Navigator.of(context).push(CustomPageRoute(page:Shopping()),)
-      //  Get.to(
-      //       () => Shopping(),
-      //       transition: Transition.downToUp,
-      //       duration: const Duration(milliseconds: 1000),
-      //       curve: Curves.easeInOut,
-      //     ),
-    },
-    {
-      'text1': 'Your Connections',
-      'text2': 'Join your friends & embrace the power of community as a squad.',
-      'icon': Assets.imagesConnections,
-      'delay': 250,
-      'ontap': () =>      Navigator.of(context).push(CustomPageRoute(page:YourConnections()),)
-      //  Get.to(
-      //       () => YourConnections(),
-      //       transition: Transition.downToUp,
-      //       duration: const Duration(milliseconds: 1000),
-      //       curve: Curves.easeInOut,
-      //     ),
-    },
-    {
-      'text1': 'Manage Your Store',
-      'text2': 'Manage your own store of posts and products simply and easily!',
-      'icon': Assets.imagesManageStore,
-      'delay': 400,
-      'ontap': () =>      Navigator.of(context).push(CustomPageRoute(page:ManageStore()),)
-      // Get.to(() => ManageStore()),
-    },
-    {
-      'text1': 'Sell on Rivala',
-      'text2': 'Manage products and orders with ease & boost your sales.',
-      'icon': Assets.imagesSell,
-      'delay': 550,
-      'ontap': () =>       Navigator.of(context).push(CustomPageRoute(page:SellOnRivala()),)
-      //Get.to(() => SellOnRivala()),
-    },
-    {
-      'text1': 'Wallet',
-      'text2': 'See your earnings and get paid on Rivala.',
-      'icon': Assets.imagesWallet,
-      'delay': 700,
-      'ontap': () =>       Navigator.of(context).push(CustomPageRoute(page:WalletMain()),)
-      //Get.to(() => WalletMain()),
-    },
-  ];
+    List<Map<String, dynamic>> mainMenuItems = [
+      {
+        'text1': 'Shopping',
+        'text2': 'Effortlessly manage your purchases and subscriptions.',
+        'icon': Assets.imagesBag,
+        'delay': 100,
+        'ontap': () => Navigator.of(context).push(
+              CustomPageRoute(page: Shopping()),
+            )
+        //  Get.to(
+        //       () => Shopping(),
+        //       transition: Transition.downToUp,
+        //       duration: const Duration(milliseconds: 1000),
+        //       curve: Curves.easeInOut,
+        //     ),
+      },
+      {
+        'text1': 'Your Connections',
+        'text2':
+            'Join your friends & embrace the power of community as a squad.',
+        'icon': Assets.imagesConnections,
+        'delay': 250,
+        'ontap': () => Navigator.of(context).push(
+              CustomPageRoute(page: YourConnections()),
+            )
+        //  Get.to(
+        //       () => YourConnections(),
+        //       transition: Transition.downToUp,
+        //       duration: const Duration(milliseconds: 1000),
+        //       curve: Curves.easeInOut,
+        //     ),
+      },
+      {
+        'text1': 'Manage Your Store',
+        'text2':
+            'Manage your own store of posts and products simply and easily!',
+        'icon': Assets.imagesManageStore,
+        'delay': 400,
+        'ontap': () => Navigator.of(context).push(
+              CustomPageRoute(page: ManageStore()),
+            )
+        // Get.to(() => ManageStore()),
+      },
+      {
+        'text1': 'Sell on Rivala',
+        'text2': 'Manage products and orders with ease & boost your sales.',
+        'icon': Assets.imagesSell,
+        'delay': 550,
+        'ontap': () => Navigator.of(context).push(
+              CustomPageRoute(page: SellOnRivala()),
+            )
+        //Get.to(() => SellOnRivala()),
+      },
+      {
+        'text1': 'Wallet',
+        'text2': 'See your earnings and get paid on Rivala.',
+        'icon': Assets.imagesWallet,
+        'delay': 700,
+        'ontap': () => Navigator.of(context).push(
+              CustomPageRoute(page: WalletMain()),
+            )
+        //Get.to(() => WalletMain()),
+      },
+    ];
     return Scaffold(
       backgroundColor: kwhite,
       body: Column(
@@ -90,38 +102,53 @@ class _MainMenuState extends State<MainMenu> {
           const SizedBox(height: 40),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Bounce_widget(
-                    widget: Image.asset(
-                  Assets.imagesBellIcon,
-                  width: 25,
-                  height: 25,
-                )),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: row_widget(
-                    onTap: () {
-                      
-                    },
-                    title: '@austin',
-                    textColor: kdargrey,
-                    iconData: Icons.keyboard_arrow_down_rounded,
-                    isIconRight: true,
-                  ),
-                ),
-                circular_icon_container()
-              ],
+            child: Consumer<AuthProvider>(
+              builder: (context, auth, _) {
+                final user = auth.user;
+                return Row(
+                  children: [
+                    Bounce_widget(
+                        widget: Image.asset(
+                      Assets.imagesBellIcon,
+                      width: 25,
+                      height: 25,
+                    )),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: row_widget(
+                        onTap: () {
+                          // Navigate to profile?
+                        },
+                        title: user?.name != null
+                            ? '@${user!.username ?? user.name}'
+                            : '@User',
+                        textColor: kdargrey,
+                        iconData: Icons.keyboard_arrow_down_rounded,
+                        isIconRight: true,
+                      ),
+                    ),
+                    if (user?.avatarUrl != null)
+                      CommonImageView(
+                        url: user!.avatarUrl!,
+                        height: 40,
+                        width: 40,
+                        radius: 50,
+                        fit: BoxFit.cover,
+                      )
+                    else
+                      circular_icon_container() // Fallback
+                  ],
+                );
+              },
             ),
           ),
           Expanded(
             child: ListView(
-              
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15,),
-                physics: const BouncingScrollPhysics(),
-
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(
+                vertical: 15,
+              ),
+              physics: const BouncingScrollPhysics(),
               children: [
                 ListView.builder(
                   shrinkWrap: true,
@@ -142,7 +169,7 @@ class _MainMenuState extends State<MainMenu> {
                           setState(() {
                             selectedIndex = index;
                           });
-                
+
                           Future.delayed(const Duration(milliseconds: 300), () {
                             item['ontap']();
                           });
@@ -151,39 +178,36 @@ class _MainMenuState extends State<MainMenu> {
                     );
                   },
                 ),
-                
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              MyText(
-                text: 'Terms of Services',
-                size: 10,
-                color: kblack,
-                weight: FontWeight.w500,
-              ),
-              SizedBox(width: 47),
-              MyText(
-                text: 'Privacy Policy',
-                size: 10,
-                color: kblack,
-                weight: FontWeight.w500,
-              ),
-            ],
-          ),
-          MyText(
-            paddingTop: 20,
-            textAlign: TextAlign.center,
-            text: 'Set Theme',
-            weight: FontWeight.w500,
-            size: 10,
-            color: Color(0xffD2468D),
-            paddingBottom: 100,
-          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    MyText(
+                      text: 'Terms of Services',
+                      size: 10,
+                      color: kblack,
+                      weight: FontWeight.w500,
+                    ),
+                    SizedBox(width: 47),
+                    MyText(
+                      text: 'Privacy Policy',
+                      size: 10,
+                      color: kblack,
+                      weight: FontWeight.w500,
+                    ),
+                  ],
+                ),
+                MyText(
+                  paddingTop: 20,
+                  textAlign: TextAlign.center,
+                  text: 'Set Theme',
+                  weight: FontWeight.w500,
+                  size: 10,
+                  color: Color(0xffD2468D),
+                  paddingBottom: 100,
+                ),
               ],
             ),
-            
           ),
-       
         ],
       ),
     );

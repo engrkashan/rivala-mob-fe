@@ -38,6 +38,7 @@ class ApiClient {
         body: jsonEncode({"refreshToken": refreshToken}),
       );
 
+      print(res.body);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         await session.saveAuthToken(data["accessToken"]);
@@ -89,6 +90,15 @@ class ApiClient {
         .replace(queryParameters: query);
 
     final response = await http.get(uri, headers: await _headers());
+
+    // 🔥 Fix: Handle 401 here
+    if (response.statusCode == 401) {
+      return _retryRequest(() async => await getResponse(
+            endpoints: endpoints,
+            query: query,
+          ));
+    }
+
     return _handleResponse(response);
   }
 
@@ -102,10 +112,10 @@ class ApiClient {
       body: data != null ? jsonEncode(data) : null,
     );
 
-    // if (response.statusCode == 401) {
-    //   return _retryRequest(
-    //       () async => await postResponse(endpoints: endpoints, data: data));
-    // }
+    if (response.statusCode == 401) {
+      return _retryRequest(
+          () async => await postResponse(endpoints: endpoints, data: data));
+    }
 
     return _handleResponse(response);
   }
@@ -157,16 +167,16 @@ class ApiClient {
 
     var response = await request.send();
 
-    // if (response.statusCode == 401) {
-    //   final refreshed = await _refreshToken();
-    //   if (!refreshed)
-    //     throw ApiException(message: "Session expired", response: null);
-    //
-    //   /// retry upload
-    //   request.headers["Authorization"] =
-    //       "Bearer ${await session.getAuthToken()}";
-    //   return await request.send();
-    // }
+    if (response.statusCode == 401) {
+      final refreshed = await _refreshToken();
+      if (!refreshed)
+        throw ApiException(message: "Session expired", response: null);
+
+      /// retry upload
+      request.headers["Authorization"] =
+          "Bearer ${await session.getAuthToken()}";
+      return await request.send();
+    }
 
     return response;
   }

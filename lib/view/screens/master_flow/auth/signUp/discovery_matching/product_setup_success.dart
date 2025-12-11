@@ -127,10 +127,7 @@ class GradientSuccessScreen extends StatelessWidget {
                     ontap: skipTap ??
                         () {
                           navBarController.resetNavigatorKeys();
-                          Get.offAll(() => PersistentBottomNavBar(),
-                              binding: BindingsBuilder(() {
-                            Get.put(BottomNavBarController());
-                          }));
+                          Get.offAll(() => const PersistentBottomNavBar());
                         },
                     widget: MyText(
                       text: 'Skip >',

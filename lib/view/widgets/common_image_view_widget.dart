@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rivala/consts/app_colors.dart';
 
-
-
-
-
 class CommonImageView extends StatelessWidget {
 // ignore_for_file: must_be_immutable
   String? url;
@@ -70,6 +66,12 @@ class CommonImageView extends StatelessWidget {
           width: width,
           fit: fit,
           imageUrl: url!,
+          // Memory optimization: Resize image in memory to display size
+          memCacheWidth: width != null ? (width! * 2.5).toInt() : null,
+          memCacheHeight: height != null ? (height! * 2.5).toInt() : null,
+          // Disk optimization: Don't store massive original images if not needed
+          maxWidthDiskCache: width != null ? (width! * 3).toInt() : null,
+          maxHeightDiskCache: height != null ? (height! * 3).toInt() : null,
           placeholder: (context, url) => Container(
             height: 23,
             width: 23,
@@ -78,7 +80,7 @@ class CommonImageView extends StatelessWidget {
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  color:ksecondary,
+                  color: ksecondary,
                   backgroundColor: Colors.grey.shade100,
                 ),
               ),

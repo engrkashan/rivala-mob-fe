@@ -17,13 +17,19 @@ import 'package:rivala/view/widgets/slider_button.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../models/product_model.dart';
+import '../../../../models/post_model.dart';
 
 class PostDisplay extends StatefulWidget {
   final bool? isDiscount;
   final VoidCallback? ontap;
   final ProductModel? product;
+  final PostModel? post;
   const PostDisplay(
-      {super.key, this.isDiscount = false, this.ontap, this.product});
+      {super.key,
+      this.isDiscount = false,
+      this.ontap,
+      this.product,
+      this.post});
 
   @override
   State<PostDisplay> createState() => _PostDisplayState();
@@ -33,15 +39,27 @@ class _PostDisplayState extends State<PostDisplay> {
   final PageController _pageController = PageController();
   int currentPage = 0;
 
-  final List<String> imageList = [
-    Assets.imagesDummyimage2,
-    Assets.imagesDummyimage2,
-    Assets.imagesDummyimage2,
-  ];
-
   @override
   Widget build(BuildContext context) {
     final prd = widget.product;
+    final post = widget.post;
+
+    // Determine images
+    List<String> images = [];
+    if (post?.media != null && post!.media!.isNotEmpty) {
+      images = post.media!;
+    } else if (prd?.image != null && prd!.image!.isNotEmpty) {
+      images = prd.image!;
+    } else {
+      images = [Assets.imagesDummyimage2];
+    }
+
+    final store = prd?.store;
+    final owner = post?.owner;
+    final title = post?.content ?? prd?.title ?? 'Post Details';
+    final likes = post?.likeCount?.toString() ?? '0';
+    final comments = post?.commentCount?.toString() ?? '0';
+
     return Scaffold(
       body: Stack(
         children: [
@@ -53,17 +71,14 @@ class _PostDisplayState extends State<PostDisplay> {
                 currentPage = index;
               });
             },
-            itemCount: prd?.image?.length,
+            itemCount: images.length,
             itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  // Get.to(() => ProductDetailedDescription());
-                },
-                child: CommonImageView(
-                  url: prd?.image?[index],
-                  width: Get.width,
-                  height: Get.height,
-                ),
+              return CommonImageView(
+                url: images[index],
+                width: Get.width,
+                height: Get.height,
+                fit: BoxFit.cover,
+                radius: 0,
               );
             },
           ),
@@ -75,7 +90,7 @@ class _PostDisplayState extends State<PostDisplay> {
             child: Center(
               child: SmoothPageIndicator(
                 controller: _pageController,
-                count: prd?.image?.length ?? 0,
+                count: images.length,
                 effect: WormEffect(
                   dotHeight: 8,
                   dotWidth: 8,
@@ -93,7 +108,11 @@ class _PostDisplayState extends State<PostDisplay> {
               children: [
                 image_appbar(
                   ontap: widget.ontap,
-                  store: prd?.store ?? StoreModel(),
+                  store:
+                      store, // Fallback need handling in widget if store is null but owner is not
+                  // For now, let's keep it simple or modify image_appbar too
+                  ownerName: owner?.username ?? store?.name,
+                  ownerAvatar: owner?.avatarUrl ?? store?.logoUrl,
                 ),
                 const Spacer(),
                 if (widget.isDiscount == true)
@@ -115,7 +134,7 @@ class _PostDisplayState extends State<PostDisplay> {
                     ),
                   ),
                 row_widget(
-                  title: 'Blue Floral Short',
+                  title: title,
                   texSize: 18,
                   weight: FontWeight.bold,
                   textColor: kwhite,
@@ -141,12 +160,12 @@ class _PostDisplayState extends State<PostDisplay> {
                       BottomButtons(
                         icon: Assets.imagesLike,
                         ontap: () {},
-                        textt: '113',
+                        textt: likes,
                       ),
                       BottomButtons(
                         icon: Assets.imagesComment,
                         ontap: () {},
-                        textt: '4',
+                        textt: comments,
                       ),
                       BottomButtons(
                         icon: Assets.imagesShare,
@@ -180,11 +199,15 @@ class image_appbar extends StatelessWidget {
   final String? title;
   final VoidCallback? ontap;
   final StoreModel? store;
+  final String? ownerName;
+  final String? ownerAvatar;
   const image_appbar({
     super.key,
     this.title,
     this.ontap,
     this.store,
+    this.ownerName,
+    this.ownerAvatar,
   });
 
   @override
@@ -192,14 +215,14 @@ class image_appbar extends StatelessWidget {
     return Row(
       children: [
         CommonImageView(
-          url: store?.logoUrl ?? '',
+          url: ownerAvatar ?? store?.logoUrl ?? '',
           height: 54,
           width: 54,
           radius: 50,
         ),
         Expanded(
           child: MyText(
-            text: '@${store?.name}',
+            text: '@${ownerName ?? store?.name ?? "User"}',
             color: kwhite,
             useCustomFont: true,
             size: 16,
