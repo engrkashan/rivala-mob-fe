@@ -64,4 +64,37 @@ class CollectionProvider extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<void> addProductToCollection(
+      String collectionId, String productId) async {
+    // Ideally we fetch the specific collection first to get its current products,
+    // but for now we assume we can just send the update if we want to add one.
+    // Or we simply update the local list if we have it.
+
+    // Find collection
+    final index = _allCollections.indexWhere((c) => c.id == collectionId);
+    if (index == -1) return;
+
+    final col = _allCollections[index];
+    final currentIds = col.products?.map((p) => p.id!).toList() ?? [];
+    if (!currentIds.contains(productId)) {
+      currentIds.add(productId);
+    }
+
+    setLoading(true);
+    try {
+      await CollectionsRepo().updateCollection(collectionId, {
+        "name": col.name,
+        "description": col.description,
+        "productIds": currentIds
+      });
+      // Update local (reload to be safe or update local model)
+      await loadAllCollections();
+      _error = '';
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
 }

@@ -147,8 +147,8 @@ class _CommissionEarnedState extends State<CommissionEarned> {
   double _calculateTotalCommission(List orders) {
     double total = 0;
     for (var order in orders) {
-      if (order.ordersItem != null) {
-        for (var item in order.ordersItem!) {
+      if (order.orderItems != null) {
+        for (var item in order.orderItems!) {
           total +=
               (item.price ?? 0) * (item.quantity ?? 0) * COMMISSION_PERCENTAGE;
         }

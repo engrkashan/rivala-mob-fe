@@ -22,6 +22,11 @@ class BrandsProvider extends ChangeNotifier {
 
   List<StoreModel> selectedBrands = [];
 
+  void clearCurrentStore() {
+    _currentStore = null;
+    notifyListeners();
+  }
+
   void toggleBrand(StoreModel brand) {
     if (selectedBrands.any((m) => m.id == brand.id)) {
       selectedBrands.removeWhere((m) => m.id == brand.id);
@@ -52,6 +57,7 @@ class BrandsProvider extends ChangeNotifier {
 
   Future<void> loadCurrentStore() async {
     setLoading(true);
+    clearCurrentStore();
     try {
       _currentStore = await _brandsRepo.getCurrentStore();
       _error = null;
@@ -96,6 +102,19 @@ class BrandsProvider extends ChangeNotifier {
     setLoading(true);
     try {
       await _brandsRepo.updateStore(store);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> loadStoreByHandle(String slug) async {
+    setLoading(true);
+    clearCurrentStore();
+    try {
+      _currentStore = await _brandsRepo.getStoreBySlug(slug);
       _error = null;
     } catch (e) {
       _error = e.toString();

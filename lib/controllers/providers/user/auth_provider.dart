@@ -21,6 +21,8 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _isLoggedIn;
+  String _currentUserId = '';
+  String get currentUserId => _currentUserId;
 
   void setLoading(bool value) {
     _isLoading = value;
@@ -34,6 +36,11 @@ class AuthProvider extends ChangeNotifier {
 
   void setPhone(String value) {
     _phone = value;
+    notifyListeners();
+  }
+
+  void setUserId(String val) {
+    _currentUserId = val;
     notifyListeners();
   }
 
@@ -83,6 +90,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       _user = await _authRepo.login(identifier: identifier, password: password);
       _error = null;
+      setUserId(_user!.id!);
     } catch (e) {
       _error = e.toString();
       _user = null;
@@ -111,11 +119,27 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> verifyEmail({required String otp}) async {
+    setLoading(true);
     try {
       _authRepo.verifySellerEmail(otp: otp);
       _error = null;
     } catch (e) {
       _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> sentOtp({required String identifier}) async {
+    setLoading(true);
+    _error = null;
+    try {
+      await _authRepo.resendSellerOtp(identifier: identifier);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
     }
   }
 }

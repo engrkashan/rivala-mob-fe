@@ -31,4 +31,44 @@ class fulfillmentPro extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<FulfillmentProvider?> getProviderById(String id) async {
+    setLoading(true);
+    try {
+      final provider = await fulfillmentProviderRepo.fetchProviderById(id);
+      _error = '';
+      return provider;
+    } catch (e) {
+      _error = e.toString();
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<bool> createProvider(
+      String type, String name, String key, String secret) async {
+    setLoading(true);
+    try {
+      final data = {
+        "type": type,
+        "name": name,
+        "apiKey": key,
+        "apiSecret": secret,
+      };
+
+      final provider = await fulfillmentProviderRepo.createProvider(data);
+      if (provider != null) {
+        // Refresh list
+        await fetchProviders();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
 }

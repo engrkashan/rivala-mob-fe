@@ -22,6 +22,7 @@ import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
 import 'package:rivala/view/screens/persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 
 import 'controllers/providers/buyer_provider.dart';
+import 'controllers/providers/cart_provider.dart';
 import 'controllers/providers/categories_provider.dart';
 import 'controllers/providers/collections_provider.dart';
 import 'controllers/providers/follow_provider.dart';

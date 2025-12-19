@@ -218,7 +218,7 @@ class horizontal_img_list extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalImages = product!.length - 3;
+    final totalImages = product?.length ?? 0;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

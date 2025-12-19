@@ -33,4 +33,11 @@ class BrandsRepo {
   Future<void> updateStore(StoreModel store) async {
     final res = api.patchResponse(endpoint: Endpoints.stores, data: store);
   }
+
+  Future<StoreModel> getStoreBySlug(String slug) async {
+    final response =
+        await api.getResponse(endpoints: Endpoints.storeBySlug(slug));
+
+    return StoreModel.fromJson(response['store']);
+  }
 }

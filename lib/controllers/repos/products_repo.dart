@@ -55,4 +55,17 @@ class ProductsRepo {
 
     return list.map((item) => ProductModel.fromJson(item)).toList();
   }
+
+  Future<void> postProduct(ProductModel product) async {
+    await api.postResponse(endpoints: Endpoints.products, data: product);
+  }
+
+  Future<void> updateProduct(ProductModel product) async {
+    await api.patchResponse(
+        endpoint: Endpoints.productsById(product.id!), data: product);
+  }
+
+  Future<void> deleteProduct(String id) async {
+    await api.deleteRequest(endpoint: Endpoints.productsById(id));
+  }
 }

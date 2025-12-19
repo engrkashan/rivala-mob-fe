@@ -17,11 +17,13 @@ class ChatRepo {
     return list.map((item) => ChatModel.fromJson(item)).toList();
   }
 
-  Future<ChatModel> sendMessage(String receiverId, String content) async {
+  Future<ChatModel> sendMessage(
+      String receiverId, String content, String senderId) async {
     final res = await api.postResponse(
       endpoints: Endpoints.messages,
       data: {
         "receiverId": receiverId,
+        "senderId": senderId,
         "content": content,
       },
     );

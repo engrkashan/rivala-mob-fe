@@ -31,11 +31,9 @@ class AuthRepo {
     return user;
   }
 
-// Assuming 'api' and 'session' are globally available or instantiated
 
   Future<UserModel> login(
       {required String identifier, required String password}) async {
-
     final response = await api.postResponse(
         endpoints: Endpoints.login,
         data: {"identifier": identifier, "password": password});
@@ -44,7 +42,8 @@ class AuthRepo {
     // which is a failure for a login endpoint.
     if (response == null) {
       throw ApiException(
-        message: "Login failed: Server returned an empty response (200 OK without content).",
+        message:
+            "Login failed: Server returned an empty response (200 OK without content).",
         response: null,
         statusCode: 200,
       );
@@ -58,7 +57,8 @@ class AuthRepo {
     // 3. Add checks for missing keys if they are mandatory
     if (token == null || userData == null) {
       throw ApiException(
-        message: "Login failed: Missing 'accessToken' or user 'data' in the response.",
+        message:
+            "Login failed: Missing 'accessToken' or user 'data' in the response.",
         response: jsonEncode(response),
         statusCode: 200,
       );
@@ -95,8 +95,8 @@ class AuthRepo {
     );
   }
 
-  Future<void> resendSellerOtp({required String email}) async {
+  Future<void> resendSellerOtp({required String identifier}) async {
     final response = await api.postResponse(
-        endpoints: Endpoints.resendVerification, data: {"email": email});
+        endpoints: Endpoints.resendVerification, data: {"email": identifier});
   }
 }

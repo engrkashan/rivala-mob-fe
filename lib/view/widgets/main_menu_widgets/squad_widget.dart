@@ -170,7 +170,7 @@ class squad_members_row extends StatelessWidget {
             ],
           ),
         ),
-        add_itemss(),
+        // add_itemss(),
       ],
     );
   }

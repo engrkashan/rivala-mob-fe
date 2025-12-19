@@ -6,6 +6,8 @@ import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+import 'package:provider/provider.dart';
+import '../../../../controllers/providers/brands_provider.dart';
 
 class MyLinks extends StatefulWidget {
   const MyLinks({super.key});
@@ -37,47 +39,58 @@ class _MyLinksState extends State<MyLinks> {
                       )),
                 )),
             Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  Image.asset(
-                    Assets.imagesStorelogo,
-                    height: 95,
-                    width: 240,
-                    fit: BoxFit.contain,
-                    color: kblack,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  links_button(),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  links_button(
-                    title: 'Facebook',
-                    icon: Assets.imagesFacebook,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  links_button(
-                    title: 'TikTok',
-                    icon: Assets.imagesTiktok,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  links_button(
-                    title: 'apolloandsage.com',
-                    icon: Assets.imagesProfileicon,
-                  )
-                ],
-              ),
-            ),
+                child: Consumer<BrandsProvider>(builder: (context, ref, _) {
+              final links = ref.currentStore?.links;
+              return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: links?.length ?? 0,
+                  itemBuilder: (context, i) {
+                    return Column(children: [
+                      links_button(
+                          icon: links?[i].url, title: "${links?[i].name}")
+                    ]);
+                  });
+              //   return  ListView(
+              //   shrinkWrap: true,
+              //   padding:
+              //       const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+              //   physics: const BouncingScrollPhysics(),
+              //   children: [
+              //     Image.asset(
+              //       Assets.imagesStorelogo,
+              //       height: 95,
+              //       width: 240,
+              //       fit: BoxFit.contain,
+              //       color: kblack,
+              //     ),
+              //     SizedBox(
+              //       height: 20,
+              //     ),
+              //     links_button(),
+              //     SizedBox(
+              //       height: 15,
+              //     ),
+              //     links_button(
+              //       title: 'Facebook',
+              //       icon: Assets.imagesFacebook,
+              //     ),
+              //     SizedBox(
+              //       height: 15,
+              //     ),
+              //     links_button(
+              //       title: 'TikTok',
+              //       icon: Assets.imagesTiktok,
+              //     ),
+              //     SizedBox(
+              //       height: 15,
+              //     ),
+              //     links_button(
+              //       title: 'apolloandsage.com',
+              //       icon: Assets.imagesProfileicon,
+              //     )
+              //   ],
+              // );
+            })),
             Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
               child: Store_Button_Row(),
@@ -109,8 +122,8 @@ class links_button extends StatelessWidget {
         widget: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.asset(
-              icon ?? Assets.imagesInsta,
+            Image.network(
+              icon ?? "",
               width: 27,
               height: 27,
             ),

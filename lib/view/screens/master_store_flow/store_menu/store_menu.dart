@@ -24,40 +24,40 @@ class _StoreMenuState extends State<StoreMenu> {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
-      {
-        "text": "About Us",
-        "ontap": () {
-          Navigator.of(context).push(CustomPageRoute(page: AboutUs()));
-          //  Get.to(() => AboutUs());
-        }
-      },
+      // {
+      //   "text": "About Us",
+      //   "ontap": () {
+      //     Navigator.of(context).push(CustomPageRoute(page: AboutUs()));
+      //     //  Get.to(() => AboutUs());
+      //   }
+      // },
       {
         "text": "Shared Products",
         "ontap": () {
           Navigator.of(context).push(CustomPageRoute(page: SharedProducts()));
         }
       },
-      {
-        "text": "Our Posts",
-        "ontap": () {
-          Navigator.of(context).push(CustomPageRoute(
-              page: CollectionGrid(
-            text1: 'What We’ve Been Up To',
-            text2:
-                'Australian designed swimwear.⁣Worldwide shipping. Ethically made.',
-          )));
-        }
-      },
+      // {
+      //   "text": "Our Posts",
+      //   "ontap": () {
+      //     Navigator.of(context).push(CustomPageRoute(
+      //         page: CollectionGrid(
+      //       text1: 'What We’ve Been Up To',
+      //       text2:
+      //           'Australian designed swimwear.⁣Worldwide shipping. Ethically made.',
+      //     )));
+      //   }
+      // },
       {
         "text": "Our Followers",
         "ontap": () {
-           Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
+          Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
         }
       },
       {
         "text": "Who We’re Following",
         "ontap": () {
-         Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
+          Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
         }
       },
       {
@@ -78,7 +78,7 @@ class _StoreMenuState extends State<StoreMenu> {
                   padding: const EdgeInsets.only(top: 40, left: 22),
                   child: Bounce_widget(
                       ontap: () {
-                          Navigator.pop(context);
+                        Navigator.pop(context);
                       },
                       widget: Image.asset(
                         Assets.imagesBackicon2,
@@ -100,24 +100,23 @@ class _StoreMenuState extends State<StoreMenu> {
                     fit: BoxFit.contain,
                     color: kblack,
                   ),
-                  ExpandableSelectionTile(
-                    title: 'Our Products',
-                    options: [
-                      {"text": "New Arrivals", "onTap": () {
-                         Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                      }},
-                      {
-                        "text": "Men",
-                        "onTap": () {
-                           Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                          // Get.to(() => StoreMainProfile());
-                        }
-                      },
-                      {"text": "Women", "onTap": () {
-                         Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                      }},
-                    ],
-                  ),
+                  ExpandableSelectionTile(title: 'Our Products', options: []
+                      // options: [
+                      //   {"text": "New Arrivals", "onTap": () {
+                      //      Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
+                      //   }},
+                      //   // {
+                      //   //   "text": "Men",
+                      //   //   "onTap": () {
+                      //   //      Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
+                      //   //     // Get.to(() => StoreMainProfile());
+                      //   //   }
+                      //   // },
+                      //   // {"text": "Women", "onTap": () {
+                      //   //    Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
+                      //   // }},
+                      // ],
+                      ),
                   ListView.builder(
                     shrinkWrap: true,
                     padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -198,11 +197,12 @@ class _ExpandableSelectionTileState extends State<ExpandableSelectionTile> {
             useCustomFont: true,
             weight: FontWeight.bold,
             onTap: () {
-               Navigator.of(context).push(CustomPageRoute(page: CollectionGrid(
-                    text1: 'The Apollo and Sage Collection',
-                    text2:
-                        'All of our Aussie-inspired swim wear featuring stylish and sustainable designs for men and women. ',
-                  )));
+              Navigator.of(context).push(CustomPageRoute(
+                  page: CollectionGrid(
+                text1: 'The Apollo and Sage Collection',
+                text2:
+                    'All of our Aussie-inspired swim wear featuring stylish and sustainable designs for men and women. ',
+              )));
               // Get.to(() => CollectionGrid(
               //       text1: 'The Apollo and Sage Collection',
               //       text2:

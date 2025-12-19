@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rivala/models/page_model.dart';
 import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/page_model.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -195,7 +195,7 @@ class _PagesAboutusState extends State<PagesAboutus> {
                 ),
               ),
 
-//NEW SECTION
+              //NEW SECTION
               CommonImageView(
                 imagePath: Assets.imagesDummy4,
                 width: Get.width,

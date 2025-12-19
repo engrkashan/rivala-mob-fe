@@ -31,4 +31,11 @@ class CollectionsRepo {
   Future<void> deleteCollection(String id) async {
     await api.deleteRequest(endpoint: Endpoints.collectionWithId(id));
   }
+
+  Future<void> updateCollection(String id, Map<String, dynamic> data) async {
+    await api.patchResponse(
+      endpoint: Endpoints.collectionWithId(id),
+      data: data,
+    );
+  }
 }

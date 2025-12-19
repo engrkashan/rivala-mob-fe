@@ -17,7 +17,8 @@ import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 class order_summary_container extends StatelessWidget {
   final bool? placeOrder;
   const order_summary_container({
-    super.key, this.placeOrder=false,
+    super.key,
+    this.placeOrder = false,
   });
 
   @override
@@ -31,33 +32,32 @@ class order_summary_container extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          bag_items_row(showAmount: true, size: 80),
-          if(placeOrder==false)...{
-          const SizedBox(height: 30),
-
-          Row(
-            children: [
-              Expanded(
-                child: MyTextField(
-                  radius: 8,
-                  contentvPad: 3,
-                   useCustomFont: true,
-                  hint: 'Discount code or gift card',
-                  filledColor: ktransparent,
-                  marginBottom: 0,
+          // bag_items_row(showAmount: true, size: 80),
+          if (placeOrder == false) ...{
+            const SizedBox(height: 30),
+            Row(
+              children: [
+                Expanded(
+                  child: MyTextField(
+                    radius: 8,
+                    contentvPad: 3,
+                    useCustomFont: true,
+                    hint: 'Discount code or gift card',
+                    filledColor: ktransparent,
+                    marginBottom: 0,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              buttonContainer(
-                text: 'APPLY',
-                 useCustomFont: true,
-                radius: 8,
-                vPadding: 3,
-                txtColor: kdargrey,
-                bgColor: kblack.withOpacity(0.05),
-              )
-            ],
-          ),
+                const SizedBox(width: 8),
+                buttonContainer(
+                  text: 'APPLY',
+                  useCustomFont: true,
+                  radius: 8,
+                  vPadding: 3,
+                  txtColor: kdargrey,
+                  bgColor: kblack.withOpacity(0.05),
+                )
+              ],
+            ),
           },
           const SizedBox(height: 30),
           ExpandedRow(
@@ -69,7 +69,7 @@ class order_summary_container extends StatelessWidget {
             size2: 16,
             weight1: FontWeight.normal,
             weight2: FontWeight.normal,
-             useCustomFont: true,
+            useCustomFont: true,
           ),
           ExpandedRow(
             text1: 'Estimated Tax',
@@ -80,7 +80,7 @@ class order_summary_container extends StatelessWidget {
             size2: 16,
             weight1: FontWeight.normal,
             weight2: FontWeight.normal,
-             useCustomFont: true,
+            useCustomFont: true,
           ),
           ExpandedRow(
             text1: 'Promo code',
@@ -91,7 +91,7 @@ class order_summary_container extends StatelessWidget {
             size2: 16,
             weight1: FontWeight.normal,
             weight2: FontWeight.normal,
-             useCustomFont: true,
+            useCustomFont: true,
           ),
           const SizedBox(height: 20),
           ExpandedRow(
@@ -103,19 +103,18 @@ class order_summary_container extends StatelessWidget {
             size2: 16,
             weight1: FontWeight.w600,
             weight2: FontWeight.w600,
-             useCustomFont: true,
+            useCustomFont: true,
           ),
           const SizedBox(height: 30),
 
-          if(placeOrder==true)
-             Mybutton2(
-                  buttonText: 'Place order',
-                   useCustomFont: true,
-                  ontap:() {
-                    
-                    Get.to(()=>OrderConfirmation());
-                  },
-                )
+          if (placeOrder == true)
+            Mybutton2(
+              buttonText: 'Place order',
+              useCustomFont: true,
+              ontap: () {
+                Get.to(() => OrderConfirmation());
+              },
+            )
         ],
       ),
     );
@@ -125,7 +124,7 @@ class order_summary_container extends StatelessWidget {
 /////////////////////
 
 class shipping_opt_container extends StatelessWidget {
-  final bool? isFree, singleText,isActive;
+  final bool? isFree, singleText, isActive;
   final String? date, deliveryText, title;
   final Color? border;
   const shipping_opt_container({
@@ -135,7 +134,8 @@ class shipping_opt_container extends StatelessWidget {
     this.deliveryText,
     this.singleText = false,
     this.title,
-    this.border, this.isActive,
+    this.border,
+    this.isActive,
   });
 
   @override
@@ -161,16 +161,16 @@ class shipping_opt_container extends StatelessWidget {
                       color1: kheader,
                       color2: isFree == true ? kgreen : kheader,
                       weight1: FontWeight.w500,
-                       useCustomFont: true,
+                      useCustomFont: true,
                     )
                   : MyText(
                       text: title ?? 'Credit Card',
                       color: kdargrey,
                       size: 14,
-                       useCustomFont: true,
+                      useCustomFont: true,
                     )),
           CustomCheckBox(
-            isActive:isActive?? false,
+            isActive: isActive ?? false,
             onTap: () {},
             iscircle: true,
             selectedColor: kwhite,
@@ -228,7 +228,7 @@ class shipping_method_list extends StatelessWidget {
                     size2: 12,
                     size1: 13,
                     weight1: FontWeight.w600,
-                     useCustomFont: true,
+                    useCustomFont: true,
                   )),
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
@@ -271,7 +271,8 @@ class shipping_method_list extends StatelessWidget {
 class payment_method_list extends StatelessWidget {
   final String? title;
   final RxBool showPaymentMethod;
-  const payment_method_list({super.key, required this.showPaymentMethod, this.title});
+  const payment_method_list(
+      {super.key, required this.showPaymentMethod, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +301,9 @@ class payment_method_list extends StatelessWidget {
               size: 14,
               paddingLeft: 18,
               paddingBottom: 10,
-               useCustomFont: true,
-              onTap: (){
-                Get.to(()=>ChooseExistingCards());
+              useCustomFont: true,
+              onTap: () {
+                Get.to(() => ChooseExistingCards());
               },
             ),
             Padding(
@@ -311,7 +312,7 @@ class payment_method_list extends StatelessWidget {
                 hint: 'Card number',
                 radius: 8,
                 contentvPad: 10,
-                 useCustomFont: true,
+                useCustomFont: true,
               ),
             ),
             Padding(
@@ -320,7 +321,7 @@ class payment_method_list extends StatelessWidget {
                 hint: 'Security Code',
                 radius: 8,
                 contentvPad: 10,
-                 useCustomFont: true,
+                useCustomFont: true,
               ),
             ),
             Padding(
@@ -329,7 +330,7 @@ class payment_method_list extends StatelessWidget {
                 hint: 'Name on Card',
                 radius: 8,
                 contentvPad: 10,
-                 useCustomFont: true,
+                useCustomFont: true,
               ),
             ),
             Padding(
@@ -338,16 +339,16 @@ class payment_method_list extends StatelessWidget {
                 hint: 'State',
                 radius: 8,
                 contentvPad: 10,
-                 useCustomFont: true,
+                useCustomFont: true,
               ),
             ),
-                MyText(
+            MyText(
               text: '+ Save card',
               color: kdarkgrey,
               size: 14,
               paddingLeft: 18,
               paddingBottom: 10,
-               useCustomFont: true,
+              useCustomFont: true,
             ),
             // Padding(
             //   padding: const EdgeInsets.symmetric(horizontal: 10),

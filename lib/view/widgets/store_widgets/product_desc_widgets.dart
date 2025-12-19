@@ -66,6 +66,8 @@ class PurchaseOptsWidget extends StatelessWidget {
 
 class ProductQuantity extends StatefulWidget {
   final double? vpad, hpad, iconSize, dpadv, dpadh, radius, midDistance;
+  final Function(int)? onChanged;
+
   const ProductQuantity(
       {super.key,
       this.vpad,
@@ -74,7 +76,8 @@ class ProductQuantity extends StatefulWidget {
       this.dpadv,
       this.dpadh,
       this.radius,
-      this.midDistance});
+      this.midDistance,
+      this.onChanged});
 
   @override
   State<ProductQuantity> createState() => _ProductQuantityState();
@@ -91,6 +94,7 @@ class _ProductQuantityState extends State<ProductQuantity> {
       } else if (quantity > 1) {
         quantity--;
       }
+      widget.onChanged?.call(quantity);
     });
   }
 
@@ -110,7 +114,7 @@ class _ProductQuantityState extends State<ProductQuantity> {
           useCustomFont: true,
         ),
         SizedBox(
-          width:widget.midDistance?? 10,
+          width: widget.midDistance ?? 10,
         ),
         buttonContainer(
           text: quantity.toString(),
@@ -124,7 +128,7 @@ class _ProductQuantityState extends State<ProductQuantity> {
           useCustomFont: true,
         ),
         SizedBox(
-             width:widget.midDistance?? 10,
+          width: widget.midDistance ?? 10,
         ),
         buttonContainer(
           bgColor: kbutton,

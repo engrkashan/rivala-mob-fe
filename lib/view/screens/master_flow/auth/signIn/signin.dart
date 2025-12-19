@@ -7,13 +7,14 @@ import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_account.dart';
-import 'package:rivala/view/screens/persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+
+import '../../../persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 
 class MasterSignIn extends StatefulWidget {
   const MasterSignIn({super.key});
@@ -182,7 +183,27 @@ class _MasterSignInState extends State<MasterSignIn>
                     await auth.login(
                         identifier: phoneCon.text.trim(),
                         password: passCon.text);
+
                     if (auth.error != null && auth.error!.isNotEmpty) {
+                      if (auth.error!.contains("Account not active")) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(phoneCon.text)) {
+                          AlertInfo.show(
+                              context: context,
+                              text: "Enter email to verify your account");
+                          return;
+                        }
+                        await auth.sentOtp(identifier: phoneCon.text);
+                        if (auth.error != null &&
+                            auth.error!.isNotEmpty &&
+                            auth.error!.contains(
+                                "Failed to resend verification OTP")) {
+                          AlertInfo.show(context: context, text: auth.error!);
+                          return;
+                        }
+                        // Get.to(() => MasterVerifyAccount());
+                        return;
+                      }
                       AlertInfo.show(context: context, text: auth.error ?? "");
                       return;
                     }

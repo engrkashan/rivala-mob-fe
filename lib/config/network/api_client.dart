@@ -75,8 +75,12 @@ class ApiClient {
         final decoded = jsonDecode(res.body);
         if (decoded is Map && decoded.containsKey("error")) {
           message = decoded["error"];
+        } else {
+          message = "Something went wrong: ${res.body}";
         }
-      } catch (e) {}
+      } catch (e) {
+        message = "Something went wrong: ${res.body}";
+      }
       throw ApiException(
           message: message, response: res.body, statusCode: res.statusCode);
     }
@@ -112,10 +116,10 @@ class ApiClient {
       body: data != null ? jsonEncode(data) : null,
     );
 
-    if (response.statusCode == 401) {
-      return _retryRequest(
-          () async => await postResponse(endpoints: endpoints, data: data));
-    }
+    // if (response.statusCode == 401) {
+    //   return _retryRequest(
+    //       () async => await postResponse(endpoints: endpoints, data: data));
+    // }
 
     return _handleResponse(response);
   }

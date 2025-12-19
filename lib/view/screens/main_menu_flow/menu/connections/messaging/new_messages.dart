@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/follow_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/connections/messaging/chats.dart';
 import 'package:rivala/view/widgets/appbar.dart';
@@ -8,7 +10,6 @@ import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-import 'package:rivala/view/widgets/chat_text_field.dart';
 
 class NewMessages extends StatefulWidget {
   const NewMessages({super.key});
@@ -18,6 +19,14 @@ class NewMessages extends StatefulWidget {
 }
 
 class _NewMessagesState extends State<NewMessages> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FollowProvider>().loadFollowers();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,33 +49,39 @@ class _NewMessagesState extends State<NewMessages> {
               color: kgrey2,
             ),
             Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 5,
+              child: Consumer<FollowProvider>(
+                builder: (context, ref, _) {
+                  if (ref.isLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (ref.followers.isEmpty) {
+                    return Center(child: MyText(text: "No contacts found"));
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 22),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: ref.followers.length,
                     itemBuilder: (context, index) {
+                      final follower = ref.followers[index];
                       return Padding(
                           padding: const EdgeInsets.only(bottom: 15),
                           child: Bounce_widget(
                             ontap: () {
-                              Get.to(() => Chats(receiverId: "dummy_id"));
+                              Get.to(() => Chats(
+                                  receiverId: follower.id!,
+                                  title: follower.name));
                             },
                             widget: Row(
                               children: [
                                 CommonImageView(
-                                  imagePath: Assets.imagesUser,
+                                  url: follower.avatarUrl,
                                   width: 30,
                                   height: 30,
                                   radius: 100,
                                 ),
                                 MyText(
-                                  text: 'Cy Tidwell',
+                                  text: follower.name ?? "",
                                   size: 15,
                                   paddingLeft: 10,
                                 )
@@ -74,13 +89,9 @@ class _NewMessagesState extends State<NewMessages> {
                             ),
                           ));
                     },
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 40),
-              child: ChatsTextField(),
             ),
           ],
         ));

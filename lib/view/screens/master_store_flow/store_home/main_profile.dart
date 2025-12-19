@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/models/store_model.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
@@ -13,7 +14,8 @@ import '../../../../controllers/providers/brands_provider.dart';
 import '../../../../controllers/providers/collections_provider.dart';
 
 class StoreMainProfile extends StatefulWidget {
-  const StoreMainProfile({super.key});
+  final String? slug;
+  const StoreMainProfile({super.key, this.slug});
 
   @override
   State<StoreMainProfile> createState() => _StoreMainProfileState();
@@ -24,9 +26,28 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BrandsProvider>().loadCurrentStore();
-      context.read<CollectionProvider>().loadAllCollections();
+      if (widget.slug == null || widget.slug!.isEmpty) {
+        context.read<BrandsProvider>().loadCurrentStore();
+      } else {
+        context.read<BrandsProvider>().loadStoreByHandle(widget.slug!);
+        print("Store dtails are: ${widget.slug}");
+      }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant StoreMainProfile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.slug != widget.slug) {
+      final brands = context.read<BrandsProvider>();
+
+      if (widget.slug == null || widget.slug!.isEmpty) {
+        brands.loadCurrentStore();
+      } else {
+        brands.loadStoreByHandle(widget.slug!);
+      }
+    }
   }
 
   @override
@@ -40,15 +61,19 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
             // Header Image Stack
             Consumer<BrandsProvider>(
               builder: (context, brands, _) {
+                if (brands.currentStore == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 return HeaderImageStack(store: brands.currentStore);
               },
             ),
 
             // Collections List
-            Consumer<CollectionProvider>(
+            Consumer<BrandsProvider>(
               builder: (context, collectionProvider, _) {
-                final collections = collectionProvider.allCollections;
-                if (collections.isEmpty) {
+                final collections =
+                    collectionProvider.currentStore?.collections;
+                if (collections == null || collections.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(20),
                     child: Center(child: Text("No collections found")),
@@ -66,7 +91,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                             padding: const EdgeInsets.symmetric(horizontal: 22),
                             child: ExpandedRow(
                               text1: collection.name ?? 'Collection',
-                              text2: 'View All',
+                              text2: '',
                               color1: kheader,
                               color2: kheader,
                               weight1: FontWeight.w600,
@@ -78,6 +103,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               },
                             ),
                           ),
+                          SizedBox(height: 10),
                           if (collection.description != null)
                             MyText(
                               text: collection.description!,
@@ -89,6 +115,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               paddingRight: 22,
                               useCustomFont: true,
                             ),
+                          SizedBox(height: 10),
                           SingleChildScrollView(
                             physics: const BouncingScrollPhysics(),
                             scrollDirection: Axis.horizontal,

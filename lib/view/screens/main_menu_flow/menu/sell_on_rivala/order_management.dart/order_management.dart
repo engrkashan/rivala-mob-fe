@@ -7,6 +7,7 @@ import 'package:rivala/view/widgets/main_menu_widgets/my_order_widgets.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 
 import '../../../../../../controllers/providers/order_provider.dart';
+import '../../../../../widgets/my_text_widget.dart';
 
 class OrderManagement extends StatefulWidget {
   const OrderManagement({super.key});
@@ -27,7 +28,7 @@ class _OrderManagementState extends State<OrderManagement> {
           children: [
             Expanded(
               child: Consumer<OrderProvider>(builder: (context, ref, _) {
-                final orders = ref.orders;
+                final orders = ref.filteredOrders;
                 return ListView(
                   shrinkWrap: true,
                   padding:
@@ -46,10 +47,18 @@ class _OrderManagementState extends State<OrderManagement> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: orders.length,
                       itemBuilder: (context, index) {
+                        if (ref.isLoading) {
+                          return Center(child: SingleChildScrollView());
+                        }
+                        if (orders.isEmpty) {
+                          return Center(
+                              child: MyText(text: "No orders available"));
+                        }
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 15),
                           child: my_order_container(
                             hasfulfuill: true,
+                            order: orders[index],
                           ),
                         );
                       },

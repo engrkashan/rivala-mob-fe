@@ -3,13 +3,15 @@ import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/store_model.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/connections/followers_manual_add.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/store_menu.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
+import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 
-import 'package:rivala/models/store_model.dart';
 //header image container
 
 class HeaderImageStack extends StatelessWidget {
@@ -38,7 +40,7 @@ class HeaderImageStack extends StatelessWidget {
 
         // Centered Content
         Positioned(
-          top: 100, // Adjust this value if needed
+          top: 50, // Adjust this value if needed
           left: 0,
           right: 0,
           child: Column(
@@ -94,6 +96,7 @@ class HeaderImageStack extends StatelessWidget {
                     children: [
                       Expanded(
                         child: buttonContainer(
+                          onTap: () => Get.to(() => OurFollowers()),
                           text: '  Followers',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,
@@ -106,6 +109,7 @@ class HeaderImageStack extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: buttonContainer(
+                          onTap: () => Get.to(() => OurFollowers()),
                           text: '  Following',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,

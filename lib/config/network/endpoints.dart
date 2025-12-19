@@ -173,4 +173,10 @@ class Endpoints {
   static const String userWithPosts = "/user/with-posts";
   static const String user = "/user";
   static const String changePassword = "/user/password";
+
+//   ========Wallet==============
+  static const String wallet = "/wallet";
+  static const String walletBalance = "/wallet/balance";
+  static const String walletTransactions = "/wallet/transactions";
+  static const String walletPayout = "/wallet/payout";
 }

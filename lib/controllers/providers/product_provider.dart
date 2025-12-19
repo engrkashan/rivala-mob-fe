@@ -120,4 +120,42 @@ class ProductProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> uploadProduct(ProductModel model) async {
+    setLoading(true);
+    try {
+      await _productRepo.postProduct(model);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updateProduct(ProductModel model) async {
+    setLoading(true);
+    try {
+      await _productRepo.updateProduct(model);
+      _error = null;
+      await loadAllProducts(); // Refresh list
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    setLoading(true);
+    try {
+      await _productRepo.deleteProduct(id);
+      _error = null;
+      await loadAllProducts(); // Refresh list
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
 }

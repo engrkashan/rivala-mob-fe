@@ -44,17 +44,17 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String content, String receiverId) async {
+  Future<void> sendMessage(
+      String content, String receiverId, String senderId) async {
     if (content.isEmpty) return;
     setSending(true);
     try {
-      final newMessage = await _repo.sendMessage(receiverId, content);
+      final newMessage = await _repo.sendMessage(receiverId, content, senderId);
       _chats.add(newMessage);
       notifyListeners();
     } catch (e) {
       _error = e.toString();
       // Optionally show a snackbar or toast here via a service or callback
-      print("Error sending message: $e");
     } finally {
       setSending(false);
     }

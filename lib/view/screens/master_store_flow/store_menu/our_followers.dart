@@ -9,6 +9,8 @@ import 'package:rivala/view/widgets/expanded_row.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/store_widgets/fotter.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+import 'package:provider/provider.dart';
+import '../../../../controllers/providers/brands_provider.dart';
 
 class OurFollowers extends StatefulWidget {
   const OurFollowers({super.key});
@@ -18,38 +20,38 @@ class OurFollowers extends StatefulWidget {
 }
 
 class _OurFollowersState extends State<OurFollowers> {
-  final List<Map<String, String>> brands = [
-    {
-      "image": Assets.imagesFitness,
-      "title": "Fitness Culture Gym",
-      "subtitle": "@fitnessculture"
-    },
-    {
-      "image": Assets.imagesNutrition,
-      "title": "Elite Sports",
-      "subtitle": "@elitesports"
-    },
-    {
-      "image": Assets.imagesItovi,
-      "title": "iTOVi",
-      "subtitle": "@adventuretravel"
-    },
-    {
-      "image": Assets.imagesNutrition,
-      "title": "Nutrition Rescue",
-      "subtitle": "@glowbeauty"
-    },
-    {
-      "image": Assets.imagesItovi,
-      "title": "iTOVi",
-      "subtitle": "@trendyapparel"
-    },
-    {
-      "image": Assets.imagesFitness,
-      "title": "Fitness Culture Gym",
-      "subtitle": "@creativestudio"
-    },
-  ];
+  // final List<Map<String, String>> brands = [
+  //   {
+  //     "image": Assets.imagesFitness,
+  //     "title": "Fitness Culture Gym",
+  //     "subtitle": "@fitnessculture"
+  //   },
+  //   {
+  //     "image": Assets.imagesNutrition,
+  //     "title": "Elite Sports",
+  //     "subtitle": "@elitesports"
+  //   },
+  //   {
+  //     "image": Assets.imagesItovi,
+  //     "title": "iTOVi",
+  //     "subtitle": "@adventuretravel"
+  //   },
+  //   {
+  //     "image": Assets.imagesNutrition,
+  //     "title": "Nutrition Rescue",
+  //     "subtitle": "@glowbeauty"
+  //   },
+  //   {
+  //     "image": Assets.imagesItovi,
+  //     "title": "iTOVi",
+  //     "subtitle": "@trendyapparel"
+  //   },
+  //   {
+  //     "image": Assets.imagesFitness,
+  //     "title": "Fitness Culture Gym",
+  //     "subtitle": "@creativestudio"
+  //   },
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -75,34 +77,42 @@ class _OurFollowersState extends State<OurFollowers> {
                 weight1: FontWeight.w600,
                 size1: 18,
                 size2: 14,
-                   useCustomFont: true,
+                useCustomFont: true,
               ),
             ),
-            GridView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-              physics: const BouncingScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: brands.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 10,
-                  mainAxisExtent: 130),
-              itemBuilder: (context, index) {
-                final brand = brands[index];
-                return Bounce_widget(
-                  ontap: () {
-                     Navigator.of(context).push(CustomPageRoute(page:FollowerMaiProfile()));
-                  },
-                  widget: curated_brand_widget(
-                    img: brand["image"]!,
-                    title: brand["title"]!,
-                    desc: brand["subtitle"]!,
-                       useCustomFont: true,
-                  ),
-                );
-              },
-            ),
+            Consumer<BrandsProvider>(builder: (context, ref, _) {
+              final followers = ref.currentStore?.followers;
+              if (followers == null || followers.isEmpty) {
+                return Text("No followers found");
+              }
+
+              return GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                physics: const BouncingScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: followers.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 10,
+                    mainAxisExtent: 130),
+                itemBuilder: (context, index) {
+                  final brand = followers[index];
+                  return Bounce_widget(
+                    ontap: () {
+                      Navigator.of(context)
+                          .push(CustomPageRoute(page: FollowerMaiProfile()));
+                    },
+                    widget: curated_brand_widget(
+                      networkImg: brand.avatarUrl,
+                      title: brand.name,
+                      desc: brand.username,
+                      useCustomFont: true,
+                    ),
+                  );
+                },
+              );
+            }),
             SizedBox(
               height: 30,
             ),
@@ -112,7 +122,7 @@ class _OurFollowersState extends State<OurFollowers> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20,bottom: 90),
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
         child: Store_Button_Row(),
       ),
     );

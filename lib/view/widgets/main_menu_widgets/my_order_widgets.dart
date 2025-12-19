@@ -8,12 +8,13 @@ import 'package:rivala/view/screens/main_menu_flow/menu/orders/replace_order.dar
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/return_order.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/order_management.dart/fulfill_order.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
+import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
-import 'package:rivala/view/widgets/main_menu_widgets/subscription_manage_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 import '../../../models/order_model.dart';
+import '../../screens/master_store_flow/store_home/product_detailed_description.dart';
 
 class my_order_container extends StatefulWidget {
   final String? date, amount, savedAmount;
@@ -90,26 +91,26 @@ class _my_order_containerState extends State<my_order_container> {
                   weight: FontWeight.w500,
                 ),
                 MyText(
-                  text: order?.ordersItem?[0].price.toString() ?? '\$5,000.00',
+                  text: "${order?.payment?.amount}",
                   size: 11,
                   weight: FontWeight.w400,
                 )
               ],
             ),
-            Row(
-              children: [
-                MyText(
-                  text: 'ORDER NUMBER: ',
-                  size: 11,
-                  weight: FontWeight.w500,
-                ),
-                MyText(
-                  text: order?.id ?? '2249821585154',
-                  size: 11,
-                  weight: FontWeight.w400,
-                )
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     MyText(
+            //       text: 'ORDER NUMBER: ',
+            //       size: 11,
+            //       weight: FontWeight.w500,
+            //     ),
+            //     MyText(
+            //       text: order?.id ?? '2249821585154',
+            //       size: 11,
+            //       weight: FontWeight.w400,
+            //     )
+            //   ],
+            // ),
             if (widget.hasfulfuill == true)
               // Row(
               //   children: [
@@ -138,22 +139,39 @@ class _my_order_containerState extends State<my_order_container> {
                 paddingBottom: 10,
                 paddingTop: 0,
               ),
-            ListView.builder(
-              padding: EdgeInsets.all(0),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: order?.products?.length ?? 0,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: subscription_sub_widget(
-                    hasRadio: true,
-                    ontap: () {
-                      // Get.to(() => ProductDetailedDescription());
-                    },
-                  ),
-                );
-              },
+            SizedBox(
+              height: 70,
+              child: ListView.builder(
+                padding: EdgeInsets.all(0),
+                itemCount: order?.product?.image?.length ?? 0,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  print("Product names: ${order?.product?.title}");
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8, left: 10),
+
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(() => ProductDetailedDescription(
+                              product: order!.product!,
+                            ));
+                      },
+                      child: CommonImageView(
+                        url: order?.product?.image?[index],
+                        radius: 50,
+                        width: 60,
+                      ),
+                    ),
+
+                    // child: subscription_sub_widget(
+                    //   hasRadio: true,
+                    //   ontap: () {
+                    //     // Get.to(() => ProductDetailedDescription());
+                    //   },
+                    // ),
+                  );
+                },
+              ),
             ),
             if (widget.isfilled == false)
               MyText(
@@ -252,7 +270,9 @@ class _my_order_containerState extends State<my_order_container> {
                           ),
                           Bounce_widget(
                             ontap: () {
-                              Get.to(() => FulfillOrder());
+                              Get.to(() => FulfillOrder(
+                                    order: order,
+                                  ));
                             },
                             widget: CustomeContainer(
                               radius: 8,
