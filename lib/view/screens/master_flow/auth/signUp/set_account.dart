@@ -11,7 +11,6 @@ import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/create
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/link_success.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/verify_account.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -205,6 +204,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                         username: _usernameCon.text.trim(),
                         email: _emailCon.text.trim(),
                         password: _passwordCon.text.trim());
+                    print("Auth error in set Account: ${auth.error}");
                     if (auth.error != null && auth.error!.isNotEmpty) {
                       AlertInfo.show(context: context, text: auth.error ?? "");
                       return;

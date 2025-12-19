@@ -1,11 +1,13 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/consts/app_fonts.dart';
+import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/auth/terms_conditions.dart';
-import 'package:rivala/view/screens/master_flow/splash/onboarding.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custom_check_box.dart';
 import 'package:rivala/view/widgets/my_button.dart';
@@ -13,14 +15,16 @@ import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/rich_text.dart';
 
-class MasterVerifyAccount extends StatefulWidget {
-  const MasterVerifyAccount({super.key});
+import '../../../persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
+
+class MasterVerifyAccount2 extends StatefulWidget {
+  const MasterVerifyAccount2({super.key});
 
   @override
-  State<MasterVerifyAccount> createState() => _MasterVerifyAccountState();
+  State<MasterVerifyAccount2> createState() => _MasterVerifyAccount2State();
 }
 
-class _MasterVerifyAccountState extends State<MasterVerifyAccount> {
+class _MasterVerifyAccount2State extends State<MasterVerifyAccount2> {
   final _otpController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -93,11 +97,21 @@ class _MasterVerifyAccountState extends State<MasterVerifyAccount> {
                       )
                     ],
                   ),
-                  Mybutton2(
-                    ontap: () {
-                      Get.to(() => MasterOnboarding());
-                    },
-                  )
+                  Consumer<AuthProvider>(builder: (context, ref, _) {
+                    return Mybutton2(
+                      ontap: () async {
+                        await ref.verifyEmail(otp: _otpController.text.trim());
+                        if (ref.error != null || ref.error!.isNotEmpty) {
+                          AlertInfo.show(
+                              context: context, text: ref.error ?? "");
+                          return;
+                        }
+                        if (ref.error == null || ref.error!.isEmpty) {
+                          Get.to(() => PersistentBottomNavBar());
+                        }
+                      },
+                    );
+                  })
                 ],
               ),
             )

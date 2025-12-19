@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:rivala/config/network/api_client.dart';
 import 'package:rivala/main.dart';
 import 'package:rivala/models/user_model.dart';
 
@@ -70,11 +69,7 @@ class AuthProvider extends ChangeNotifier {
       _user = await _authRepo.register(data: body);
       _error = null;
     } catch (e) {
-      if (e is ApiException) {
-        _error = e.message;
-      } else {
-        _error = "Something went wrong";
-      }
+      _error = e.toString();
       _user = null;
     } finally {
       setLoading(false);

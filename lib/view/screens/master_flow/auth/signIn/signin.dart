@@ -15,6 +15,7 @@ import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 import '../../../persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
+import '../signUp/verify_account_2.dart';
 
 class MasterSignIn extends StatefulWidget {
   const MasterSignIn({super.key});
@@ -201,7 +202,7 @@ class _MasterSignInState extends State<MasterSignIn>
                           AlertInfo.show(context: context, text: auth.error!);
                           return;
                         }
-                        // Get.to(() => MasterVerifyAccount());
+                        Get.to(() => MasterVerifyAccount2());
                         return;
                       }
                       AlertInfo.show(context: context, text: auth.error ?? "");
