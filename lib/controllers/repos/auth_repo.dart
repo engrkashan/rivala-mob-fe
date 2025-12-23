@@ -18,7 +18,7 @@ class AuthRepo {
 
     final token = response['accessToken'];
     final refreshToken = response['refreshToken'];
-    final userData = response['data'];
+    final userData = response['user'];
     final user = UserModel.fromJson(userData);
 
     if (token != null) {
@@ -30,7 +30,6 @@ class AuthRepo {
 
     return user;
   }
-
 
   Future<UserModel> login(
       {required String identifier, required String password}) async {

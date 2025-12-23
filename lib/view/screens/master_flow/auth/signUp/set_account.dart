@@ -7,10 +7,7 @@ import 'package:rivala/controllers/providers/media_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/main.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/create_links.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/link_success.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
-import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
+import 'package:rivala/view/screens/master_flow/auth/signUp/verify_account.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -209,29 +206,32 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       AlertInfo.show(context: context, text: auth.error ?? "");
                       return;
                     }
+                    await auth.sentOtp(identifier: _emailCon.text.trim());
 
-                    Get.to(() => GradientSuccessScreen(
-                          title: 'Well done',
-                          desc: 'Now let’s select your theme.',
-                          buttontext: 'Choose your theme',
-                          ontap: () {
-                            Get.to(() => SelectTheme());
-                          },
-                          skipTap: () {
-                            Get.back();
-                            Get.to(() => GradientSuccessScreen(
-                                  title: 'Well done!',
-                                  desc: 'Now, let’s import your links.',
-                                  buttontext: 'Import your links',
-                                  ontap: () {
-                                    Get.to(() => MasterCreateLink());
-                                  },
-                                  skipTap: () {
-                                    Get.to(() => MAsterLinkSuccess());
-                                  },
-                                ));
-                          },
-                        ));
+                    Get.to(() => MasterVerifyAccount());
+
+                    // Get.to(() => GradientSuccessScreen(
+                    //       title: 'Well done',
+                    //       desc: 'Now let’s select your theme.',
+                    //       buttontext: 'Choose your theme',
+                    //       ontap: () {
+                    //         Get.to(() => SelectTheme());
+                    //       },
+                    //       skipTap: () {
+                    //         Get.back();
+                    //         Get.to(() => GradientSuccessScreen(
+                    //               title: 'Well done!',
+                    //               desc: 'Now, let’s import your links.',
+                    //               buttontext: 'Import your links',
+                    //               ontap: () {
+                    //                 Get.to(() => MasterCreateLink());
+                    //               },
+                    //               skipTap: () {
+                    //                 Get.to(() => MAsterLinkSuccess());
+                    //               },
+                    //             ));
+                    //       },
+                    //     ));
                   },
                 )
               ],
