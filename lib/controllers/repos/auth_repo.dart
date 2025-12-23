@@ -15,7 +15,7 @@ class AuthRepo {
   Future<UserModel> register({required Map<String, dynamic> data}) async {
     final response =
         await api.postResponse(endpoints: Endpoints.register, data: data);
-
+    print("Thi is response $response");
     final token = response['accessToken'];
     final refreshToken = response['refreshToken'];
     final userData = response['user'];
