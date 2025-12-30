@@ -109,7 +109,7 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
                       if (ref.isLoading) {
                         return Center(child: CircularProgressIndicator());
                       }
-                      if (item == null && item!.isEmpty) {
+                      if (item == null) {
                         return Center(
                             child: MyText(
                                 text: "No active fulfillment providers"));
@@ -128,6 +128,13 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
                                 // delay: item['delay'],
                                 mleft: 0,
                                 isSelected: selectedIndex == index,
+                                ontap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              ManageShippmentMethod()));
+                                },
                                 // ontap: () {
                                 //   Future.delayed(const Duration(milliseconds: 300),
                                 //           () {

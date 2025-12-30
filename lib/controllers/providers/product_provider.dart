@@ -92,6 +92,7 @@ class ProductProvider extends ChangeNotifier {
     setLoading(true);
     try {
       _prds = await _productRepo.getMyProducts();
+      _filteredPrds = _prds;
       _error = null;
     } catch (e) {
       _error = e.toString();

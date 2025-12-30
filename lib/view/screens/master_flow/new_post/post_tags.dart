@@ -15,7 +15,6 @@ import 'package:rivala/view/widgets/expanded_row.dart';
 import 'package:rivala/view/widgets/image_stack.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
-import 'package:rivala/view/widgets/my_text_widget.dart';
 
 import '../../../../models/product_model.dart';
 
@@ -74,16 +73,21 @@ class _PostTagsState extends State<PostTags> {
                   ),
                   Consumer<ProductProvider>(
                     builder: (context, ref, _) {
-                      final prd = ref.prds;
+                      final prdList = ref.prds ?? [];
+
+                      if (prdList.isEmpty) {
+                        return const Center(child: Text("No products found"));
+                      }
+
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 3,
-                        itemBuilder: (context, switchIndex) {
+                        itemCount: prdList.length,
+                        itemBuilder: (context, index) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: tags_search_row(
-                              product: prd?[switchIndex],
+                              product: prdList[index],
                               isProduct: true,
                             ),
                           );
@@ -114,9 +118,7 @@ class _PostTagsState extends State<PostTags> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        context.read<ProductProvider>().loadCurrentProducts();
-      });
+      context.read<ProductProvider>().loadCurrentProducts();
     });
   }
 }
@@ -155,48 +157,45 @@ class tags_search_row extends StatefulWidget {
 }
 
 class _tags_search_rowState extends State<tags_search_row> {
-  late bool isSelected = widget.isSelected ?? false;
-
   @override
   Widget build(BuildContext context) {
-    // ------------------------------
-    // IMAGE PRIORITY HANDLING
-    // ------------------------------
-    final String? productImage = widget.product?.image?.isNotEmpty == true
-        ? widget.product!.image!.first
-        : null;
+    final postProvider = context.watch<PostProvider>();
+    final productProvider = context.watch<ProductProvider>();
 
-    print("Image: $productImage");
+    final product = widget.product;
+
+    final isSelected = product != null &&
+        postProvider.tagProducts.any((p) => p?.id == product.id);
+
+    // ------------------------------
+    // SAFE IMAGE HANDLING
+    // ------------------------------
+    final String? productImage =
+        product?.image != null && product!.image!.isNotEmpty
+            ? product.image!.first
+            : null;
 
     final String? mainImage =
         widget.isProduct == true ? productImage : widget.image;
 
     return Bounce_widget(
-      ontap: () {
-        setState(() {
-          isSelected = !isSelected;
-        });
-        if (isSelected) {
-          Provider.of<PostProvider>(context, listen: false)
-              .tagProducts
-              .add(widget.product!);
-        } else {
-          Provider.of<PostProvider>(context, listen: false)
-              .tagProducts
-              .remove(widget.product!);
-        }
-        print(
-            "Selected product: ${Provider.of<PostProvider>(context, listen: false).tagProducts}");
-      },
+      ontap: product == null
+          ? null
+          : () {
+              if (isSelected) {
+                postProvider.tagProducts
+                    .removeWhere((p) => p?.id == product.id);
+              } else {
+                postProvider.tagProducts.add(product);
+              }
+            },
       widget: Container(
         color: isSelected ? widget.bgColor ?? kbackground : ktransparent,
         padding:
             EdgeInsets.symmetric(horizontal: widget.hpad ?? 22, vertical: 2),
         child: Row(
           children: [
-            // ---------------------------------------------------------
-            // IMAGE BLOCK
-            // ---------------------------------------------------------
+            // IMAGE
             widget.isSquad == true
                 ? SizedBox(
                     width: 70,
@@ -206,115 +205,86 @@ class _tags_search_rowState extends State<tags_search_row> {
                     children: [
                       CommonImageView(
                         url: mainImage,
-                        imagePath: mainImage ?? Assets.imagesTagsimg,
+                        imagePath: Assets.imagesTagsimg,
                         width: widget.size ?? 90,
                         height: widget.size ?? 90,
                         radius: 10,
                       ),
-
-                      // tag icon at bottom right
                       Positioned(
                         bottom: 4,
                         right: 4,
-                        child: SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                        sigmaX: 10, sigmaY: 10),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: kblack.withOpacity(0.1),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Center(
-                                  child: CommonImageView(
-                                    imagePath: Assets.imagesTags,
-                                    width: 10,
-                                    height: 10,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        child: _TagIcon(),
                       ),
                     ],
                   ),
 
             const SizedBox(width: 20),
 
-            // ---------------------------------------------------------
-            // TEXT SECTION
-            // ---------------------------------------------------------
+            // TEXT
             Expanded(
               child: widget.isProduct == true
                   ? TwoTextedColumn(
-                      text1: widget.product?.title ?? "",
-                      text2: widget.product?.store?.name ?? "",
+                      text1: product?.title ?? '',
+                      text2: product?.store?.name ?? '',
                       size2: 12,
                       color1: kblack,
                       size1: 14,
                       color2: ktertiary,
                     )
-                  : widget.isMainMenu == true || widget.isSquad == true
-                      ? MyText(
-                          text: widget.title ?? '',
-                          size: 15,
-                          color: kblack,
-                          weight: FontWeight.w500,
-                        )
-                      : TwoTextedColumn(
-                          text1: widget.title ?? '',
-                          text2: widget.tags ?? '',
-                          size2: 12,
-                          color1: kblack,
-                          size1: 14,
-                          color2: ktertiary,
-                        ),
+                  : TwoTextedColumn(
+                      text1: widget.title ?? '',
+                      text2: widget.tags ?? '',
+                      size2: 12,
+                      color1: kblack,
+                      size1: 14,
+                      color2: ktertiary,
+                    ),
             ),
 
-            // ---------------------------------------------------------
-            // CHECKBOX OR PLUS ICON
-            // ---------------------------------------------------------
-            if (widget.onlyTexts == false)
-              (widget.hasCheckbox == true)
-                  ? CustomCheckBox(
-                      isActive: isSelected,
-                      onTap: () {},
-                      borderColor: kblack,
-                      iscircle: true,
-                      circleIcon: Icons.check,
-                    )
-                  : Bounce_widget(
-                      ontap: () {
-                        setState(() {
-                          isSelected = !isSelected;
-                        });
+            // CHECK ICON
+            if (widget.onlyTexts != true)
+              CustomCheckBox(
+                isActive: isSelected,
+                onTap: () {},
+                borderColor: kblack,
+                iscircle: true,
+                circleIcon: Icons.check,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                        context
-                            .read<ProductProvider>()
-                            .toggleMember(widget.product!);
-                      },
-                      widget: Image.asset(
-                        isSelected ||
-                                context
-                                    .read<ProductProvider>()
-                                    .selectedMembers
-                                    .contains(widget.product)
-                            ? Assets.imagesCheckmark
-                            : Assets.imagesAdd,
-                        width: 22,
-                      ),
-                    ),
+class _TagIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 18,
+      width: 18,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: kblack.withOpacity(0.1),
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: CommonImageView(
+                imagePath: Assets.imagesTags,
+                width: 10,
+                height: 10,
+              ),
+            ),
           ],
         ),
       ),

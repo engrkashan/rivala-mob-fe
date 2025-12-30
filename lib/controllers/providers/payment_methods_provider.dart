@@ -31,10 +31,11 @@ class PaymentMethodsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addPaymentMethod(Map<String, dynamic> data) async {
+  Future<void> addPaymentMethod(
+      Map<String, dynamic> data, String cardType) async {
     setLoading(true);
     try {
-      await _paymentMethodsRepo.createCardPaymentMethod(data);
+      await _paymentMethodsRepo.createCardPaymentMethod(data, cardType);
       // Reload list to show new method
       await loadPaymentMethods();
       _error = null;
@@ -42,6 +43,36 @@ class PaymentMethodsProvider extends ChangeNotifier {
       _error = e.toString();
       // Rethrow to let UI handle specific error display if needed
       rethrow;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updatePaymentMethod(
+      Map<String, dynamic> data, String cardType, String id) async {
+    setLoading(true);
+    try {
+      await _paymentMethodsRepo.updatePaymentMethod(data, cardType, id);
+      // Reload list to show new method
+      await loadPaymentMethods();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      // Rethrow to let UI handle specific error display if needed
+      rethrow;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> deletPaymentMethod(String id) async {
+    setLoading(true);
+    try {
+      await _paymentMethodsRepo.deletePaymentMethod(id);
+      await loadPaymentMethods();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
     } finally {
       setLoading(false);
     }

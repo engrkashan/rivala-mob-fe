@@ -1,3 +1,4 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -82,18 +83,33 @@ class _CreateNewSquadState extends State<CreateNewSquad> {
 
   final squadName = TextEditingController();
   final squadSummary = TextEditingController();
+  int nameCount = 0;
+  int summaryCount = 0;
 
   @override
   Widget build(BuildContext context) {
     final squadMember = context.watch<SquadProvider>();
     final sellersProvider = context.watch<BrandsProvider>();
     final prdProvider = context.watch<ProductProvider>();
-    final memberImages =
-        squadMember.selectedMembers.map((e) => e.avatarUrl).toList();
-    final sellerImages =
-        sellersProvider.filteredStores.map((e) => e.logoUrl).toList();
-    final prdImages =
-        prdProvider.filteredPrds?.map((e) => e.image?[0]).toList();
+    final memberImages = squadMember.selectedMembers
+        .map((e) => e.avatarUrl)
+        .whereType<String>()
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    final sellerImages = sellersProvider.filteredStores
+        .map((e) => e.logoUrl)
+        .whereType<String>()
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    final prdImages = prdProvider.filteredPrds
+            ?.map((e) => e.image?.isNotEmpty == true ? e.image!.first : null)
+            .whereType<String>()
+            .where((e) => e.isNotEmpty)
+            .toList() ??
+        [];
+
     print(memberImages.toList());
     print("Seller Images: ${sellerImages.toList()}");
     print("Product Images: ${prdImages?.toList()}");
@@ -101,146 +117,165 @@ class _CreateNewSquadState extends State<CreateNewSquad> {
         backgroundColor: kwhite,
         appBar:
             simpleAppBar(context: context, title: 'Squads', centerTitle: true),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: Stack(
           children: [
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  EditImgStack(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  MyTextField(
-                    label: 'Squad Name',
-                    hint: 'American Fork Football 2025',
-                    controller: squadName,
-                    filledColor: kblack.withOpacity(0.04),
-                    bordercolor: ktransparent,
-                    suffixIcon: SizedBox(
-                      height: 20,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              MyText(
-                                text: '20/100',
-                                color: ktertiary,
-                                paddingRight: 3,
-                              ),
-                              Image.asset(
-                                Assets.imagesCheckbox,
-                                width: 15,
-                                height: 15,
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  MyTextField(
-                    controller: squadSummary,
-                    label: 'Summary',
-                    hint:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
-                    filledColor: kblack.withOpacity(0.04),
-                    bordercolor: ktransparent,
-                    maxLines: 5,
-                    delay: 250,
-                    suffixIcon: SizedBox(
-                      height: 100,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              MyText(
-                                text: '20/100',
-                                color: ktertiary,
-                                paddingRight: 3,
-                              ),
-                              Image.asset(
-                                Assets.imagesCheckbox,
-                                width: 15,
-                                height: 15,
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ListView.builder(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: newSquad.length,
-                    itemBuilder: (context, index) {
-                      final item = newSquad[index];
-
-                      // Select correct images based on type
-                      List<String?> images = [];
-
-                      if (item["type"] == "members") {
-                        images = memberImages;
-                      } else if (item["type"] == "sellers") {
-                        images = sellerImages;
-                      } else if (item["type"] == "products") {
-                        images = prdImages ?? [];
-                      } else {
-                        images = [];
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            add_link_container(
-                              title: item["title"]!,
-                              link: item["link"]!,
-                              editButtontext: item["editButton"]!,
-                              onEditTap: item["ontap"]!,
-                              delay: (index + 1) * 200,
-                              text2Size: 11,
-                              maxlines: 3,
-                              isMainMenu: true,
-                              leadingWidget: images.isNotEmpty
-                                  ? StackedImagesWidget(
-                                      urlImages:
-                                          images.whereType<String>().toList(),
-                                    )
-                                  : null,
-                            ),
-                          ],
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 22),
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      EditImgStack(),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      MyTextField(
+                        label: 'Squad Name',
+                        hint: 'American Fork Football 2025',
+                        controller: squadName,
+                        filledColor: kblack.withOpacity(0.04),
+                        bordercolor: ktransparent,
+                        onChanged: (e) {
+                          nameCount = e.length;
+                          setState(() {});
+                        },
+                        suffixIcon: SizedBox(
+                          height: 20,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  MyText(
+                                    text: '$nameCount/100',
+                                    color: ktertiary,
+                                    paddingRight: 3,
+                                  ),
+                                  Image.asset(
+                                    Assets.imagesCheckbox,
+                                    width: 15,
+                                    height: 15,
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                      MyTextField(
+                        controller: squadSummary,
+                        label: 'Summary',
+                        hint: "Squad summary or description",
+                        filledColor: kblack.withOpacity(0.04),
+                        bordercolor: ktransparent,
+                        maxLines: 5,
+                        delay: 250,
+                        onChanged: (e) {
+                          summaryCount = e.length;
+                          setState(() {});
+                        },
+                        suffixIcon: SizedBox(
+                          height: 100,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  MyText(
+                                    text: '$summaryCount/100',
+                                    color: ktertiary,
+                                    paddingRight: 3,
+                                  ),
+                                  Image.asset(
+                                    Assets.imagesCheckbox,
+                                    width: 15,
+                                    height: 15,
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: newSquad.length,
+                        itemBuilder: (context, index) {
+                          final item = newSquad[index];
+
+                          // Select correct images based on type
+                          List<String?> images = [];
+
+                          if (item["type"] == "members") {
+                            images = memberImages;
+                          } else if (item["type"] == "sellers") {
+                            images = sellerImages;
+                          } else if (item["type"] == "products") {
+                            images = prdImages ?? [];
+                          } else {
+                            images = [];
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                add_link_container(
+                                  title: item["title"]!,
+                                  link: item["link"]!,
+                                  editButtontext: item["editButton"]!,
+                                  onEditTap: item["ontap"]!,
+                                  delay: (index + 1) * 200,
+                                  text2Size: 11,
+                                  maxlines: 3,
+                                  isMainMenu: true,
+                                  leadingWidget: images.isNotEmpty
+                                      ? StackedImagesWidget(
+                                          urlImages: images
+                                              .whereType<String>()
+                                              .toList(),
+                                        )
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(
+                        width: 200,
+                        child: MyButton(
+                          buttonText: "Add Squad",
+                          onTap: () {
+                            squadMember.sendSquadRequest(
+                                squadName.text, squadSummary.text, context);
+                            if (squadMember.error != null) {
+                              print("squad error: ${squadMember.error}");
+                              AlertInfo.show(
+                                  context: context, text: squadMember.error!);
+                              return;
+                            }
+                            Navigator.pop(context);
+                          },
+                          height: 50,
+                        ),
+                      )
+                    ],
                   ),
-                  SizedBox(
-                    width: 200,
-                    child: MyButton(
-                      buttonText: "Add Squad",
-                      onTap: () {
-                        squadMember.sendSquadRequest(
-                            squadName.text, squadSummary.text, context);
-                      },
-                      height: 50,
-                    ),
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
             if (squadMember.isLoading)
               Positioned.fill(

@@ -131,6 +131,8 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
     }
   }
 
+  String status = "Live";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,8 +182,7 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                 ),
                 MyTextField(
                   controller: summaryCtrl,
-                  hint:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
+                  hint: 'Product Summary',
                   label: 'Summary',
                   suffixIcon: Image.asset(
                     Assets.imagesEdit,
@@ -194,8 +195,7 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                   bordercolor: ktransparent,
                 ),
                 MyTextField(
-                  hint:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
+                  hint: 'Any Special Notes',
                   label: 'Special Notes',
                   suffixIcon: Image.asset(
                     Assets.imagesEdit,
@@ -216,8 +216,11 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                       'Paused',
                       'Live',
                     ],
-                    selectedValue: 'Live',
-                    onChanged: (e) {}),
+                    selectedValue: status,
+                    onChanged: (e) {
+                      status = e;
+                      setState(() {});
+                    }),
                 Row(
                   children: [
                     Expanded(

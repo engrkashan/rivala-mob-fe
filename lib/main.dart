@@ -16,6 +16,7 @@ import 'package:rivala/controllers/providers/post_provider.dart';
 import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/controllers/providers/promo_provider.dart';
 import 'package:rivala/controllers/providers/revenue_provider.dart';
+import 'package:rivala/controllers/providers/tax_document_provider.dart';
 import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/controllers/providers/wallet_provider.dart';
@@ -78,7 +79,8 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => CartProvider(),
         ),
-        ChangeNotifierProvider(create: (_) => RevenueProvider())
+        ChangeNotifierProvider(create: (_) => RevenueProvider()),
+        ChangeNotifierProvider(create: (_) => TaxDocumentProvider()),
       ],
       child: MyApp(
         token: token,

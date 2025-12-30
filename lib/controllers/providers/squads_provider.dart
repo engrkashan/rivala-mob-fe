@@ -23,7 +23,7 @@ class SquadProvider extends ChangeNotifier {
 
   List<UserModel> selectedMembers = [];
 
-  String get error => _error ?? '';
+  String? get error => _error;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -114,6 +114,7 @@ class SquadProvider extends ChangeNotifier {
       );
 
       await _repo.createSquad(squad);
+      await getSquads();
       print("Squad created successfully");
       clear();
     } catch (e) {

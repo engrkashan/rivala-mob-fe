@@ -1,3 +1,4 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
@@ -89,6 +90,7 @@ class _FollowingsManualAddState extends State<FollowingsManualAdd> {
                             buttonText:
                                 widget.follower == true ? 'Remove' : 'Unfollow',
                             following: following.following[index],
+                            follow: following,
                           ),
                         );
                       },
@@ -118,6 +120,7 @@ class manual_add_row extends StatelessWidget {
   final bool? isFollowing, isButton;
   final VoidCallback? ontap;
   final FollowModel? following;
+  final FollowProvider? follow;
   const manual_add_row({
     super.key,
     this.text1,
@@ -134,6 +137,7 @@ class manual_add_row extends StatelessWidget {
     this.mbot,
     this.ontap,
     this.following,
+    this.follow,
   });
 
   @override
@@ -149,8 +153,8 @@ class manual_add_row extends StatelessWidget {
       widget: Row(
         children: [
           CommonImageView(
+            // imagePath: img ?? Assets.imagesProfileicon,
             url: following?.logo,
-            imagePath: following?.logo ?? img ?? Assets.imagesProfileicon,
             width: 54,
             height: 54,
             radius: 100,
@@ -178,6 +182,14 @@ class manual_add_row extends StatelessWidget {
               hPadding: 10,
               radius: 5,
               bgColor: ktertiary,
+              onTap: () async {
+                await follow!.unfollowBrand(following!.id!);
+                if (follow!.error != null) {
+                  AlertInfo.show(context: context, text: follow!.error!);
+                } else {
+                  await follow!.loadFollowings();
+                }
+              },
             ),
           if (isButton == false) MyText(text: '5m ago')
         ],

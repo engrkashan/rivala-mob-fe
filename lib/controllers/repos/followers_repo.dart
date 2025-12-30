@@ -15,7 +15,7 @@ class FollowsRepo {
   Future<List<FollowModel>> getFollowing() async {
     final response =
         await api.getResponse(endpoints: Endpoints.currentFollowing);
-    final List<dynamic> data = response['followingStores'] ?? [];
+    final data = response['followingStores'] as List;
     return data.map((item) => FollowModel.fromJson(item)).toList();
   }
 

@@ -92,8 +92,10 @@ class _FollowersManualAddState extends State<FollowersManualAdd> {
                           padding: const EdgeInsets.only(bottom: 15),
                           child: manual_add_row(
                             follower: followers.followers[index],
+                            isButton: false,
                             buttonText:
                                 widget.follower == true ? 'Remove' : 'Unfollow',
+                            imageUrl: followers.followers[index].logo,
                           ),
                         );
                       },

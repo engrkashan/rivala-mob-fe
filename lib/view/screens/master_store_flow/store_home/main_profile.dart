@@ -92,7 +92,9 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               size2: 14,
                               useCustomFont: true,
                               ontap2: () {
-                                Get.to(() => CollectionGrid());
+                                Get.to(() => CollectionGrid(
+                                      store: collection.store,
+                                    ));
                               },
                             ),
                           ),

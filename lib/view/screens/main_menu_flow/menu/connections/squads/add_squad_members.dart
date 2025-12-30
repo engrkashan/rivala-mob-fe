@@ -121,8 +121,12 @@ class _AddSquadMembersState extends State<AddSquadMembers> {
             Expanded(
               child: Consumer<ProductProvider>(
                 builder: (context, product, _) {
-                  final prdList = product.filteredPrds ?? product.prds ?? [];
-
+                  final prdList = product.filteredPrds ?? [];
+                  if (product.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
                   if (prdList.isEmpty) {
                     return const Center(child: Text("No products found"));
                   }
@@ -146,7 +150,9 @@ class _AddSquadMembersState extends State<AddSquadMembers> {
                             size: 54,
                             hpad: 0,
                             bgColor: ktransparent,
-                            image: prd.image?[0],
+                            image: (prd.image != null && prd.image!.isNotEmpty)
+                                ? prd.image!.first
+                                : null,
                             title: prd.title,
                             tags: prd.store?.name,
                             isSelected: isSelected, // pass directly
@@ -195,7 +201,7 @@ class _AddSquadMembersState extends State<AddSquadMembers> {
     }
     if (widget.isProduct! && !widget.isBrand!) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ProductProvider>().loadAllProducts();
+        context.read<ProductProvider>().loadCurrentProducts();
       });
     }
   }

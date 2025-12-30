@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/wallet_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/wallet/bank_info/bank_management.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/wallet/payment/payment_management.dart';
-import 'package:rivala/view/screens/main_menu_flow/menu/wallet/tax_documentation/tax_documentation.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/wallet/tax_documentation/tax_documents.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/circle_icon.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-
-import 'package:provider/provider.dart';
-import 'package:rivala/controllers/providers/wallet_provider.dart';
 
 class WalletMain extends StatefulWidget {
   const WalletMain({super.key});
@@ -31,7 +29,7 @@ class _WalletMainState extends State<WalletMain> {
         'icon': Assets.imagesTax,
         'delay': 100,
         'onTap': () => Navigator.of(context).push(
-              CustomPageRoute(page: TaxDocumentation()),
+              CustomPageRoute(page: TaxDocumentsListScreen()),
             )
       },
       {
