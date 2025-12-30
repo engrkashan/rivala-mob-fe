@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/collections_provider.dart';
+import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/product_model.dart';
+import 'package:rivala/models/promotions_model.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/add_attribute.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/add_pdp.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/add_product_collection.dart';
@@ -10,15 +15,10 @@ import 'package:rivala/view/screens/master_flow/new_post/add_promo/start_new_pro
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
+import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
-import 'package:rivala/view/widgets/my_button.dart';
-
-import 'package:provider/provider.dart';
-import 'package:rivala/controllers/providers/product_provider.dart';
-import 'package:rivala/controllers/providers/collections_provider.dart';
-import 'package:rivala/models/product_model.dart';
 
 class EditExistingProducts extends StatefulWidget {
   final bool? hasProducts;
@@ -32,10 +32,16 @@ class EditExistingProducts extends StatefulWidget {
 }
 
 class _EditExistingProductsState extends State<EditExistingProducts> {
+  bool get isEdit => widget.product != null;
   late TextEditingController nameCtrl;
   late TextEditingController summaryCtrl;
   late TextEditingController
       priceCtrl; // reusing commission field for price/commission
+  late TextEditingController skuCtrl;
+  late TextEditingController stockCtrl;
+  late List<CollectionProvider> col;
+  late List<String> images;
+  late List<PromotionModel> promos;
 
   @override
   void initState() {
@@ -45,10 +51,44 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
         TextEditingController(text: widget.product?.description ?? '');
     priceCtrl =
         TextEditingController(text: widget.product?.price?.toString() ?? '');
+    skuCtrl = TextEditingController(text: widget.product?.SKU ?? '');
+    stockCtrl = TextEditingController(
+        text: widget.product?.stockQuantity?.toString() ?? '');
+
+    images = widget.product?.image ?? [];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CollectionProvider>().loadAllCollections();
     });
+  }
+
+  Future<void> _handleCreate() async {
+    if (nameCtrl.text.trim().isEmpty ||
+        double.tryParse(priceCtrl.text) == null) {
+      Get.snackbar("Validation", "Title and valid price required");
+      return;
+    }
+
+    final provider = context.read<ProductProvider>();
+
+    final product = ProductModel(
+      title: nameCtrl.text.trim(),
+      description: summaryCtrl.text.trim(),
+      price: double.parse(priceCtrl.text),
+      SKU: skuCtrl.text.trim(),
+      stockQuantity: int.tryParse(stockCtrl.text),
+      isActive: true,
+      country: "PK",
+    );
+
+    await provider.createProduct(product);
+    provider.filteredPrds?.add(product);
+    if (provider.error == null) {
+      Navigator.pop(context);
+      Get.snackbar("Success", "Product uploaded");
+    } else {
+      Get.snackbar("Error", provider.error!);
+    }
   }
 
   Future<void> _handleUpdate() async {
@@ -68,8 +108,10 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
     );
 
     await provider.updateProduct(updated);
+
     if (provider.error == null) {
-      Get.back();
+      Navigator.pop(context);
+
       Get.snackbar("Success", "Product updated");
     } else {
       Get.snackbar("Error", provider.error!);
@@ -80,9 +122,9 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
     if (widget.product == null) return;
     final provider = context.read<ProductProvider>();
     await provider.deleteProduct(widget.product!.id!);
+    provider.filteredPrds?.remove(widget.product);
     if (provider.error == null) {
-      Get.back(); // Close edit screen
-      Get.back(); // Close detail screen if any
+      Navigator.pop(context);
       Get.snackbar("Success", "Product deleted");
     } else {
       Get.snackbar("Error", provider.error!);
@@ -512,31 +554,35 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                   },
                 ),
                 SizedBox(
-                  height: 100,
-                )
+                    // height: 40,
+                    )
               ],
             ),
           ),
-          SizedBox(height: 20),
+          // SizedBox(height: 20),
           Consumer<ProductProvider>(builder: (context, provider, _) {
             return provider.isLoading
                 ? Center(child: CircularProgressIndicator())
                 : Column(
                     children: [
                       MyButton(
-                        buttonText: "Save Changes",
-                        onTap: _handleUpdate,
+                        buttonText: isEdit ? "Save Changes" : "Upload Product",
+                        onTap: isEdit ? _handleUpdate : _handleCreate,
                       ),
-                      SizedBox(height: 10),
-                      MyButton(
-                        buttonText: "Delete Product",
-                        backgroundColor: Colors.red,
-                        onTap: _handleDelete,
-                      ),
+                      if (isEdit)
+                        MyButton(
+                          buttonText: "Delete Product",
+                          backgroundColor: Colors.red,
+                          onTap: _handleDelete,
+                        ),
+                      SizedBox(height: 15),
                       SizedBox(height: 30),
                     ],
                   );
           }),
+          SizedBox(
+            height: 50,
+          )
         ],
       ),
     );

@@ -4,8 +4,8 @@ import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/chat_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/view/widgets/appbar.dart';
-import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/chat_text_field.dart';
+import 'package:rivala/view/widgets/my_text_widget.dart';
 
 class Chats extends StatefulWidget {
   final String? title;
@@ -67,7 +67,7 @@ class _ChatsState extends State<Chats> {
                   final userId = context.read<AuthProvider>().currentUserId;
                   context
                       .read<ChatProvider>()
-                      .sendMessage(_controller.text, widget.receiverId, userId);
+                      .sendMessage(_controller.text, widget.receiverId);
                   _controller.clear();
                 },
               ),

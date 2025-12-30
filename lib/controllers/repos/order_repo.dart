@@ -64,4 +64,15 @@ class OrderRepo {
       return null;
     }
   }
+
+  Future<void> cancelOrder(String id) async {
+    await api.patchResponse(endpoint: Endpoints.cancelBuyerOrder(id));
+  }
+
+  Future<void> updateOrderStatus(String id, String status) async {
+    await api.patchResponse(
+      endpoint: Endpoints.updateStoreOrderStatus(id),
+      data: {'status': status},
+    );
+  }
 }

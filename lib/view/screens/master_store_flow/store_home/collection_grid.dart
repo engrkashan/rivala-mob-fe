@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/add_filters.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
-import 'package:rivala/view/widgets/my_button.dart';
-import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/fotter.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
-import 'package:provider/provider.dart';
+
 import '../../../../controllers/providers/brands_provider.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
+import '../../../../models/store_model.dart';
 
 class CollectionGrid extends StatefulWidget {
   final String? text1, text2;
-  const CollectionGrid({super.key, this.text1, this.text2});
+  final StoreModel? store;
+  const CollectionGrid({super.key, this.text1, this.text2, this.store});
 
   @override
   State<CollectionGrid> createState() => _CollectionGridState();
@@ -30,6 +30,7 @@ class _CollectionGridState extends State<CollectionGrid> {
           children: [
             HeaderImageStack(
               showContent: false,
+              store: widget.store,
             ),
 //
 
@@ -94,15 +95,17 @@ class _CollectionGridState extends State<CollectionGrid> {
             SizedBox(
               height: 30,
             ),
-            StoreFotter()
+            StoreFotter(
+              store: widget.store,
+            )
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
-        child: Store_Button_Row(),
-      ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: Padding(
+      //   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
+      //   child: Store_Button_Row(),
+      // ),
     );
   }
 }

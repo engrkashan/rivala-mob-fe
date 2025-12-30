@@ -4,13 +4,12 @@ import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/store_model.dart';
-import 'package:rivala/view/screens/main_menu_flow/menu/connections/followers_manual_add.dart';
+import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/store_menu.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 
 //header image container
 
@@ -31,7 +30,7 @@ class HeaderImageStack extends StatelessWidget {
           ),
           child: CommonImageView(
             imagePath: Assets.imagesDummyImg, // Maybe store cover image?
-            url: store?.logoUrl, // Assuming StoreModel has coverUrl or similar
+            url: store?.owner?.avatarUrl,
             width: Get.width,
             height: 300, // Fixed height for cover
             fit: BoxFit.cover,
@@ -133,7 +132,10 @@ class HeaderImageStack extends StatelessWidget {
           left: 22,
           child: Bounce_widget(
             ontap: () {
-              Navigator.of(context).push(CustomPageRoute(page: StoreMenu()));
+              Navigator.of(context).push(CustomPageRoute(
+                  page: StoreMenu(
+                store: store,
+              )));
               // Get.to(StoreMenu());
             },
             widget: Image.asset(

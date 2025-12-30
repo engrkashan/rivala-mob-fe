@@ -149,8 +149,8 @@ class manual_add_row extends StatelessWidget {
       widget: Row(
         children: [
           CommonImageView(
-            url: following?.avatarUrl,
-            imagePath: following?.avatarUrl ?? img ?? Assets.imagesProfileicon,
+            url: following?.logo,
+            imagePath: following?.logo ?? img ?? Assets.imagesProfileicon,
             width: 54,
             height: 54,
             radius: 100,

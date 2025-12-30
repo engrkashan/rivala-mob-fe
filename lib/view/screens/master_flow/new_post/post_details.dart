@@ -1,15 +1,15 @@
 import 'dart:io';
 
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/product_model.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_location/add_location.dart';
-import 'package:rivala/view/screens/master_flow/new_post/add_promo/start_new_promo.dart';
-import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_expiry/post_expiration.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_tags.dart';
 import 'package:rivala/view/screens/master_flow/new_post/tag_collection/tag_collection.dart';
@@ -23,6 +23,9 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/post_detail_widget.dart';
 
+import '../../../../controllers/providers/post_provider.dart';
+import '../../persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
+
 class PostDetails extends StatefulWidget {
   ProductModel? product;
   PostDetails({super.key, this.product});
@@ -32,56 +35,76 @@ class PostDetails extends StatefulWidget {
 }
 
 class _PostDetailsState extends State<PostDetails> {
-  List<Map<String, dynamic>> postOptions = [
-    {
-      "icon": Assets.imagesFeatured, "title": "Featured Post", 'ontap': () {},
-      'isFeatured': true
-      // 'tags': [""],
-    },
-    {
-      "icon": Assets.imagesPromo,
-      "title": "Add promo",
-      'ontap': () {
-        Get.to(() => StartNewPromo());
-      },
-      //  'tags': ["Tech", "Fashion"],
-    },
-    {
-      "icon": Assets.imagesTags,
-      "title": "Tag products",
-      'ontap': () {
-        Get.to(() => PostTags());
-      },
-      'tags': ["Duck Flow Airflow Windshell Jacket"],
-    },
-    {
-      "icon": Assets.imagesTagcollection,
-      "title": "Tag collections",
-      'ontap': () {
-        Get.to(() => TagCollection());
-      },
-      'tags': ["My Favorites", "Apparel"],
-      'tagIcon': Assets.imagesTagcollection
-    },
-    {
-      "icon": Assets.imagesPostexp,
-      "title": "Post expiration",
-      'ontap': () {
-        Get.to(() => PostExpiration());
-      },
-      'hasText': true,
-      'addedText': '01/08/2024, 10:00 AM'
-    },
-    {
-      "icon": Assets.imagesLocation,
-      "title": "Add location",
-      'ontap': () {
-        Get.to(() => AddLocation());
-      },
-      'hasText': true,
-      'addedText': 'Seattle, WA'
-    },
-  ];
+  bool isFeaturedPost = false;
+  List<Map<String, dynamic>> get postOptions => [
+        {
+          "icon": Assets.imagesFeatured,
+          "title": "Featured Post",
+          "ontap": () {
+            setState(() {
+              isFeaturedPost = !isFeaturedPost;
+            });
+          },
+          'isFeatured': isFeaturedPost
+
+          // 'tags': [""],
+        },
+        // {
+        //   "icon": Assets.imagesPromo,
+        //   "title": "Add promo",
+        //   'ontap': () {
+        //     Get.to(() => StartNewPromo());
+        //   },
+        //   //  'tags': ["Tech", "Fashion"],
+        // },
+        {
+          "icon": Assets.imagesTags,
+          "title": "Tag products",
+          'ontap': () {
+            Get.to(() => PostTags());
+          },
+          'tags': Provider.of<PostProvider>(context, listen: false)
+              .tagProducts
+              .map((e) => e!.title!)
+              .toList(),
+        },
+        {
+          "icon": Assets.imagesTagcollection,
+          "title": "Tag collections",
+          'ontap': () {
+            Get.to(() => TagCollection());
+          },
+          'tags': Provider.of<PostProvider>(context, listen: false)
+              .tagCollections
+              .map((e) => e?.name ?? "")
+              .toList(),
+          'tagIcon': Assets.imagesTagcollection
+        },
+        {
+          "icon": Assets.imagesPostexp,
+          "title": "Post expiration",
+          'ontap': () {
+            Get.to(() => PostExpiration());
+          },
+          'hasText': true,
+          'addedText': context.watch<PostProvider>().postExpiration == null
+              ? null
+              : context.watch<PostProvider>().formattedExpiration(context),
+        },
+        {
+          "icon": Assets.imagesLocation,
+          "title": "Add location",
+          'ontap': () {
+            Get.to(() => AddLocation());
+          },
+          'hasText': true,
+          'addedText': 'Seattle, WA'
+        },
+      ];
+
+  final titleController = TextEditingController();
+  final desc = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final ImagePickerController controller = Get.put(ImagePickerController());
@@ -259,11 +282,13 @@ class _PostDetailsState extends State<PostDetails> {
                       hintColor: kblack,
                       contentvPad: 10,
                       delay: 200,
+                      controller: titleController,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 22),
                     child: MyTextField(
+                      controller: desc,
                       hint: 'Write a caption or share a description . . . ',
                       label: 'Description',
                       radius: 25,
@@ -311,14 +336,41 @@ class _PostDetailsState extends State<PostDetails> {
               buttonText: 'Share',
               mbot: 30,
               hpad: 22,
-              ontap: () {
+              ontap: () async {
+                List<String> list = [];
+                // final mediaList = controller.selectedMedia;
+                // for (final file in mediaList) {
+                //   await context.read<MediaProvider>().upload(url: file);
+                //   list.add(context.read<MediaProvider>().uploadedUrl!);
+                // }
+                await context.read<PostProvider>().createPost({
+                  "title": titleController.text,
+                  "description": desc.text,
+                  "media": list,
+                  "taggedProducts":
+                      Provider.of<PostProvider>(context, listen: false)
+                          .tagProducts
+                          .map((e) => e?.id)
+                          .toList(),
+                  "taggedCollection":
+                      Provider.of<PostProvider>(context, listen: false)
+                          .tagCollections
+                          .map((e) => e?.id)
+                          .toList(),
+                  "locations": null
+                });
+                final error = context.watch<PostProvider>().error;
+
+                if (error != null && error.isNotEmpty) {
+                  AlertInfo.show(context: context, text: error);
+                }
                 Get.to(() => GradientSuccessScreen(
                       title: 'Congratulations!',
                       textSize: 32,
                       desc: 'Now let’s share your post.',
                       buttontext: 'Share your post!',
                       ontap: () {
-                        Get.to(() => PostDisplay());
+                        Get.to(() => PersistentBottomNavBar());
                       },
                       // hasSkip: false,
                     ));

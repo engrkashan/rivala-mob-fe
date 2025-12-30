@@ -10,8 +10,11 @@ import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../../models/store_model.dart';
+
 class FollowerMaiProfile extends StatefulWidget {
-  const FollowerMaiProfile({super.key});
+  final StoreModel? store;
+  const FollowerMaiProfile({super.key, this.store});
 
   @override
   State<FollowerMaiProfile> createState() => _FollowerMaiProfileState();
@@ -23,7 +26,8 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
     return Stack(
       children: [
         CommonImageView(
-          imagePath: Assets.imagesNutritionbg,
+          // imagePath: Assets.imagesNutritionbg,
+          url: widget.store?.logoUrl,
           height: Get.height,
           width: Get.width,
         ),
@@ -42,24 +46,25 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
                   child: Bounce_widget(
                     ontap: () {
-                      Get.back();
+                      Navigator.pop(context);
                     },
                     widget: Image.asset(
-                      Assets.imagesMenubutton,
-                      width: 46,
-                      height: 46,
+                      Assets.imagesBack2,
+                      width: 16,
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
               CommonImageView(
-                imagePath: Assets.imagesNutrition,
+                // imagePath: Assets.imagesNutrition,
+                url: widget.store?.logoUrl,
                 width: 80,
                 height: 80,
                 radius: 100,
               ),
               MyText(
-                text: 'Nutrition Rescue',
+                text: widget.store?.name ?? 'Nutrition Rescue',
                 color: kwhite,
                 size: 22,
                 weight: FontWeight.bold,
@@ -67,7 +72,7 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
                 useCustomFont: true,
               ),
               MyText(
-                text: '@nutritionrescue  ·  2,486 Likes',
+                text: '@${widget.store?.owner?.username}',
                 color: kwhite,
                 size: 12,
                 weight: FontWeight.w400,
@@ -76,8 +81,8 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
               ),
               MyText(
                 paddingTop: 15,
-                text:
-                    'Nutritionally-optimized meals for chronically malnourished children',
+                text: "${widget.store?.owner?.bio}",
+                // 'Nutritionally-optimized meals for chronically malnourished children',
                 color: kwhite,
                 size: 12,
                 paddingLeft: 18,
@@ -94,7 +99,7 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
                   children: [
                     Expanded(
                       child: buttonContainer(
-                        text: '245   Followers',
+                        text: '${widget.store?.followers.length}   Followers',
                         bgColor: ksecondary.withOpacity(0.2),
                         txtColor: kwhite,
                         textsize: 11,
@@ -106,7 +111,7 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: buttonContainer(
-                        text: '143   Following',
+                        text: '${widget.store?.followings.length}   Following',
                         bgColor: ksecondary.withOpacity(0.2),
                         txtColor: kwhite,
                         textsize: 11,
@@ -128,7 +133,7 @@ class _FollowerMaiProfileState extends State<FollowerMaiProfile> {
               right: 20,
               bottom: Platform.isIOS ? 120 : 100,
             ),
-            child: Store_Button_Row(),
+            child: Store_Button_Row(brandId: widget.store?.id),
           ),
         )
       ],

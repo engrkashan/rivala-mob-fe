@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:rivala/config/network/api_client.dart';
+import 'package:rivala/config/network/endpoints.dart';
 import 'package:rivala/controllers/repos/products_repo.dart';
 import 'package:rivala/models/product_model.dart';
 
@@ -41,6 +43,23 @@ class ProductProvider extends ChangeNotifier {
     } finally {
       setLoading(false);
     }
+  }
+
+  Future<void> createProduct(ProductModel product) async {
+    setLoading(true);
+    try {
+      final response = await ApiClient().postResponse(
+        endpoints: Endpoints.products,
+        data: product.toJson(),
+      );
+
+      final created = ProductModel.fromJson(response.data['product']);
+      _filteredPrds!.add(created);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    }
+    setLoading(false);
   }
 
   Future<void> loadForYou(String id) async {

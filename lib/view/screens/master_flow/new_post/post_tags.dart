@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/post_provider.dart';
 import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/widgets/appbar.dart';
@@ -35,16 +36,16 @@ class _PostTagsState extends State<PostTags> {
             title: 'Tag products',
             centerTitle: true,
             actions: [
-              Bounce_widget(
-                  widget: MyText(
-                text: '+ New',
-                size: 16,
-                color: kblue,
-                weight: FontWeight.w500,
-              )),
-              SizedBox(
-                width: 12,
-              )
+              // Bounce_widget(
+              //     widget: MyText(
+              //   text: '+ New',
+              //   size: 16,
+              //   color: kblue,
+              //   weight: FontWeight.w500,
+              // )),
+              // SizedBox(
+              //   width: 12,
+              // )
             ]),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,17 +72,25 @@ class _PostTagsState extends State<PostTags> {
                       ),
                     ),
                   ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 3,
-                    itemBuilder: (context, switchIndex) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: tags_search_row(),
+                  Consumer<ProductProvider>(
+                    builder: (context, ref, _) {
+                      final prd = ref.prds;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 3,
+                        itemBuilder: (context, switchIndex) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: tags_search_row(
+                              product: prd?[switchIndex],
+                              isProduct: true,
+                            ),
+                          );
+                        },
                       );
                     },
-                  ),
+                  )
                 ],
               ),
             ),
@@ -99,6 +108,16 @@ class _PostTagsState extends State<PostTags> {
             )
           ],
         ));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        context.read<ProductProvider>().loadCurrentProducts();
+      });
+    });
   }
 }
 
@@ -147,6 +166,8 @@ class _tags_search_rowState extends State<tags_search_row> {
         ? widget.product!.image!.first
         : null;
 
+    print("Image: $productImage");
+
     final String? mainImage =
         widget.isProduct == true ? productImage : widget.image;
 
@@ -155,6 +176,17 @@ class _tags_search_rowState extends State<tags_search_row> {
         setState(() {
           isSelected = !isSelected;
         });
+        if (isSelected) {
+          Provider.of<PostProvider>(context, listen: false)
+              .tagProducts
+              .add(widget.product!);
+        } else {
+          Provider.of<PostProvider>(context, listen: false)
+              .tagProducts
+              .remove(widget.product!);
+        }
+        print(
+            "Selected product: ${Provider.of<PostProvider>(context, listen: false).tagProducts}");
       },
       widget: Container(
         color: isSelected ? widget.bgColor ?? kbackground : ktransparent,

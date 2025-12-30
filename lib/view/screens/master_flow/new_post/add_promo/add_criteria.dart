@@ -20,10 +20,12 @@ class AddCriteria extends StatelessWidget {
             'A promo code is a unique code providing discounts or promotions at checkout.',
         'icon': Assets.imagesTags2,
         'ontap': () {
-                 Get.back();
-          Get.bottomSheet(PromoCode(
-            isPromo: true,
-          ),isScrollControlled: true);
+          Get.back();
+          Get.bottomSheet(
+              PromoCode(
+                isPromo: true,
+              ),
+              isScrollControlled: true);
         }
       },
       {
@@ -32,10 +34,13 @@ class AddCriteria extends StatelessWidget {
             'A tailored price reduction emphasizing a product’s exclusive benefits.',
         'icon': Assets.imagesProduct,
         'ontap': () {
-              Get.back();
-              Get.bottomSheet(PromoCode(
-   title: 'Product Promo',
-          ),isScrollControlled: true);
+          Get.back();
+          Get.bottomSheet(
+              PromoCode(
+                title: 'Product Promo',
+                isPromo: true,
+              ),
+              isScrollControlled: true);
         }
       },
       {
@@ -44,10 +49,13 @@ class AddCriteria extends StatelessWidget {
             'Exclusive discount tailored to a distinct, one-of-a-kind product collection',
         'icon': Assets.imagesCollection,
         'ontap': () {
-                 Get.back();
-              Get.bottomSheet(PromoCode(
-          title: 'Collection Promo',
-          ),isScrollControlled: true);
+          Get.back();
+          Get.bottomSheet(
+              PromoCode(
+                title: 'Collection Promo',
+                isPromo: true,
+              ),
+              isScrollControlled: true);
         }
       },
       {
@@ -56,11 +64,14 @@ class AddCriteria extends StatelessWidget {
             'Lowest spending required to qualify for a promotion or discount.',
         'icon': Assets.imagesPurchase,
         'ontap': () {
-                  Get.back();
-              Get.bottomSheet(PromoCode(
-          title: 'Min/Max Purchase',
-          isMinMax: true,
-          ),isScrollControlled: true);
+          Get.back();
+          Get.bottomSheet(
+              PromoCode(
+                isPromo: true,
+                title: 'Min/Max Purchase',
+                isMinMax: true,
+              ),
+              isScrollControlled: true);
         }
       },
       {
@@ -96,14 +107,14 @@ class AddCriteria extends StatelessWidget {
                 weight: FontWeight.w500,
               )),
               Bounce_widget(
-                   ontap: (){
-                      Get.back();
-                },
+                  ontap: () {
+                    Get.back();
+                  },
                   widget: Image.asset(
-                Assets.imagesClose2,
-                width: 22,
-                height: 22,
-              ))
+                    Assets.imagesClose2,
+                    width: 22,
+                    height: 22,
+                  ))
             ],
           ),
           SizedBox(

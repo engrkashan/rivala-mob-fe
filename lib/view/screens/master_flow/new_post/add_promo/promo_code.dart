@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/promo_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_promo/search_criteria_products.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -10,12 +12,23 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
-class PromoCode extends StatelessWidget {
+class PromoCode extends StatefulWidget {
   final String? title;
   final bool? isPromo, isMinMax;
 
   const PromoCode(
       {super.key, this.title, this.isPromo = false, this.isMinMax = false});
+
+  @override
+  State<PromoCode> createState() => _PromoCodeState();
+}
+
+class _PromoCodeState extends State<PromoCode> {
+  final TextEditingController minController = TextEditingController();
+  String selectedType = "Discount entire order";
+  final TextEditingController maxController = TextEditingController();
+  final TextEditingController promoController = TextEditingController();
+  final TextEditingController discountController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +44,7 @@ class PromoCode extends StatelessWidget {
             children: [
               Bounce_widget(
                   ontap: () {
-                        Get.back();
+                    Get.back();
                   },
                   widget: Image.asset(
                     Assets.imagesBackicon1,
@@ -39,13 +52,13 @@ class PromoCode extends StatelessWidget {
                     height: 22,
                   )),
               MyText(
-                text: title ?? 'Promo Code',
+                text: widget.title ?? 'Promo Code',
                 size: 15,
                 weight: FontWeight.w500,
               ),
               Bounce_widget(
                   ontap: () {
-                        Get.back();
+                    Get.back();
                   },
                   widget: Image.asset(
                     Assets.imagesClose2,
@@ -66,7 +79,7 @@ class PromoCode extends StatelessWidget {
             ),
             readOnly: true,
             ontapp: () {
-                  Get.back();
+              Get.back();
               Get.bottomSheet(SearchCriteriaProducts(),
                   isScrollControlled: true);
             },
@@ -74,7 +87,7 @@ class PromoCode extends StatelessWidget {
           ),
           ////if minmax
 
-          if (isMinMax == true) ...{
+          if (widget.isMinMax == true) ...{
             SizedBox(
               height: 12,
             ),
@@ -95,6 +108,7 @@ class PromoCode extends StatelessWidget {
                     marginBottom: 0,
                     hint: '\$100',
                     contentvPad: 4,
+                    controller: minController,
                   ),
                 ),
               ],
@@ -119,6 +133,7 @@ class PromoCode extends StatelessWidget {
                     marginBottom: 0,
                     hint: '\$100',
                     contentvPad: 4,
+                    controller: maxController,
                   ),
                 ),
               ],
@@ -126,7 +141,7 @@ class PromoCode extends StatelessWidget {
           },
 
           ////if promo
-          if (isPromo == true) ...{
+          if (widget.isPromo == true) ...{
             SizedBox(
               height: 12,
             ),
@@ -143,6 +158,7 @@ class PromoCode extends StatelessWidget {
                     marginBottom: 0,
                     hint: 'Enter Promo Code',
                     contentvPad: 4,
+                    controller: promoController,
                   ),
                 ),
               ],
@@ -169,8 +185,11 @@ class PromoCode extends StatelessWidget {
                       bordercolor: ktertiary,
                       hint: 'Choose your discount type',
                       items: ['Discount shipping', 'Discount entire order'],
-                      selectedValue: 'Discount entire order',
-                      onChanged: (e) {})),
+                      selectedValue: selectedType,
+                      onChanged: (e) {
+                        selectedType = e!;
+                        setState(() {});
+                      })),
             ],
           ),
           SizedBox(
@@ -193,6 +212,7 @@ class PromoCode extends StatelessWidget {
                   marginBottom: 0,
                   hint: '10%',
                   contentvPad: 4,
+                  controller: discountController,
                 ),
               ),
               SizedBox(
@@ -247,7 +267,20 @@ class PromoCode extends StatelessWidget {
           MyButton(
             buttonText: 'Save criteria',
             onTap: () {
-                  Get.back();
+              print('DISCOUNT TEXT: "${discountController.text}"');
+              Provider.of<PromoProvider>(context, listen: false).addCriteria({
+                'title': widget.isPromo == true
+                    ? 'Promo Code: ${promoController.text}'
+                    : 'The minimum Purchase is at least: \$${minController.text} and max Purchase is: \$${maxController.text}',
+                'desc': {
+                  'type': selectedType,
+                  'amount': double.parse(discountController.text),
+                },
+                'promo': promoController.text
+              });
+              print(Provider.of<PromoProvider>(context, listen: false)
+                  .criteriaList);
+              Get.back();
             },
             mBottom: 60,
           )

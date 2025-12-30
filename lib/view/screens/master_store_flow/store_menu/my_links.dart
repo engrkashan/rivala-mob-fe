@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
-import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-import 'package:provider/provider.dart';
+
 import '../../../../controllers/providers/brands_provider.dart';
+import '../../../widgets/common_image_view_widget.dart';
 
 class MyLinks extends StatefulWidget {
   const MyLinks({super.key});
@@ -46,8 +46,12 @@ class _MyLinksState extends State<MyLinks> {
                   itemCount: links?.length ?? 0,
                   itemBuilder: (context, i) {
                     return Column(children: [
-                      links_button(
-                          icon: links?[i].url, title: "${links?[i].name}")
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            bottom: 15, right: 15, left: 15),
+                        child: links_button(
+                            icon: links?[i].url, title: "${links?[i].name}"),
+                      )
                     ]);
                   });
               //   return  ListView(
@@ -91,10 +95,10 @@ class _MyLinksState extends State<MyLinks> {
               //   ],
               // );
             })),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
-              child: Store_Button_Row(),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
+            //   child: Store_Button_Row(),
+            // ),
           ],
         ));
   }
@@ -118,12 +122,12 @@ class links_button extends StatelessWidget {
         color: kblack,
         radius: 50,
         vpad: 8,
-        hpad: 8,
+        hpad: 12,
         widget: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Image.network(
-              icon ?? "",
+            CommonImageView(
+              url: icon,
               width: 27,
               height: 27,
             ),
@@ -135,6 +139,7 @@ class links_button extends StatelessWidget {
                 weight: FontWeight.w600,
                 color: kwhite,
                 useCustomFont: true,
+                overflow: TextOverflow.ellipsis,
               ),
             )),
           ],

@@ -93,4 +93,29 @@ class OrderProvider extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<void> cancelOrder(String id) async {
+    setLoading(true);
+    _error = "";
+    try {
+      await _orderRepo.cancelOrder(id);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updateOrderStatus(String id, String status) async {
+    setLoading(true);
+
+    _error = "";
+    try {
+      await _orderRepo.updateOrderStatus(id, status);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
 }

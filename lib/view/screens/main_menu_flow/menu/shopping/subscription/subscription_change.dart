@@ -5,14 +5,15 @@ import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 class SubscriptionChange extends StatelessWidget {
-  final String? title, desc, appTitle;
-  const SubscriptionChange({super.key, this.title, this.desc, this.appTitle});
+  final String? title, desc, appTitle, email;
+  const SubscriptionChange(
+      {super.key, this.title, this.desc, this.appTitle, this.email});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: simpleAppBar(
-        context: context,
+          context: context,
           title: appTitle ?? 'Pause Your Subscription',
           size: 18,
           centerTitle: true),
@@ -51,7 +52,7 @@ class SubscriptionChange extends StatelessWidget {
           )),
           Center(
               child: MyText(
-                  text: 'janesmith@gmail.com',
+                  text: email ?? 'janesmith@gmail.com',
                   size: 18,
                   color: kbody,
                   weight: FontWeight.w600,

@@ -82,6 +82,7 @@ class Endpoints {
   static const String logout = "/onboarding/logout";
   static const String forgotPassword = "/onboarding/forgot-password";
   static const String resetPassword = "/onboarding/reset-password";
+  static const String restriction = "/sellerRestriction";
 
 //   =========orders==============
   static const String orders = "/orders";
@@ -179,4 +180,7 @@ class Endpoints {
   static const String walletBalance = "/wallet/balance";
   static const String walletTransactions = "/wallet/transactions";
   static const String walletPayout = "/wallet/payout";
+
+//   =========revenue==========
+  static const String revenue = "/revenue";
 }

@@ -8,21 +8,23 @@ import 'package:rivala/controllers/font_controller.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
 import 'package:rivala/controllers/navbar_controller.dart';
 import 'package:rivala/controllers/providers/brands_provider.dart';
+import 'package:rivala/controllers/providers/cart_provider.dart';
 import 'package:rivala/controllers/providers/chat_provider.dart';
 import 'package:rivala/controllers/providers/link_provider.dart';
 import 'package:rivala/controllers/providers/order_provider.dart';
 import 'package:rivala/controllers/providers/post_provider.dart';
 import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/controllers/providers/promo_provider.dart';
+import 'package:rivala/controllers/providers/revenue_provider.dart';
 import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
+import 'package:rivala/controllers/providers/wallet_provider.dart';
 import 'package:rivala/controllers/repos/auth_repo.dart';
 import 'package:rivala/font_customisation/font_customization.dart';
 import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
 import 'package:rivala/view/screens/persistent_bottom_nav_bar/persistant_bottom_navbar.dart';
 
 import 'controllers/providers/buyer_provider.dart';
-import 'controllers/providers/cart_provider.dart';
 import 'controllers/providers/categories_provider.dart';
 import 'controllers/providers/collections_provider.dart';
 import 'controllers/providers/follow_provider.dart';
@@ -72,6 +74,11 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PagesProvider()),
         ChangeNotifierProvider(create: (_) => HeroSectionProvider()),
         ChangeNotifierProvider(create: (_) => fulfillmentPro()),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(),
+        ),
+        ChangeNotifierProvider(create: (_) => RevenueProvider())
       ],
       child: MyApp(
         token: token,

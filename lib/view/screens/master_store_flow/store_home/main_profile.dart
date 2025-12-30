@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
-import 'package:rivala/models/store_model.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
@@ -11,11 +10,10 @@ import 'package:rivala/view/widgets/store_widgets/fotter.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 
 import '../../../../controllers/providers/brands_provider.dart';
-import '../../../../controllers/providers/collections_provider.dart';
 
 class StoreMainProfile extends StatefulWidget {
-  final String? slug;
-  const StoreMainProfile({super.key, this.slug});
+  // final String? slug;
+  const StoreMainProfile({super.key});
 
   @override
   State<StoreMainProfile> createState() => _StoreMainProfileState();
@@ -26,29 +24,24 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.slug == null || widget.slug!.isEmpty) {
-        context.read<BrandsProvider>().loadCurrentStore();
-      } else {
-        context.read<BrandsProvider>().loadStoreByHandle(widget.slug!);
-        print("Store dtails are: ${widget.slug}");
-      }
+      context.read<BrandsProvider>().loadCurrentStore();
     });
   }
 
-  @override
-  void didUpdateWidget(covariant StoreMainProfile oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.slug != widget.slug) {
-      final brands = context.read<BrandsProvider>();
-
-      if (widget.slug == null || widget.slug!.isEmpty) {
-        brands.loadCurrentStore();
-      } else {
-        brands.loadStoreByHandle(widget.slug!);
-      }
-    }
-  }
+  // @override
+  // void didUpdateWidget(covariant StoreMainProfile oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //
+  //   if (oldWidget.slug != widget.slug) {
+  //     final brands = context.read<BrandsProvider>();
+  //
+  //     if (widget.slug == null || widget.slug!.isEmpty) {
+  //       brands.loadCurrentStore();
+  //     } else {
+  //       brands.loadStoreByHandle(widget.slug!);
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +149,11 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
             ),
 
             /// FOOTER
-            StoreFotter()
+            Consumer<BrandsProvider>(builder: (context, brands, _) {
+              return StoreFotter(
+                store: brands.currentStore,
+              );
+            })
           ],
         ),
       ),

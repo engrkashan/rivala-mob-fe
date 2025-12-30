@@ -9,7 +9,7 @@ class ProductModel {
   final String? title;
   final String? description;
   final double? price;
-  final String? sku;
+  final String? SKU;
   final int? stockQuantity;
   final bool? isActive;
   final int? purchaseCount;
@@ -34,7 +34,7 @@ class ProductModel {
     this.title,
     this.description,
     this.price,
-    this.sku,
+    this.SKU,
     this.stockQuantity,
     this.isActive,
     this.purchaseCount,
@@ -61,7 +61,7 @@ class ProductModel {
       title: json['title'] as String?,
       description: json['description'] as String?,
       price: (json['price'] as num?)?.toDouble(),
-      sku: json['sku'] as String?,
+      SKU: json['SKU'] ?? json['sku'],
       stockQuantity: json['stockQuantity'] as int?,
       isActive: json['isActive'] as bool?,
       purchaseCount: json['purchaseCount'] as int?,
@@ -149,7 +149,7 @@ class ProductModel {
       if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (price != null) 'price': price,
-      if (sku != null) 'sku': sku,
+      if (SKU != null) 'SKU': SKU,
       if (stockQuantity != null) 'stockQuantity': stockQuantity,
       if (isActive != null) 'isActive': isActive,
       if (purchaseCount != null) 'purchaseCount': purchaseCount,
@@ -208,7 +208,7 @@ class ProductModel {
       title: title ?? this.title,
       description: description ?? this.description,
       price: price ?? this.price,
-      sku: sku ?? this.sku,
+      SKU: sku ?? this.SKU,
       stockQuantity: stockQuantity ?? this.stockQuantity,
       isActive: isActive ?? this.isActive,
       purchaseCount: purchaseCount ?? this.purchaseCount,
@@ -237,7 +237,7 @@ class ProductModel {
         other.title == title &&
         other.description == description &&
         other.price == price &&
-        other.sku == sku &&
+        other.SKU == SKU &&
         other.stockQuantity == stockQuantity &&
         other.isActive == isActive &&
         other.purchaseCount == purchaseCount &&
@@ -264,7 +264,7 @@ class ProductModel {
       title,
       description,
       price,
-      sku,
+      SKU,
       stockQuantity,
       isActive,
       purchaseCount,

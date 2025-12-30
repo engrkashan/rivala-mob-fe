@@ -17,10 +17,10 @@ class MediaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> upload() async {
+  Future<void> upload({File? url}) async {
     setLoading(true);
     try {
-      uploadedUrl = await _mediaRepo.uploadFile(file: selectedImage!);
+      uploadedUrl = await _mediaRepo.uploadFile(file: selectedImage ?? url!);
       print("Uploaded image url: $uploadedUrl");
     } catch (e) {
       print("error while uploading: $e");

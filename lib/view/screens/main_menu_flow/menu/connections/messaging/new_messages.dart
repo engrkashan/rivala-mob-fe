@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/follow_provider.dart';
-import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/connections/messaging/chats.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -23,7 +22,7 @@ class _NewMessagesState extends State<NewMessages> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FollowProvider>().loadFollowers();
+      context.read<FollowProvider>().loadFollowings();
     });
   }
 
@@ -54,7 +53,7 @@ class _NewMessagesState extends State<NewMessages> {
                   if (ref.isLoading) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  if (ref.followers.isEmpty) {
+                  if (ref.following.isEmpty) {
                     return Center(child: MyText(text: "No contacts found"));
                   }
                   return ListView.builder(
@@ -69,13 +68,13 @@ class _NewMessagesState extends State<NewMessages> {
                           child: Bounce_widget(
                             ontap: () {
                               Get.to(() => Chats(
-                                  receiverId: follower.id!,
+                                  receiverId: follower.id ?? "",
                                   title: follower.name));
                             },
                             widget: Row(
                               children: [
                                 CommonImageView(
-                                  url: follower.avatarUrl,
+                                  url: follower.logo,
                                   width: 30,
                                   height: 30,
                                   radius: 100,

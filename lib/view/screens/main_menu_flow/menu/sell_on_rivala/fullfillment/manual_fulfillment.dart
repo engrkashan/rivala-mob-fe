@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/fulfillment.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
-
-import 'package:provider/provider.dart';
-import 'package:rivala/controllers/providers/fulfillment.dart';
-import 'package:get/get.dart';
 
 class ManualFulfillment extends StatefulWidget {
   const ManualFulfillment({super.key});
@@ -21,7 +20,7 @@ class _ManualFulfillmentState extends State<ManualFulfillment> {
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController keyCtrl = TextEditingController();
   final TextEditingController secretCtrl = TextEditingController();
-  String selectedType = 'Shipstation';
+  String selectedType = 'SHIP_STATION';
 
   Future<void> _handleVerify() async {
     final name = nameCtrl.text.trim();
@@ -74,12 +73,22 @@ class _ManualFulfillmentState extends State<ManualFulfillment> {
                 physics: const BouncingScrollPhysics(),
                 children: [
                   CustomDropDown(
-                    hint: 'Shipstation',
-                    items: ['Shipstation', 'Shipstation2'],
+                    hint: 'SHIP_STATION',
+                    items: [
+                      'SHIP_STATION',
+                      'UPS_GROUND',
+                      'UPS_NEXT_DAY',
+                      'USPS',
+                      'AMAZON_FBA',
+                      'FBA_AMAZON',
+                      'DISCOUNT_SHOPPING',
+                      'DISCOUNT_ORDER',
+                      'STORE_CREDIT'
+                    ],
                     selectedValue: selectedType,
                     onChanged: (s) {
                       setState(() {
-                        selectedType = s ?? 'Shipstation';
+                        selectedType = s ?? 'SHIP_STATION';
                       });
                     },
                     label: 'Fulfillment Type',

@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/main_profile.dart';
-import 'package:rivala/view/screens/master_store_flow/store_menu/about_us.dart';
-import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/my_links.dart';
-import 'package:rivala/view/screens/master_store_flow/store_menu/shared_products.dart';
+import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../../models/store_model.dart';
+
 class StoreMenu extends StatefulWidget {
-  const StoreMenu({super.key});
+  final StoreModel? store;
+  const StoreMenu({super.key, this.store});
 
   @override
   State<StoreMenu> createState() => _StoreMenuState();
@@ -31,12 +29,12 @@ class _StoreMenuState extends State<StoreMenu> {
       //     //  Get.to(() => AboutUs());
       //   }
       // },
-      {
-        "text": "Shared Products",
-        "ontap": () {
-          Navigator.of(context).push(CustomPageRoute(page: SharedProducts()));
-        }
-      },
+      // {
+      //   "text": "Shared Products",
+      //   "ontap": () {
+      //     Navigator.of(context).push(CustomPageRoute(page: SharedProducts()));
+      //   }
+      // },
       // {
       //   "text": "Our Posts",
       //   "ontap": () {
@@ -93,14 +91,26 @@ class _StoreMenuState extends State<StoreMenu> {
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  Image.asset(
-                    Assets.imagesStorelogo,
-                    height: 95,
-                    width: 240,
-                    fit: BoxFit.contain,
+                  // CommonImageView(
+                  //   url: widget.store?.name,
+                  //   width: 100,
+                  //   height: 100,
+                  //   radius: 100,
+                  // ),
+                  MyText(
+                    text: widget.store?.name ?? 'Store Name',
+                    size: 26,
                     color: kblack,
+                    weight: FontWeight.bold,
+                    paddingTop: 10,
+                    paddingBottom: 20,
+                    useCustomFont: true,
                   ),
-                  ExpandableSelectionTile(title: 'Our Products', options: []
+                  ExpandableSelectionTile(
+                      title: 'Our Products',
+                      options: [],
+                      storeName: widget.store?.name,
+                      store: widget.store
                       // options: [
                       //   {"text": "New Arrivals", "onTap": () {
                       //      Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
@@ -138,7 +148,7 @@ class _StoreMenuState extends State<StoreMenu> {
                   SizedBox(
                     height: 50,
                   ),
-                  Store_Button_Row()
+                  // Store_Button_Row()
                 ],
               ),
             ),
@@ -154,6 +164,8 @@ class ExpandableSelectionTile extends StatefulWidget {
   final List<Map<String, dynamic>> options; // Now holds text & ontap
   final String initialValue;
   final ValueChanged<String>? onChanged;
+  final String? storeName;
+  final StoreModel? store;
 
   const ExpandableSelectionTile({
     Key? key,
@@ -161,6 +173,8 @@ class ExpandableSelectionTile extends StatefulWidget {
     required this.options,
     this.initialValue = '',
     this.onChanged,
+    this.storeName,
+    this.store,
   }) : super(key: key);
 
   @override
@@ -172,12 +186,12 @@ class _ExpandableSelectionTileState extends State<ExpandableSelectionTile> {
   late String selectedValue;
 
   @override
-  void initState() {
-    super.initState();
-    selectedValue = widget.initialValue.isNotEmpty
-        ? widget.initialValue
-        : widget.options.first['text']; // Extract text from map
-  }
+  // void initState() {
+  //   super.initState();
+  //   selectedValue = widget.initialValue.isNotEmpty
+  //       ? widget.initialValue
+  //       : widget.options.first['text']; // Extract text from map
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +213,8 @@ class _ExpandableSelectionTileState extends State<ExpandableSelectionTile> {
             onTap: () {
               Navigator.of(context).push(CustomPageRoute(
                   page: CollectionGrid(
-                text1: 'The Apollo and Sage Collection',
+                store: widget.store,
+                text1: '${widget.storeName}',
                 text2:
                     'All of our Aussie-inspired swim wear featuring stylish and sustainable designs for men and women. ',
               )));

@@ -12,6 +12,8 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import 'add_criteria.dart';
+
 class StartNewPromo extends StatefulWidget {
   final Color? color;
   final String? buttonText;
@@ -29,6 +31,8 @@ class _StartNewPromoState extends State<StartNewPromo> {
   final startDate = TextEditingController();
   final endDate = TextEditingController();
   String status = "Live";
+  double discount = 0;
+  String promo = '';
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +181,21 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   hint: 'MM/DD/YYYY',
                   label: 'Start Date',
                   filledColor: kblack.withOpacity(0.05),
+                  bordercolor: ktransparent,
+                  readOnly: true, // 👈 IMPORTANT
+                  ontapp: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+
+                    if (pickedDate != null) {
+                      startDate.text =
+                          '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
+                    }
+                  },
                   suffixIcon: Image.asset(
                     Assets.imagesCalender,
                     width: 20,
@@ -184,8 +203,8 @@ class _StartNewPromoState extends State<StartNewPromo> {
                     fit: BoxFit.contain,
                   ),
                   delay: 600,
-                  bordercolor: ktransparent,
                 ),
+
                 MyTextField(
                   controller: endDate,
                   hint: 'MM/DD/YYYY',
@@ -196,6 +215,20 @@ class _StartNewPromoState extends State<StartNewPromo> {
                     width: 20,
                     height: 20,
                   ),
+                  ontapp: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+
+                    if (pickedDate != null) {
+                      endDate.text =
+                          '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
+                    }
+                  },
+                  readOnly: true,
                   delay: 800,
                   bordercolor: ktransparent,
                 ),
@@ -210,120 +243,158 @@ class _StartNewPromoState extends State<StartNewPromo> {
                     setState(() {});
                   },
                 ),
-                MyText(
-                  text: 'Criteria #1',
-                  size: 15,
-                  weight: FontWeight.w500,
-                  color: kblack,
-                  paddingBottom: 15,
-                ),
-                Container(
-                  height: Get.height * 0.2,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Row(
+
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount:
+                        context.watch<PromoProvider>().criteriaList.length,
+                    itemBuilder: (context, i) {
+                      final item = context.watch<PromoProvider>().criteriaList;
+                      final title = item[i]['title'];
+                      final desc = item[i]['desc'];
+                      final type = desc['type'];
+                      final amount = desc['amount'];
+                      discount = amount;
+                      promo = item[i]['promo'];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MyText(
-                            text: 'IF',
+                            text: 'Criteria #${i + 1}',
+                            size: 15,
+                            weight: FontWeight.w500,
                             color: kblack,
-                            weight: FontWeight.w700,
-                            size: 20,
-                            paddingRight: 5,
+                            paddingBottom: 15,
                           ),
-                          Image.asset(
-                            Assets.imagesIfIcon,
-                            width: 34,
-                            height: 34,
-                          ),
-                          SizedBox(
-                            width: 12,
-                          ),
-                          Expanded(
-                            child: CustomeContainer(
-                              radius: 15,
-                              vpad: 10,
-                              hpad: 12,
-                              color: kblack.withOpacity(0.05),
-                              widget: MyText(
-                                text:
-                                    'The minimum purchase amount is at least \$100.00',
-                                size: 14,
-                                color: ktertiary,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      // Positioned(
-                      //   left: 40,
-                      //   child: Image.asset(Assets.imagesGradline,width: 4,height: 93,)),
-                      Positioned(
-                        top: 80,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          children: [
-                            MyText(
-                              text: 'THEN',
-                              color: kblack,
-                              weight: FontWeight.w700,
-                              size: 10,
-                              paddingRight: 5,
-                            ),
-                            Image.asset(
-                              Assets.imagesThen,
-                              width: 34,
-                              height: 34,
-                            ),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Expanded(
-                              child: CustomeContainer(
-                                radius: 15,
-                                vpad: 10,
-                                hpad: 12,
-                                color: kblack.withOpacity(0.05),
-                                widget: MyText(
-                                  text: 'Discount shipping by 20%',
-                                  size: 14,
-                                  color: ktertiary,
+                          Container(
+                            height: Get.height * 0.2,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Row(
+                                  children: [
+                                    MyText(
+                                      text: 'IF',
+                                      color: kblack,
+                                      weight: FontWeight.w700,
+                                      size: 20,
+                                      paddingRight: 5,
+                                    ),
+                                    Image.asset(
+                                      Assets.imagesIfIcon,
+                                      width: 34,
+                                      height: 34,
+                                    ),
+                                    SizedBox(
+                                      width: 12,
+                                    ),
+                                    Expanded(
+                                      child: CustomeContainer(
+                                        radius: 15,
+                                        vpad: 10,
+                                        hpad: 12,
+                                        color: kblack.withOpacity(0.05),
+                                        widget: MyText(
+                                          text: title,
+                                          size: 14,
+                                          color: ktertiary,
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                                // Positioned(
+                                //   left: 40,
+                                //   child: Image.asset(Assets.imagesGradline,width: 4,height: 93,)),
+                                Positioned(
+                                  top: 50,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    children: [
+                                      MyText(
+                                        text: 'THEN',
+                                        color: kblack,
+                                        weight: FontWeight.w700,
+                                        size: 10,
+                                        paddingRight: 5,
+                                      ),
+                                      Image.asset(
+                                        Assets.imagesThen,
+                                        width: 34,
+                                        height: 34,
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                      Expanded(
+                                        child: CustomeContainer(
+                                          radius: 15,
+                                          vpad: 10,
+                                          hpad: 12,
+                                          color: kblack.withOpacity(0.05),
+                                          widget: MyText(
+                                            text: '$type ${amount.toString()}%',
+                                            size: 14,
+                                            color: ktertiary,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
 
-                // MyText(
-                //   text: '+ Add criteria',
-                //   size: 12,
-                //   color: kblue,
-                //   onTap: () {
-                //     Get.bottomSheet(AddCriteria(), isScrollControlled: true);
-                //   },
-                // ),
+                MyText(
+                  text: '+ Add criteria',
+                  size: 12,
+                  color: kblue,
+                  onTap: () {
+                    Get.bottomSheet(AddCriteria(), isScrollControlled: true);
+                  },
+                ),
                 const SizedBox(height: 50),
               ],
             ),
           ),
-          MyButton(
-            buttonText: widget.buttonText ?? 'Add & save promo',
-            mBottom: 30,
-            mhoriz: 22,
-            onTap: () async {
-              await context.read<PromoProvider>().uploadPromo(title.text,
-                  description.text, startDate.text, endDate.text, status);
-              Get.back();
-              // Get.to(() => StartNewPromoSuccess());
-            },
-          ),
+          Consumer<PromoProvider>(builder: (context, ref, _) {
+            return ref.isLoading
+                ? CircularProgressIndicator()
+                : MyButton(
+                    buttonText: widget.buttonText ?? 'Add & save promo',
+                    mBottom: 30,
+                    mhoriz: 22,
+                    onTap: () async {
+                      await context.read<PromoProvider>().uploadPromo(
+                          title.text,
+                          description.text,
+                          startDate.text,
+                          endDate.text,
+                          status,
+                          promo,
+                          discount);
+                      Get.back();
+                    },
+                  );
+          })
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        Provider.of<PromoProvider>(context, listen: false).criteriaList.clear();
+      });
+    });
   }
 }

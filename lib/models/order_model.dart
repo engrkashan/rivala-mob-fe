@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:rivala/models/fulfillment.dart';
 import 'package:rivala/models/payment_model.dart';
 import 'package:rivala/models/product_model.dart';
+import 'package:rivala/models/user_model.dart';
 
 OrderModel orderModelFromJson(String str) =>
     OrderModel.fromJson(json.decode(str));
@@ -25,7 +26,7 @@ class OrderModel {
   String? status;
   ShippingAddress? shippingAddress;
   FulfillmentModel? fulFillment;
-
+  UserModel? buyer;
   List<OrdersItem>? orderItems; // <-- FIXED name
 
   OrderModel({
@@ -40,6 +41,7 @@ class OrderModel {
     this.shippingAddress,
     this.fulFillment,
     this.orderItems,
+    this.buyer,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
@@ -75,6 +77,10 @@ class OrderModel {
             ? null
             : List<OrdersItem>.from(
                 json["OrderItem"].map((x) => OrdersItem.fromJson(x))),
+        buyer: json["buyer"] == null
+            ? null
+            : UserModel.fromJson(
+                json["buyer"].map((x) => UserModel.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -91,6 +97,7 @@ class OrderModel {
         "OrderItem": orderItems == null
             ? null
             : List<dynamic>.from(orderItems!.map((x) => x.toJson())),
+        "buyer": buyer?.toJson(),
       };
 }
 

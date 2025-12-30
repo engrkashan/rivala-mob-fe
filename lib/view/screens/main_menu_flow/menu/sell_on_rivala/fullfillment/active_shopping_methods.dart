@@ -11,6 +11,7 @@ import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 
 import '../../../../../../controllers/providers/fulfillment.dart';
+import '../../../../../widgets/my_text_widget.dart';
 
 class ActiveShoppingMethods extends StatefulWidget {
   const ActiveShoppingMethods({super.key});
@@ -85,7 +86,14 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
                 physics: const BouncingScrollPhysics(),
                 children: [
                   row_widget(
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(
+                        () => ManualFulfillment(),
+                        transition: Transition.downToUp,
+                        duration: const Duration(milliseconds: 1500),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                     icon: Assets.imagesAdd3,
                     title: 'Create new provider',
                     iconSize: 22,
@@ -95,29 +103,40 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
                   SizedBox(
                     height: 20,
                   ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: mainMenuItems.length,
-                    itemBuilder: (context, index) {
-                      final item = mainMenuItems[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: ShoppingRow(
-                          textt: item['text'],
-                          icon: item['icon'],
-                          delay: item['delay'],
-                          mleft: 0,
-                          isSelected: selectedIndex == index,
-                          ontap: () {
-                            Future.delayed(const Duration(milliseconds: 300),
-                                () {
-                              item['onTap']();
-                            });
-                          },
-                        ),
-                      );
+                  Consumer<fulfillmentPro>(
+                    builder: (context, ref, _) {
+                      final item = ref.allProviders;
+                      if (ref.isLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (item == null && item!.isEmpty) {
+                        return Center(
+                            child: MyText(
+                                text: "No active fulfillment providers"));
+                      }
+                      return ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: item.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: ShoppingRow(
+                                textt: item[index].name,
+                                icon: Assets.imagesShipstation,
+                                // delay: item['delay'],
+                                mleft: 0,
+                                isSelected: selectedIndex == index,
+                                // ontap: () {
+                                //   Future.delayed(const Duration(milliseconds: 300),
+                                //           () {
+                                //         item['onTap']();
+                                //       });
+                                // },
+                              ),
+                            );
+                          });
                     },
                   ),
                 ],

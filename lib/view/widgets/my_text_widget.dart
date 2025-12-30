@@ -24,29 +24,30 @@ class MyText extends StatefulWidget {
   final double? paddingBottom;
   final double? letterSpacing;
   final bool? useCustomFont;
-
-  MyText({
-    Key? key,
-    required this.text,
-    this.size,
-    this.lineHeight,
-    this.maxLines = 100,
-    this.decoration = TextDecoration.none,
-    this.color,
-    this.letterSpacing,
-    this.weight = FontWeight.w400,
-    this.textAlign,
-    this.textOverflow,
-    this.fontFamily,
-    this.paddingTop = 0,
-    this.paddingRight = 0,
-    this.paddingLeft = 0,
-    this.paddingBottom = 0,
-    this.onTap,
-    this.shadow,
-    this.fontStyle,
-    this.useCustomFont = false,
-  }) : super(key: key);
+  final TextOverflow? overflow;
+  MyText(
+      {Key? key,
+      required this.text,
+      this.size,
+      this.lineHeight,
+      this.maxLines = 100,
+      this.decoration = TextDecoration.none,
+      this.color,
+      this.letterSpacing,
+      this.weight = FontWeight.w400,
+      this.textAlign,
+      this.textOverflow,
+      this.fontFamily,
+      this.paddingTop = 0,
+      this.paddingRight = 0,
+      this.paddingLeft = 0,
+      this.paddingBottom = 0,
+      this.onTap,
+      this.shadow,
+      this.fontStyle,
+      this.useCustomFont = false,
+      this.overflow})
+      : super(key: key);
 
   @override
   State<MyText> createState() => _MyTextState();
@@ -65,30 +66,30 @@ class _MyTextState extends State<MyText> {
         bottom: widget.paddingBottom!,
       ),
       child: GestureDetector(
-          onTap: widget.onTap,
-          child: Text(
-            widget.text,
-            style: TextStyle(
-              shadows: widget.shadow,
-              fontSize: widget.size ?? 12,
-              color: widget.color ?? kblack2,
-              fontWeight: widget.weight,
-              decoration: widget.decoration,
-              decorationColor: widget.color ?? kblack2,
-              decorationThickness: 2,
-              fontFamily: widget.useCustomFont == true
-                  ? fontController.selectedFont.value 
-                  : widget.fontFamily ?? AppFonts.poppins,
-              height: widget.lineHeight,
-              fontStyle: widget.fontStyle,
-              letterSpacing: widget.letterSpacing ?? 0.5,
-            ),
-            textAlign: widget.textAlign,
-            maxLines: widget.maxLines,
-            overflow: widget.textOverflow,
+        onTap: widget.onTap,
+        child: Text(
+          widget.text,
+          style: TextStyle(
+            shadows: widget.shadow,
+            fontSize: widget.size ?? 12,
+            color: widget.color ?? kblack2,
+            fontWeight: widget.weight,
+            decoration: widget.decoration,
+            decorationColor: widget.color ?? kblack2,
+            decorationThickness: 2,
+            fontFamily: widget.useCustomFont == true
+                ? fontController.selectedFont.value
+                : widget.fontFamily ?? AppFonts.poppins,
+            height: widget.lineHeight,
+            fontStyle: widget.fontStyle,
+            letterSpacing: widget.letterSpacing ?? 0.5,
+            overflow: widget.overflow ?? TextOverflow.visible,
           ),
+          textAlign: widget.textAlign,
+          maxLines: widget.maxLines,
+          overflow: widget.textOverflow,
         ),
-      
+      ),
     );
   }
 }
@@ -103,7 +104,8 @@ class MyGradientText extends StatelessWidget {
       this.gradient = kgradmainmenu,
       this.ontap,
       this.decorationn,
-      this.length, this.weight})
+      this.length,
+      this.weight})
       : super(key: key);
 
   final String text;

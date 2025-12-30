@@ -1,7 +1,7 @@
 import 'package:rivala/config/network/api_client.dart';
 import 'package:rivala/config/network/endpoints.dart';
-import 'package:rivala/models/user_model.dart';
 import 'package:rivala/models/post_model.dart';
+import 'package:rivala/models/user_model.dart';
 
 class PostRepo {
   ApiClient api = ApiClient();
@@ -18,5 +18,12 @@ class PostRepo {
     // Assuming response is a list or contains a list under 'posts'
     final list = (response['posts'] ?? response) as List;
     return list.map((item) => PostModel.fromJson(item)).toList();
+  }
+
+  Future<void> createPost(dynamic post) async {
+    await api.postResponse(
+      endpoints: Endpoints.posts,
+      data: post,
+    );
   }
 }

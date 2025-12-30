@@ -2,18 +2,19 @@ class FollowModel {
   String? id;
   String? name;
   String? username;
-  String? avatarUrl;
+  String? logo;
   String? followerId;
   String? createdAt;
+  String? ownerId;
 
-  FollowModel({
-    this.id,
-    this.name,
-    this.username,
-    this.avatarUrl,
-    this.followerId,
-    this.createdAt,
-  });
+  FollowModel(
+      {this.id,
+      this.name,
+      this.username,
+      this.logo,
+      this.followerId,
+      this.createdAt,
+      this.ownerId});
 
   factory FollowModel.fromJson(Map<String, dynamic> json) {
     final follower = json["follower"] ?? {};
@@ -23,7 +24,8 @@ class FollowModel {
       followerId: follower["id"],
       name: follower["name"],
       username: follower["username"],
-      avatarUrl: follower["avatarUrl"],
+      logo: follower["logo"] ?? follower["avatarUrl"],
+      ownerId: json["ownerId"],
       createdAt: json["createdAt"],
     );
   }
@@ -33,7 +35,8 @@ class FollowModel {
         "followerId": followerId,
         "name": name,
         "username": username,
-        "avatarUrl": avatarUrl,
+        "logo": logo,
+        "ownerId": ownerId,
         "createdAt": createdAt,
       };
 }

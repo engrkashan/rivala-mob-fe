@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -9,17 +7,15 @@ import 'package:rivala/controllers/providers/brands_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/discovery/search_discovery_products.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/show_products/curated_brands.dart';
-import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/main_profile.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
-import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../controllers/providers/product_provider.dart';
 import '../../../controllers/providers/post_provider.dart';
+import '../../../controllers/providers/product_provider.dart';
+import '../master_store_flow/store_menu/following_profile.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -97,10 +93,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
         final recent = brands.store;
 
         if (recent == null) {
-          return const SizedBox(
-            height: 150,
-            child: Center(child: CircularProgressIndicator()),
-          );
+          return CircularProgressIndicator();
         }
 
         if (recent.isEmpty) {
@@ -122,10 +115,14 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               return GestureDetector(
                 onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => StoreMainProfile(
-                              slug: brand.slug,
-                            ))),
+                    // MaterialPageRoute(
+                    //     builder: (_) => StoreMainProfile(
+                    //           slug: brand.slug,
+                    //         ))
+                    CustomPageRoute(
+                        page: FollowerMaiProfile(
+                      store: brand,
+                    ))),
                 child: curated_brand_widget(
                   size: 135,
                   networkImg: brand.logoUrl ?? '',
@@ -218,8 +215,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
       ),
     );
   }
-
-  // ---------------- BUILD ----------------
 
   @override
   Widget build(BuildContext context) {

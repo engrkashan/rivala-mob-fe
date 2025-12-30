@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:rivala/controllers/repos/post_repo.dart';
+import 'package:rivala/models/collection_model.dart';
 import 'package:rivala/models/user_model.dart';
+
 import '../../models/post_model.dart';
+import '../../models/product_model.dart';
 
 class PostProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   final PostRepo postRepo = PostRepo();
   List<UserModel>? _users;
-
+  List<ProductModel?> tagProducts = [];
+  List<CollectionModel?> tagCollections = [];
   List<UserModel>? get creators => _users;
 
   bool get isLoading => _isLoading;
@@ -16,6 +20,20 @@ class PostProvider extends ChangeNotifier {
   void setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+  DateTime? postExpiration;
+
+  void setPostExpiration(DateTime dateTime) {
+    postExpiration = dateTime;
+    notifyListeners();
+  }
+
+  String formattedExpiration(BuildContext context) {
+    if (postExpiration == null) return '';
+    final dt = postExpiration!;
+    return '${dt.month}/${dt.day}/${dt.year}, '
+        '${TimeOfDay.fromDateTime(dt).format(context)}';
   }
 
   Future<void> loadCreators() async {
@@ -44,6 +62,18 @@ class PostProvider extends ChangeNotifier {
       _error = e.toString();
       // Keep previous posts if any, or clear?
       // _posts = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> createPost(dynamic post) async {
+    setLoading(true);
+    try {
+      await postRepo.createPost(post);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
     } finally {
       setLoading(false);
     }

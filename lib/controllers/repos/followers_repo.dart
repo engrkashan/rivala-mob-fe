@@ -15,7 +15,17 @@ class FollowsRepo {
   Future<List<FollowModel>> getFollowing() async {
     final response =
         await api.getResponse(endpoints: Endpoints.currentFollowing);
-    final List<dynamic> data = response['following'] ?? [];
+    final List<dynamic> data = response['followingStores'] ?? [];
     return data.map((item) => FollowModel.fromJson(item)).toList();
+  }
+
+  Future<void> followBrand(String brandId) async {
+    await api.postResponse(
+      endpoints: Endpoints.brandWithId(brandId),
+    );
+  }
+
+  Future<void> unfollowBrand(String brandId) async {
+    await api.deleteRequest(endpoint: Endpoints.brandWithId(brandId));
   }
 }

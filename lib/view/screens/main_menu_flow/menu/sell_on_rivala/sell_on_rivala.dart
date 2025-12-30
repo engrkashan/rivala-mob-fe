@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
@@ -8,9 +7,8 @@ import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/fullfillm
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/order_management.dart/order_management.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/product_manage_main.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/promotions/promotions_main.dart';
-
+import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/seller_restrictions.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
-
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/circle_icon.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
@@ -23,91 +21,86 @@ class SellOnRivala extends StatefulWidget {
 }
 
 class _SellOnRivalaState extends State<SellOnRivala> {
-
-
- 
-
-
   int selectedIndex = -1;
   @override
   Widget build(BuildContext context) {
-     List<Map<String, dynamic>> mainMenuItems = [
-  {
-    'text': 'Product Management',
-    'icon': Assets.imagesProductmanagement,
-    'delay': 100,
-    'onTap': () =>
-       Navigator.of(context).push(CustomPageRoute(page:ProductManageMain()),)
-    //  Get.to(
-    //       () => ProductManageMain(),
-    //       transition: Transition.downToUp,
-    //       duration: const Duration(milliseconds: 1000),
-    //       curve: Curves.easeInOut,
-    //     ),
-  },
-  {
-    'text': 'Promotions',
-    'icon': Assets.imagesPromotion,
-    'delay': 250,
-    'onTap': () =>
-       Navigator.of(context).push(CustomPageRoute(page:PromotionsMain()),)
-    
-  },
-  {
-    'text': 'Order Management',
-    'icon': Assets.imagesOrdermanag,
-    'delay': 400,
-    'onTap': () => 
-       Navigator.of(context).push(CustomPageRoute(page:OrderManagement()),)
-  
-  },
-  {
-    'text': 'Fulfillment',
-    'icon': Assets.imagesFullfillment,
-    'delay': 550,
-    'onTap': () =>
-     Navigator.of(context).push(CustomPageRoute(page:ActiveShoppingMethods()),)
-
-  },
-  {
-    'text': 'Revenue Generated',
-    'icon': Assets.imagesRevenue,
-    'delay': 700,
-    'onTap': () =>
-     Navigator.of(context).push(CustomPageRoute(page:CommissionEarned(
-           
-            title: 'Revenue Generated',
-        )),)
- 
-  },
-  {
-    'text': 'Commissions Paid',
-    'icon': Assets.imagesCommission,
-    'delay': 850,
-    'onTap': () =>
-     Navigator.of(context).push(CustomPageRoute(page: CommissionEarned(
-            hascart: true,
-            title: 'Commissions Paid',
-          ),),)
-
-  },
-  {
-    'text': 'Seller Restrictions',
-    'icon': Assets.imagesSellerrestriction,
-    'delay': 1000,
-    'onTap': () => 
-    
-         Navigator.of(context).push(CustomPageRoute(page:CommissionEarned(
-            hascart: true,
-            title: 'Commissions Paid',
-          ),),)
-          
-      
-  },
-];
+    List<Map<String, dynamic>> mainMenuItems = [
+      {
+        'text': 'Product Management',
+        'icon': Assets.imagesProductmanagement,
+        'delay': 100,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: ProductManageMain()),
+            )
+        //  Get.to(
+        //       () => ProductManageMain(),
+        //       transition: Transition.downToUp,
+        //       duration: const Duration(milliseconds: 1000),
+        //       curve: Curves.easeInOut,
+        //     ),
+      },
+      {
+        'text': 'Promotions',
+        'icon': Assets.imagesPromotion,
+        'delay': 250,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: PromotionsMain()),
+            )
+      },
+      {
+        'text': 'Order Management',
+        'icon': Assets.imagesOrdermanag,
+        'delay': 400,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: OrderManagement()),
+            )
+      },
+      {
+        'text': 'Fulfillment',
+        'icon': Assets.imagesFullfillment,
+        'delay': 550,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: ActiveShoppingMethods()),
+            )
+      },
+      {
+        'text': 'Revenue Generated',
+        'icon': Assets.imagesRevenue,
+        'delay': 700,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(
+                  page: CommissionEarned(
+                title: 'Revenue Generated',
+              )),
+            )
+      },
+      {
+        'text': 'Commissions Paid',
+        'icon': Assets.imagesCommission,
+        'delay': 850,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(
+                page: CommissionEarned(
+                  hascart: true,
+                  title: 'Commissions Paid',
+                ),
+              ),
+            )
+      },
+      {
+        'text': 'Seller Restrictions',
+        'icon': Assets.imagesSellerrestriction,
+        'delay': 1000,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(
+                page: SellerRestrictionsScreen(),
+              ),
+            )
+      },
+    ];
     return Scaffold(
         backgroundColor: kwhite,
-        appBar: simpleAppBar(context: context,actions: [
+        appBar: simpleAppBar(context: context, actions: [
           circular_icon_container(),
           SizedBox(
             width: 12,
@@ -160,7 +153,9 @@ class _SellOnRivalaState extends State<SellOnRivala> {
                       );
                     },
                   ),
-                  SizedBox(height: 100,)
+                  SizedBox(
+                    height: 100,
+                  )
                 ],
               ),
             ),

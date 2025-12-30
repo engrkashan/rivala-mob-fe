@@ -7,6 +7,9 @@ class PromoProvider extends ChangeNotifier {
   List<PromotionModel> _promos = [];
   List<PromotionModel> get promos => _promos;
 
+  List<dynamic> criteriaList = [];
+  String promoCode = '';
+  double discount = 0.0;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -25,18 +28,25 @@ class PromoProvider extends ChangeNotifier {
     }
   }
 
+  void addCriteria(Map<String, dynamic> criteria) {
+    criteriaList.add(criteria);
+    notifyListeners();
+  }
+
   Future<void> uploadPromo(String title, String description, String startDate,
-      String endDate, String status) async {
+      String endDate, String status, String promo, double discount) async {
     setLoading(true);
-    print(startDate + endDate);
     DateTime? start = _parseDate(startDate);
     DateTime? end = _parseDate(endDate);
     PromotionModel model = PromotionModel(
-        title: title,
-        description: description,
-        startDate: start,
-        endDate: end,
-        status: status);
+      title: title,
+      description: description,
+      startDate: start,
+      endDate: end,
+      status: status,
+      promoCode: promo,
+      discount: discount,
+    );
     try {
       await PromoRepo().createPromo(model);
     } catch (e) {

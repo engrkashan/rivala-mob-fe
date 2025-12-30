@@ -50,10 +50,7 @@ class _ProductManageMainState extends State<ProductManageMain> {
                         row_widget(
                           onTap: () {
                             Navigator.of(context).push(
-                              CustomPageRoute(
-                                  page: EditExistingProducts(
-                                hasProducts: false,
-                              )),
+                              CustomPageRoute(page: EditExistingProducts()),
                             );
                           },
                           icon: Assets.imagesAdd3,
@@ -199,7 +196,7 @@ class _product_manage_containerState extends State<product_manage_container> {
                   // ),
                   texts_row(
                     text1: 'SKU:',
-                    text2: p.sku,
+                    text2: p.SKU,
                   ),
                   texts_row(
                     text1: 'COMMISSION: ',
@@ -244,7 +241,10 @@ class _product_manage_containerState extends State<product_manage_container> {
                       paddingTop: 15,
                       onTap: () {
                         Navigator.of(context).push(
-                          CustomPageRoute(page: EditExistingProducts()),
+                          CustomPageRoute(
+                              page: EditExistingProducts(
+                            product: p,
+                          )),
                         );
                       },
                     )

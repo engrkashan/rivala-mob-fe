@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/order_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/cancel_order.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/replace_order.dart';
@@ -14,6 +16,7 @@ import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 import '../../../models/order_model.dart';
+import '../../screens/main_menu_flow/menu/shopping/subscription/subscription_change.dart';
 import '../../screens/master_store_flow/store_home/product_detailed_description.dart';
 
 class my_order_container extends StatefulWidget {
@@ -189,19 +192,40 @@ class _my_order_containerState extends State<my_order_container> {
                   ? Row(
                       children: [
                         Bounce_widget(
-                          ontap: () {
-                            Get.to(() => ReturnOrder());
-                          },
                           widget: CustomeContainer(
                             radius: 8,
                             vpad: 6,
                             hpad: 5,
                             color: ktertiary,
-                            widget: MyText(
-                              text: 'Mark as Fulfilled',
-                              size: 9,
-                              color: kwhite,
-                            ),
+                            widget: Consumer<OrderProvider>(
+                                builder: (context, ref, _) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  await ref.updateOrderStatus(
+                                    widget.order!.id!,
+                                    'fulfill',
+                                  );
+                                  if (ref.error.isNotEmpty) {
+                                    Get.snackbar(
+                                      'Error',
+                                      ref.error,
+                                    );
+                                    return;
+                                  }
+                                  Get.to(() => SubscriptionChange(
+                                        title: 'Order Fulfilled!',
+                                        appTitle: 'Fulfill an Order',
+                                        desc: "",
+                                        email: "",
+                                      ));
+                                },
+                                child: MyText(
+                                  text: 'Mark as Fulfilled',
+                                  size: 9,
+                                  color: kwhite,
+                                ),
+                              );
+                            }),
                           ),
                         ),
                       ],
@@ -212,7 +236,9 @@ class _my_order_containerState extends State<my_order_container> {
 
                         Bounce_widget(
                           ontap: () {
-                            Get.to(() => ReturnOrder());
+                            Get.to(() => ReturnOrder(
+                                  order: widget.order!,
+                                ));
                           },
                           widget: CustomeContainer(
                             radius: 8,
@@ -231,7 +257,9 @@ class _my_order_containerState extends State<my_order_container> {
                         ),
                         Bounce_widget(
                           ontap: () {
-                            Get.to(() => CancelOrder());
+                            Get.to(() => CancelOrder(
+                                  order: widget.order!,
+                                ));
                           },
                           widget: CustomeContainer(
                             radius: 8,
