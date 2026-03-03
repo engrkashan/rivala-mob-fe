@@ -31,6 +31,38 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
   final _confirmPasswordCon = TextEditingController();
   bool _isObSecure = true;
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: ksecondary,
+              onPrimary: kwhite,
+              onSurface: kblack,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: ksecondary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _birthdayCon.text =
+            "${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -70,7 +102,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _nameCon,
-                        hint: 'Austin Larsen',
+                        hint: 'Enter your name',
                         label: 'Name',
                         suffixIcon: Image.asset(
                           Assets.imagesEdit,
@@ -89,7 +121,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _usernameCon,
-                        hint: '@austinlarsen27',
+                        hint: 'Enter username',
                         label: 'Handle',
                         suffixIcon: Image.asset(
                           Assets.imagesEdit,
@@ -108,7 +140,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _emailCon,
-                        hint: 'austinlarsen27@gmail.com',
+                        hint: 'Enter your email address',
                         label: 'Email Address',
                         suffixIcon: Image.asset(
                           Assets.imagesEdit,
@@ -130,7 +162,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _passwordCon,
-                        hint: '*********',
+                        hint: 'Enter password',
                         label: 'Password',
                         suffixIcon: Icon(
                           _isObSecure ? Icons.visibility_off : Icons.visibility,
@@ -153,8 +185,10 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _birthdayCon,
-                        hint: 'MM/DD/YYYY',
+                        hint: 'Select your birthday',
                         label: 'Birthday',
+                        readOnly: true,
+                        ontapp: () => _selectDate(context),
                         filledColor: kblack.withOpacity(0.05),
                         suffixIcon: Image.asset(
                           Assets.imagesCalender,
@@ -166,8 +200,7 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                       ),
                       MyTextField(
                         controller: _bioCon,
-                        hint:
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
+                        hint: 'Enter a short bio for your store',
                         label: 'Store Bio',
                         suffixIcon: Image.asset(
                           Assets.imagesEdit,
@@ -190,17 +223,24 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                   mBottom: 40,
                   mhoriz: 22,
                   onTap: () async {
+                    String? uploadedAvatarUrl;
                     if (Provider.of<MediaProvider>(context, listen: false)
                             .selectedImage !=
                         null) {
                       await Provider.of<MediaProvider>(context, listen: false)
                           .upload();
+                      uploadedAvatarUrl =
+                          Provider.of<MediaProvider>(context, listen: false)
+                              .uploadedUrl;
                     }
                     await auth.registerUser(
                         name: _nameCon.text.trim(),
                         username: _usernameCon.text.trim(),
                         email: _emailCon.text.trim(),
-                        password: _passwordCon.text.trim());
+                        password: _passwordCon.text.trim(),
+                        birthday: _birthdayCon.text.trim(),
+                        bio: _bioCon.text.trim(),
+                        avatarUrl: uploadedAvatarUrl);
                     print("Auth error in set Account: ${auth.error}");
                     if (auth.error != null && auth.error!.isNotEmpty) {
                       AlertInfo.show(context: context, text: auth.error ?? "");
@@ -268,15 +308,29 @@ class _EditImgStackState extends State<EditImgStack> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          CommonImageView(
-            url: media.selectedImage == null
-                ? (widget.imageUrl ?? dummyImage)
-                : null,
-            file: media.selectedImage,
-            width: 109,
-            height: 109,
-            radius: 100,
-          ),
+          media.selectedImage == null && widget.imageUrl == null
+              ? Container(
+                  width: 109,
+                  height: 109,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Colors.grey[600],
+                  ),
+                )
+              : CommonImageView(
+                  url: media.selectedImage == null
+                      ? (widget.imageUrl ?? dummyImage)
+                      : null,
+                  file: media.selectedImage,
+                  width: 109,
+                  height: 109,
+                  radius: 100,
+                ),
           Positioned(
               bottom: -15,
               left: -6,

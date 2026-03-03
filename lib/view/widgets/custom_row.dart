@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
-
-import '../../../generated/assets.dart';
+import 'package:rivala/view/widgets/common_image_view_widget.dart';
 
 class row_widget extends StatelessWidget {
   final String? icon, title;
@@ -15,7 +14,7 @@ class row_widget extends StatelessWidget {
   final bool isIconRight;
   final bool? useCustomFont;
   final FontStyle? fontstyle;
-final TextDecoration? decoration;
+  final TextDecoration? decoration;
   const row_widget({
     super.key,
     this.icon,
@@ -28,7 +27,9 @@ final TextDecoration? decoration;
     this.iconSize,
     this.onTap,
     this.useCustomFont,
-    this.isIconRight = false, this.decoration, this.fontstyle,
+    this.isIconRight = false,
+    this.decoration,
+    this.fontstyle,
   });
 
   @override
@@ -37,11 +38,14 @@ final TextDecoration? decoration;
         ? Bounce(
             onPressed: onTap ?? () {},
             duration: const Duration(milliseconds: 200),
-            child: Image.asset(
-              icon ?? Assets.imagesGoogle,
+            child: CommonImageView(
+              url: (icon != null && icon!.startsWith('http')) ? icon : null,
+              imagePath:
+                  (icon != null && !icon!.startsWith('http')) ? icon : null,
+              name: title,
               width: iconSize ?? 24,
               height: iconSize ?? 24,
-              color: iconColor,
+              radius: 100,
               fit: BoxFit.contain,
             ),
           )
@@ -61,8 +65,8 @@ final TextDecoration? decoration;
       paddingRight: isIconRight ? 5 : 0,
       weight: weight ?? FontWeight.w500,
       useCustomFont: useCustomFont,
-      decoration: decoration??TextDecoration.none,
-      fontStyle:fontstyle ,
+      decoration: decoration ?? TextDecoration.none,
+      fontStyle: fontstyle,
       onTap: onTap,
     );
 

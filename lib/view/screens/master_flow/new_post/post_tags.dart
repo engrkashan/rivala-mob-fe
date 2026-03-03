@@ -17,6 +17,9 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 
 import '../../../../models/product_model.dart';
+import '../../../../models/collection_model.dart';
+import '../../../../models/squad_model.dart';
+import '../../master_store_flow/store_home/product_detailed_description.dart';
 
 class PostTags extends StatefulWidget {
   const PostTags({super.key});
@@ -129,11 +132,15 @@ class tags_search_row extends StatefulWidget {
       hasCheckbox,
       isMainMenu,
       isSquad,
+      isCollection,
       onlyTexts,
       isProduct;
   final ProductModel? product;
+  final CollectionModel? collection;
+  final SquadModel? squad;
   final double? size, hpad;
   final Color? bgColor;
+  final Function(dynamic)? onItemSelected;
 
   const tags_search_row({
     super.key,
@@ -147,9 +154,13 @@ class tags_search_row extends StatefulWidget {
     this.hasCheckbox = true,
     this.isMainMenu = false,
     this.isSquad = false,
+    this.isCollection = false,
     this.onlyTexts = false,
     this.isProduct = false,
     this.product,
+    this.collection,
+    this.squad,
+    this.onItemSelected,
   });
 
   @override
@@ -164,31 +175,56 @@ class _tags_search_rowState extends State<tags_search_row> {
 
     final product = widget.product;
 
-    final isSelected = product != null &&
-        postProvider.tagProducts.any((p) => p?.id == product.id);
+    final isSelected = widget.isSelected ??
+        (product != null &&
+            (widget.onItemSelected != null
+                ? productProvider.selectedMembers.any((p) => p.id == product.id)
+                : postProvider.tagProducts.any((p) => p?.id == product.id)));
 
     // ------------------------------
     // SAFE IMAGE HANDLING
     // ------------------------------
-    final String? productImage =
-        product?.image != null && product!.image!.isNotEmpty
-            ? product.image!.first
-            : null;
+    String? mainImage = widget.image;
+    String? title = widget.title;
+    String? subtitle = widget.tags;
 
-    final String? mainImage =
-        widget.isProduct == true ? productImage : widget.image;
+    if (widget.isProduct == true && product != null) {
+      mainImage =
+          product.image?.isNotEmpty == true ? product.image!.first : null;
+      title = product.title;
+      subtitle = product.store?.name;
+    } else if (widget.isCollection == true && widget.collection != null) {
+      final col = widget.collection!;
+      mainImage = (col.products?.isNotEmpty == true &&
+              col.products!.first.image?.isNotEmpty == true)
+          ? col.products!.first.image!.first
+          : null;
+      title = col.name;
+      subtitle = "${col.products?.length ?? 0} Products";
+    } else if (widget.isSquad == true && widget.squad != null) {
+      final sq = widget.squad!;
+      title = sq.name;
+      subtitle = "${sq.members?.length ?? 0} Members";
+    }
 
     return Bounce_widget(
-      ontap: product == null
-          ? null
-          : () {
-              if (isSelected) {
-                postProvider.tagProducts
-                    .removeWhere((p) => p?.id == product.id);
-              } else {
-                postProvider.tagProducts.add(product);
-              }
-            },
+      ontap: () {
+        if (widget.onItemSelected != null) {
+          if (widget.isProduct == true) widget.onItemSelected!(product);
+          if (widget.isCollection == true)
+            widget.onItemSelected!(widget.collection);
+          if (widget.isSquad == true) widget.onItemSelected!(widget.squad);
+          return;
+        }
+
+        if (product != null) {
+          if (isSelected) {
+            postProvider.tagProducts.removeWhere((p) => p?.id == product.id);
+          } else {
+            postProvider.tagProducts.add(product);
+          }
+        }
+      },
       widget: Container(
         color: isSelected ? widget.bgColor ?? kbackground : ktransparent,
         padding:
@@ -205,16 +241,18 @@ class _tags_search_rowState extends State<tags_search_row> {
                     children: [
                       CommonImageView(
                         url: mainImage,
-                        imagePath: Assets.imagesTagsimg,
+                        // imagePath: Assets.imagesTagsimg,
+                        name: title,
                         width: widget.size ?? 90,
                         height: widget.size ?? 90,
                         radius: 10,
                       ),
-                      Positioned(
-                        bottom: 4,
-                        right: 4,
-                        child: _TagIcon(),
-                      ),
+                      if (widget.isProduct == true)
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: _TagIcon(),
+                        ),
                     ],
                   ),
 
@@ -222,18 +260,31 @@ class _tags_search_rowState extends State<tags_search_row> {
 
             // TEXT
             Expanded(
-              child: widget.isProduct == true
-                  ? TwoTextedColumn(
-                      text1: product?.title ?? '',
-                      text2: product?.store?.name ?? '',
-                      size2: 12,
-                      color1: kblack,
-                      size1: 14,
-                      color2: ktertiary,
+              child: widget.isProduct == true && product != null
+                  ? InkWell(
+                      onTap: () {
+                        if (widget.onItemSelected != null) {
+                          widget.onItemSelected!(product);
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => ProductDetailedDescription(
+                                      product: product)));
+                        }
+                      },
+                      child: TwoTextedColumn(
+                        text1: title ?? '',
+                        text2: subtitle ?? '',
+                        size2: 12,
+                        color1: kblack,
+                        size1: 14,
+                        color2: ktertiary,
+                      ),
                     )
                   : TwoTextedColumn(
-                      text1: widget.title ?? '',
-                      text2: widget.tags ?? '',
+                      text1: title ?? '',
+                      text2: subtitle ?? '',
                       size2: 12,
                       color1: kblack,
                       size1: 14,

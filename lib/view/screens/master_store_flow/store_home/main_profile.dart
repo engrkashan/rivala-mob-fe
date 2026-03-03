@@ -47,12 +47,11 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header Image Stack
-            Consumer<BrandsProvider>(
+      body: CustomScrollView(
+        slivers: [
+          // Header Image Stack
+          SliverToBoxAdapter(
+            child: Consumer<BrandsProvider>(
               builder: (context, brands, _) {
                 if (brands.currentStore == null) {
                   return const Center(child: CircularProgressIndicator());
@@ -60,21 +59,25 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                 return HeaderImageStack(store: brands.currentStore);
               },
             ),
+          ),
 
-            // Collections List
-            Consumer<BrandsProvider>(
-              builder: (context, collectionProvider, _) {
-                final collections =
-                    collectionProvider.currentStore?.collections;
-                if (collections == null || collections.isEmpty) {
-                  return const Padding(
+          // Collections List
+          Consumer<BrandsProvider>(
+            builder: (context, collectionProvider, _) {
+              final collections = collectionProvider.currentStore?.collections;
+              if (collections == null || collections.isEmpty) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
                     padding: EdgeInsets.all(20),
                     child: Center(child: Text("No collections found")),
-                  );
-                }
+                  ),
+                );
+              }
 
-                return Column(
-                  children: collections.map((collection) {
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final collection = collections[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       child: Column(
@@ -98,7 +101,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               },
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           if (collection.description != null)
                             MyText(
                               text: collection.description!,
@@ -110,7 +113,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               paddingRight: 22,
                               useCustomFont: true,
                             ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           SingleChildScrollView(
                             physics: const BouncingScrollPhysics(),
                             scrollDirection: Axis.horizontal,
@@ -141,23 +144,89 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                         ],
                       ),
                     );
-                  }).toList(),
-                );
-              },
-            ),
+                  },
+                  childCount: collections.length,
+                ),
+              );
+            },
+          ),
 
-            const SizedBox(
+          // Store Products
+          Consumer<BrandsProvider>(
+            builder: (context, brands, _) {
+              final products = brands.currentStore?.products;
+              if (products == null || products.isEmpty) {
+                return const SliverToBoxAdapter(child: SizedBox.shrink());
+              }
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 22),
+                        child: ExpandedRow(
+                          text1: 'Store Products',
+                          text2: '',
+                          color1: kheader,
+                          color2: kheader,
+                          weight1: FontWeight.w600,
+                          size1: 18,
+                          size2: 14,
+                          useCustomFont: true,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 22),
+                        child: Row(
+                          children: products.map((product) {
+                            final image = (product.image != null &&
+                                    product.image!.isNotEmpty)
+                                ? product.image!.first
+                                : null;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: store_image_stack(
+                                url: image,
+                                title: product.title,
+                                price: product.price?.toString(),
+                                onTap: () {
+                                  Get.to(() => ProductDetailedDescription(
+                                        product: product,
+                                      ));
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const SliverToBoxAdapter(
+            child: SizedBox(
               height: 20,
             ),
+          ),
 
-            /// FOOTER
-            Consumer<BrandsProvider>(builder: (context, brands, _) {
+          /// FOOTER
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Consumer<BrandsProvider>(builder: (context, brands, _) {
               return StoreFotter(
                 store: brands.currentStore,
               );
-            })
-          ],
-        ),
+            }),
+          )
+        ],
       ),
     );
   }

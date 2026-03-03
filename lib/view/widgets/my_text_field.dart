@@ -94,17 +94,27 @@ class _MyTextFieldState extends State<MyTextField> {
   late FocusNode _focusNode;
   final ValueNotifier<bool> _focusNotifier = ValueNotifier<bool>(false);
   final ThemeController themeController = Get.find();
+
+  bool _isLocalFocusNode = false;
+
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
+    if (widget.focusNode != null) {
+      _focusNode = widget.focusNode!;
+    } else {
+      _focusNode = FocusNode();
+      _isLocalFocusNode = true;
+    }
     _focusNode.addListener(_onFocusChange);
   }
 
   @override
   void dispose() {
     _focusNode.removeListener(_onFocusChange);
-    _focusNode.dispose();
+    if (_isLocalFocusNode) {
+      _focusNode.dispose();
+    }
     _focusNotifier.dispose();
     super.dispose();
   }

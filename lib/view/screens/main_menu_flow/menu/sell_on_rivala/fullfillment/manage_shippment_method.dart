@@ -42,8 +42,11 @@ class _ManageShippmentMethodState extends State<ManageShippmentMethod> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      appBar: simpleAppBar(context: context,
-          title: 'Manage shipping methods', centerTitle: true, size: 16),
+      appBar: simpleAppBar(
+          context: context,
+          title: 'Manage shipping methods',
+          centerTitle: true,
+          size: 16),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -80,6 +83,11 @@ class _ManageShippmentMethodState extends State<ManageShippmentMethod> {
                         title: item['title'],
                         icon: item['icon'],
                         isActive: item['active'],
+                        onChanged: (val) {
+                          setState(() {
+                            item['active'] = val;
+                          });
+                        },
                       ),
                     );
                   },
@@ -102,11 +110,13 @@ class _ManageShippmentMethodState extends State<ManageShippmentMethod> {
 class manage_shippment_row extends StatelessWidget {
   final String? title, icon;
   final bool? isActive;
+  final ValueChanged<bool>? onChanged;
   const manage_shippment_row({
     super.key,
     this.title,
     this.icon,
     this.isActive,
+    this.onChanged,
   });
 
   @override
@@ -135,6 +145,7 @@ class manage_shippment_row extends StatelessWidget {
         )),
         SwitchButton(
           isActive: isActive ?? true,
+          onChanged: onChanged,
           scale: 0.85,
         )
       ],

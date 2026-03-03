@@ -59,7 +59,15 @@ class BrandsProvider extends ChangeNotifier {
     setLoading(true);
     // clearCurrentStore();
     try {
-      _currentStore = await _brandsRepo.getCurrentStore();
+      final fetchedStore = await _brandsRepo.getCurrentStore();
+      // Preserve logoUrl if backend returned null but we have a previous value
+      if ((fetchedStore.logoUrl == null || fetchedStore.logoUrl!.isEmpty) &&
+          (_currentStore?.logoUrl != null &&
+              _currentStore!.logoUrl!.isNotEmpty)) {
+        _currentStore = fetchedStore.copyWith(logoUrl: _currentStore!.logoUrl);
+      } else {
+        _currentStore = fetchedStore;
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -101,7 +109,16 @@ class BrandsProvider extends ChangeNotifier {
   Future<void> updateStore(StoreModel store) async {
     setLoading(true);
     try {
-      await _brandsRepo.updateStore(store);
+      print("store in provider: ${store.toJson()}");
+      final updatedStore = await _brandsRepo.updateStore(store);
+      // Preserve logoUrl if backend returned null but we had one in input
+      if ((updatedStore.logoUrl == null || updatedStore.logoUrl!.isEmpty) &&
+          (store.logoUrl != null && store.logoUrl!.isNotEmpty)) {
+        _currentStore = updatedStore.copyWith(logoUrl: store.logoUrl);
+      } else {
+        _currentStore = updatedStore;
+        loadCurrentStore();
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();

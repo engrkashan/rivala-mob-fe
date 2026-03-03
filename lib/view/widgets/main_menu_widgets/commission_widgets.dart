@@ -227,7 +227,9 @@ class horizontal_img_list extends StatelessWidget {
             (index) => Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: store_image_stack(
-                    url: product?[index].image?[0] ?? "",
+                    url: (product?[index].image?.isNotEmpty == true)
+                        ? product![index].image!.first
+                        : "",
                     width: 45,
                     height: 45,
                     iconSize: 15,

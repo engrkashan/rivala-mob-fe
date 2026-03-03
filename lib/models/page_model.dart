@@ -1,3 +1,5 @@
+import 'package:rivala/models/product_model.dart';
+
 class PageModel {
   final String? id;
   final String? storeId;
@@ -58,8 +60,10 @@ class PageSectionModel {
   final String? title;
   final String? type;
   final int? order;
+  final bool? isVisible;
   final Map<String, dynamic>? settings;
   final List<SectionBlockModel>? blocks;
+  final List<ProductModel>? products;
 
   const PageSectionModel({
     this.id,
@@ -69,6 +73,8 @@ class PageSectionModel {
     this.order,
     this.settings,
     this.blocks,
+    this.products,
+    this.isVisible,
   });
 
   factory PageSectionModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +88,10 @@ class PageSectionModel {
       blocks: (json['blocks'] as List<dynamic>?)
           ?.map((e) => SectionBlockModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      products: (json['products'] as List<dynamic>?)
+          ?.map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      isVisible: json['isVisible'] as bool?,
     );
   }
 
@@ -94,6 +104,8 @@ class PageSectionModel {
       'order': order,
       'settings': settings,
       'blocks': blocks?.map((e) => e.toJson()).toList(),
+      'products': products?.map((e) => e.toJson()).toList(),
+      'isVisible': isVisible
     };
   }
 }

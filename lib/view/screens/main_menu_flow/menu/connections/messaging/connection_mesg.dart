@@ -25,6 +25,7 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatProvider>().getAllChats();
       context.read<ChatProvider>().loadUnreadMessages();
     });
   }
@@ -82,7 +83,7 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
                   ),
                   Consumer<ChatProvider>(
                     builder: (context, provider, _) {
-                      if (provider.unreadMessages.isEmpty) {
+                      if (provider.allChats.isEmpty) {
                         return Center(
                           child: MyText(
                             text: "No new messages",
@@ -94,18 +95,23 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: provider.unreadMessages.length,
+                        itemCount: provider.allChats.length,
                         itemBuilder: (context, index) {
-                          final msg = provider.unreadMessages[index];
+                          final msg = provider.allChats;
+                          final unread =
+                              provider.unreadChats?[msg[index].chatId] ?? 0;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 15),
                             child: manual_add_row(
                               ontap: () {
-                                Get.to(() =>
-                                    Chats(receiverId: msg.senderId ?? ""));
+                                Get.to(() => Chats(
+                                    receiverId: msg[index].id,
+                                    title: msg[index].name));
                               },
-                              imageUrl: msg.sender?.avatarUrl,
-                              text1: msg.sender?.name ?? "Unknown",
+                              imageUrl: msg[index].avatarUrl,
+                              text1: msg[index].name,
+                              text2: msg[index].lastMessage ?? '',
+                              name: msg[index].name,
                               color2: kblack,
                               color1: kblack,
                               size1: 15,
@@ -113,6 +119,33 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
                               isButton: false,
                               mbot: 4,
                               weight2: FontWeight.normal,
+                              suffixWidget: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (unread > 0)
+                                    Container(
+                                      width: 25,
+                                      height: 25,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: kgreen),
+                                      child: Center(
+                                          child: MyText(
+                                        text: "$unread",
+                                        color: kwhite,
+                                      )),
+                                    ),
+                                  SizedBox(
+                                    height: 2,
+                                  ),
+                                  MyText(
+                                    text: formatChatTime(
+                                        msg[index].lastMessageTime),
+                                    size: 11,
+                                    color: kblack.withOpacity(0.6),
+                                  )
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -124,5 +157,36 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
             ),
           ],
         ));
+  }
+
+  String formatChatTime(DateTime? time) {
+    if (time == null) return "";
+
+    final now = DateTime.now();
+    final difference = now.difference(time);
+
+    // Today
+    if (difference.inDays == 0) {
+      if (difference.inMinutes < 1) {
+        return "Just now";
+      } else if (difference.inMinutes < 60) {
+        return "${difference.inMinutes} min ago";
+      } else {
+        return "${difference.inHours} hours ago";
+      }
+    }
+
+    // Yesterday
+    if (difference.inDays == 1) {
+      return "Yesterday";
+    }
+
+    // Before yesterday → Day name
+    return _dayName(time.weekday);
+  }
+
+  String _dayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
   }
 }

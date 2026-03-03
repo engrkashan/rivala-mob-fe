@@ -28,6 +28,7 @@ class FollowingsManualAdd extends StatefulWidget {
 }
 
 class _FollowingsManualAddState extends State<FollowingsManualAdd> {
+  bool autoAcceptFollowers = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,7 +71,12 @@ class _FollowingsManualAddState extends State<FollowingsManualAdd> {
                         ),
                         SwitchButton(
                           scale: 0.6,
-                          isActive: true,
+                          isActive: autoAcceptFollowers,
+                          onChanged: (val) {
+                            setState(() {
+                              autoAcceptFollowers = val;
+                            });
+                          },
                         )
                       ],
                     ),
@@ -91,6 +97,7 @@ class _FollowingsManualAddState extends State<FollowingsManualAdd> {
                                 widget.follower == true ? 'Remove' : 'Unfollow',
                             following: following.following[index],
                             follow: following,
+                            name: following.following[index].name,
                           ),
                         );
                       },
@@ -113,7 +120,7 @@ class _FollowingsManualAddState extends State<FollowingsManualAdd> {
 }
 
 class manual_add_row extends StatelessWidget {
-  final String? text1, text2, img, buttonText;
+  final String? text1, text2, img, buttonText, name;
   final Color? color1, color2;
   final double? size1, size2, mbot;
   final FontWeight? weight2;
@@ -138,6 +145,7 @@ class manual_add_row extends StatelessWidget {
     this.ontap,
     this.following,
     this.follow,
+    this.name,
   });
 
   @override
@@ -155,6 +163,7 @@ class manual_add_row extends StatelessWidget {
           CommonImageView(
             // imagePath: img ?? Assets.imagesProfileicon,
             url: following?.logo,
+            name: name ?? following?.name,
             width: 54,
             height: 54,
             radius: 100,

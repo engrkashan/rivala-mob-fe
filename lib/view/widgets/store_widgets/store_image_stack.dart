@@ -11,6 +11,8 @@ import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import 'package:rivala/view/widgets/color_converter.dart';
+
 //header image container
 
 class HeaderImageStack extends StatelessWidget {
@@ -20,21 +22,39 @@ class HeaderImageStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use the theme nested directly in the store response
+    final currentTheme = store?.theme;
+    final coverUrl = currentTheme?.coverImage ?? store?.owner?.avatarUrl;
+
+    // Resolve theme color or default to grey
+    Color backgroundColor = kdargrey;
+    if (currentTheme?.color1 != null) {
+      try {
+        backgroundColor = hexToColor(currentTheme!.color1!);
+      } catch (e) {
+        backgroundColor = kdargrey;
+      }
+    }
+
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Background Image
+        // Background cover image / Color
         Container(
+          width: Get.width,
+          height: 300,
           decoration: BoxDecoration(
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(15),
           ),
-          child: CommonImageView(
-            imagePath: Assets.imagesDummyImg, // Maybe store cover image?
-            url: store?.owner?.avatarUrl,
-            width: Get.width,
-            height: 300, // Fixed height for cover
-            fit: BoxFit.cover,
-          ),
+          child: (coverUrl != null && coverUrl.isNotEmpty)
+              ? CommonImageView(
+                  url: coverUrl,
+                  width: Get.width,
+                  height: 300,
+                  fit: BoxFit.cover,
+                )
+              : const SizedBox.shrink(),
         ),
 
         // Centered Content
@@ -45,18 +65,37 @@ class HeaderImageStack extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Profile Image
-              CommonImageView(
-                imagePath: Assets.imagesProfileapolo,
-                url: store?.logoUrl,
-                width: 80,
-                height: 80,
-                radius: 100,
-              ),
+              // Profile Image / Initials
+              if (store?.logoUrl != null && store!.logoUrl!.isNotEmpty)
+                CommonImageView(
+                  url: store?.logoUrl,
+                  width: 80,
+                  height: 80,
+                  radius: 100,
+                )
+              else
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: ksecondary,
+                  ),
+                  child: Center(
+                    child: Text(
+                      (store?.name ?? 'S').substring(0, 1).toUpperCase(),
+                      style: TextStyle(
+                        color: kwhite,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
 
               // Profile Name
               MyText(
-                text: store?.name ?? 'Apollo & Sage',
+                text: store?.name ?? "",
                 color: kwhite,
                 size: 22,
                 weight: FontWeight.bold,
@@ -66,7 +105,7 @@ class HeaderImageStack extends StatelessWidget {
 
               // Likes & Username
               MyText(
-                text: '@${store?.owner?.username ?? "apollo.and.sage"} ',
+                text: '@${store?.owner?.username ?? ""} ',
                 color: kwhite,
                 size: 12,
                 weight: FontWeight.w400,
@@ -77,8 +116,10 @@ class HeaderImageStack extends StatelessWidget {
                 // Description
                 MyText(
                   paddingTop: 15,
-                  text: store?.owner?.bio ??
-                      'Australian designed swimwear.\nWorldwide shipping. Ethically made.',
+                  text: (store?.owner?.bio != null &&
+                          store!.owner!.bio!.isNotEmpty)
+                      ? store!.owner!.bio!
+                      : '',
                   color: kwhite,
                   size: 12,
                   textAlign: TextAlign.center,
@@ -95,7 +136,8 @@ class HeaderImageStack extends StatelessWidget {
                     children: [
                       Expanded(
                         child: buttonContainer(
-                          onTap: () => Get.to(() => OurFollowers()),
+                          onTap: () =>
+                              Get.to(() => OurFollowers(initialIndex: 0)),
                           text: '  Followers',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,
@@ -108,7 +150,8 @@ class HeaderImageStack extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: buttonContainer(
-                          onTap: () => Get.to(() => OurFollowers()),
+                          onTap: () =>
+                              Get.to(() => OurFollowers(initialIndex: 1)),
                           text: '  Following',
                           bgColor: ksecondary.withOpacity(0.2),
                           txtColor: kwhite,

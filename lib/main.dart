@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,7 @@ import 'package:rivala/controllers/providers/tax_document_provider.dart';
 import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/controllers/providers/wallet_provider.dart';
+import 'package:rivala/controllers/providers/import_product_provider.dart';
 import 'package:rivala/controllers/repos/auth_repo.dart';
 import 'package:rivala/font_customisation/font_customization.dart';
 import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
@@ -43,6 +45,10 @@ import 'controllers/repos/media_repo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey =
+      "pk_test_51ONbNUGiLncS8H2RdBxcNeR317Nao7sT21wtoQzezP6qBcSBi9a0QVmdpkjHItIECAJDt5I8Ti3odGvNIZPV8WEv00OlDoF6CJ";
+
+  await Stripe.instance.applySettings();
   setupLocator();
   final token = await Session().getAuthToken();
   Get.put(ThemeController());
@@ -81,6 +87,7 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (_) => RevenueProvider()),
         ChangeNotifierProvider(create: (_) => TaxDocumentProvider()),
+        ChangeNotifierProvider(create: (_) => ImportProductProvider()),
       ],
       child: MyApp(
         token: token,
@@ -105,10 +112,16 @@ final String dummyImage =
 class MyApp extends StatelessWidget {
   final String? token;
   const MyApp({super.key, this.token});
+  // Future<void> _initializeStripe() async {
+  //   Stripe.publishableKey =
+  //       "pk_test_51ONbNUGiLncS8H2RdBxcNeR317Nao7sT21wtoQzezP6qBcSBi9a0QVmdpkjHItIECAJDt5I8Ti3odGvNIZPV8WEv00OlDoF6CJ";
+  //   await Stripe.instance.applySettings();
+  // }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // _initializeStripe();
     return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         home: token != null

@@ -1,3 +1,4 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -50,11 +51,14 @@ class _ProductManageMainState extends State<ProductManageMain> {
                         row_widget(
                           onTap: () {
                             Navigator.of(context).push(
-                              CustomPageRoute(page: EditExistingProducts()),
+                              CustomPageRoute(
+                                  page: EditExistingProducts(
+                                hasProducts: false,
+                              )),
                             );
                           },
                           icon: Assets.imagesAdd3,
-                          title: ' Add new link',
+                          title: ' Add new Product',
                           iconSize: 22,
                           texSize: 12,
                           weight: FontWeight.bold,
@@ -156,8 +160,9 @@ class _product_manage_containerState extends State<product_manage_container> {
                     children: [
                       ...List.generate(p.image?.length ?? 0, (i) {
                         return CommonImageView(
-                          imagePath: Assets.imagesNutrition2,
+                          // imagePath: Assets.imagesNutrition2,
                           url: p.image?[i],
+                          name: p.title,
                           radius: 8,
                           width: 54,
                           height: 54,
@@ -199,7 +204,7 @@ class _product_manage_containerState extends State<product_manage_container> {
                     text2: p.SKU,
                   ),
                   texts_row(
-                    text1: 'COMMISSION: ',
+                    text1: 'Price: ',
                     text2: p.price.toString(),
                   ),
                   if (isActive) ...{
@@ -208,19 +213,19 @@ class _product_manage_containerState extends State<product_manage_container> {
                     ),
                     Row(
                       children: [
-                        buttonContainer(
-                          text: 'Make Unavailable',
-                          bgColor: korange,
-                          radius: 5,
-                          vPadding: 4,
-                          textsize: 10,
-                          hPadding: 3,
-                          txtColor: kblack,
-                          weight: FontWeight.normal,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
+                        // buttonContainer(
+                        //   text: 'Make Unavailable',
+                        //   bgColor: korange,
+                        //   radius: 5,
+                        //   vPadding: 4,
+                        //   textsize: 10,
+                        //   hPadding: 3,
+                        //   txtColor: kblack,
+                        //   weight: FontWeight.normal,
+                        // ),
+                        // SizedBox(
+                        //   width: 10,
+                        // ),
                         buttonContainer(
                           text: 'Delete Product',
                           bgColor: kred,
@@ -230,6 +235,38 @@ class _product_manage_containerState extends State<product_manage_container> {
                           hPadding: 3,
                           txtColor: kblack,
                           weight: FontWeight.normal,
+                          onTap: () async {
+                            bool? confirm = await Get.defaultDialog<bool>(
+                              title: "Delete Product",
+                              middleText:
+                                  "Are you sure you want to delete this product?",
+                              textConfirm: "Delete",
+                              textCancel: "Cancel",
+                              confirmTextColor: Colors.white,
+                              onConfirm: () => Get.back(result: true),
+                              onCancel: () => Get.back(result: false),
+                            );
+
+                            if (confirm == true) {
+                              if (p.id == null) {
+                                AlertInfo.show(
+                                  context: context,
+                                  text: "Error: Product ID is missing",
+                                );
+                                return;
+                              }
+                              await Provider.of<ProductProvider>(context,
+                                      listen: false)
+                                  .deleteProduct(p.id!);
+
+                              if (mounted) {
+                                AlertInfo.show(
+                                  context: context,
+                                  text: "Product deleted successfully",
+                                );
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),

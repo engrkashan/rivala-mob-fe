@@ -91,7 +91,8 @@ class _PagesMainState extends State<PagesMain> {
                               ontap: () {
                                 Navigator.of(context).push(
                                   CustomPageRoute(
-                                      page: PagesAboutus(page: page)),
+                                    page: PagesAboutus(page: page),
+                                  ),
                                 );
                               },
                             ),

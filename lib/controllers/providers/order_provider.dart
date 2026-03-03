@@ -32,17 +32,26 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 
-  // void searchOrders(String query){
-  //   if (query.isEmpty) {
-  //     _filteredOrders = _orders;
-  //   } else {
-  //     _filteredOrders = _orders!
-  //         .where((order) =>
-  //         order.products.contains()!.toLowerCase().contains(query.toLowerCase()))
-  //         .toList();
-  //   }
-  //   notifyListeners();
-  // }
+  void searchOrders(String query) {
+    if (query.isEmpty) {
+      _filteredOrders = _orders;
+    } else {
+      _filteredOrders = _orders
+          .where((order) =>
+              (order.orderNumber != null &&
+                  order.orderNumber!
+                      .toLowerCase()
+                      .contains(query.toLowerCase())) ||
+              (order.id != null &&
+                  order.id!.toLowerCase().contains(query.toLowerCase())) ||
+              (order.buyer?.email != null &&
+                  order.buyer!.email!
+                      .toLowerCase()
+                      .contains(query.toLowerCase())))
+          .toList();
+    }
+    notifyListeners();
+  }
 
   List<FulfillmentModel> _fulfillments = [];
   List<FulfillmentModel> get fulfillments => _fulfillments;
@@ -50,17 +59,17 @@ class OrderProvider extends ChangeNotifier {
   // Future<void> fetchFulfillments() async {
   //   _fulfillments = await _orderRepo.listFulfillments();
   // }
-  Future<bool> createOrder(Map<String, dynamic> orderData) async {
+  Future<OrderModel?> createOrder(Map<String, dynamic> orderData) async {
     setLoading(true);
     _error = "";
     try {
-      await _orderRepo.createOrder(orderData);
+      final createdOrder = await _orderRepo.createOrder(orderData);
       // Ideally update _orders list locally or re-fetch
       // await loadStoreOrders(); // Usually buyer orders are different from store orders
-      return true;
+      return createdOrder;
     } catch (e) {
       _error = e.toString();
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }
@@ -86,6 +95,26 @@ class OrderProvider extends ChangeNotifier {
     _error = "";
     try {
       return await _orderRepo.fetchOrderById(id);
+    } catch (e) {
+      _error = e.toString();
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /// Public tracking using order number (or email, backend decides)
+  Future<OrderModel?> trackOrder({
+    required String orderNumber,
+    String? email,
+  }) async {
+    setLoading(true);
+    _error = "";
+    try {
+      return await _orderRepo.trackOrder(
+        orderNumber: orderNumber,
+        email: email,
+      );
     } catch (e) {
       _error = e.toString();
       return null;

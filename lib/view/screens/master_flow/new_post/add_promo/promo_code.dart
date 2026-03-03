@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/promo_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/promotions_model.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_promo/search_criteria_products.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
@@ -15,9 +16,15 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 class PromoCode extends StatefulWidget {
   final String? title;
   final bool? isPromo, isMinMax;
+  final String? targetType; // NEW: "PRODUCT" or "COLLECTION"
 
-  const PromoCode(
-      {super.key, this.title, this.isPromo = false, this.isMinMax = false});
+  const PromoCode({
+    super.key,
+    this.title,
+    this.isPromo = false,
+    this.isMinMax = false,
+    this.targetType,
+  });
 
   @override
   State<PromoCode> createState() => _PromoCodeState();
@@ -30,14 +37,17 @@ class _PromoCodeState extends State<PromoCode> {
   final TextEditingController promoController = TextEditingController();
   final TextEditingController discountController = TextEditingController();
 
+  String? selectedId; // NEW
+  String? selectedName; // NEW
+
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             color: kwhite),
-        padding: EdgeInsets.symmetric(vertical: 22, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,28 +77,45 @@ class _PromoCodeState extends State<PromoCode> {
                   ))
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 25,
           ),
-          MyTextField(
-            hint: 'Search Products',
-            prefixIcon: Image.asset(
-              Assets.imagesSearch,
-              width: 15,
-              height: 15,
+          if (widget.targetType != null) ...{
+            MyTextField(
+              hint: selectedName ??
+                  'Search ${widget.targetType == "PRODUCT" ? "Products" : "Collections"}',
+              prefixIcon: Image.asset(
+                Assets.imagesSearch,
+                width: 15,
+                height: 15,
+              ),
+              readOnly: true,
+              ontapp: () {
+                Get.bottomSheet(
+                    SearchCriteriaProducts(
+                      title: widget.targetType == "PRODUCT"
+                          ? "Search Products"
+                          : "Search Collections",
+                      hintText: widget.targetType == "PRODUCT"
+                          ? "Enter product name"
+                          : "Enter collection name",
+                      onItemSelected: (item) {
+                        setState(() {
+                          selectedId = item.id;
+                          selectedName = item.title ?? item.name;
+                        });
+                        Get.back();
+                      },
+                    ),
+                    isScrollControlled: true);
+              },
+              contentvPad: 6,
             ),
-            readOnly: true,
-            ontapp: () {
-              Get.back();
-              Get.bottomSheet(SearchCriteriaProducts(),
-                  isScrollControlled: true);
-            },
-            contentvPad: 6,
-          ),
+          },
           ////if minmax
 
           if (widget.isMinMax == true) ...{
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -113,7 +140,7 @@ class _PromoCodeState extends State<PromoCode> {
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -142,7 +169,7 @@ class _PromoCodeState extends State<PromoCode> {
 
           ////if promo
           if (widget.isPromo == true) ...{
-            SizedBox(
+            const SizedBox(
               height: 12,
             ),
             Row(
@@ -184,7 +211,10 @@ class _PromoCodeState extends State<PromoCode> {
                       bgColor: ktransparent,
                       bordercolor: ktertiary,
                       hint: 'Choose your discount type',
-                      items: ['Discount shipping', 'Discount entire order'],
+                      items: const [
+                        'Discount shipping',
+                        'Discount entire order'
+                      ],
                       selectedValue: selectedType,
                       onChanged: (e) {
                         selectedType = e!;
@@ -192,7 +222,7 @@ class _PromoCodeState extends State<PromoCode> {
                       })),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Row(
@@ -215,7 +245,7 @@ class _PromoCodeState extends State<PromoCode> {
                   controller: discountController,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               Expanded(
@@ -226,9 +256,9 @@ class _PromoCodeState extends State<PromoCode> {
                   color: kblack.withOpacity(0.05),
                   widget: Row(
                     children: [
-                      Bounce_widget(
+                      const Bounce_widget(
                         widget: Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
+                          padding: EdgeInsets.only(bottom: 6),
                           child: Icon(
                             Icons.minimize_rounded,
                             color: kblack,
@@ -249,7 +279,7 @@ class _PromoCodeState extends State<PromoCode> {
                           ),
                         ),
                       ),
-                      Bounce_widget(
+                      const Bounce_widget(
                           widget: Icon(
                         Icons.add_rounded,
                         color: kblack,
@@ -261,25 +291,42 @@ class _PromoCodeState extends State<PromoCode> {
               )
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 40,
           ),
           MyButton(
             buttonText: 'Save criteria',
             onTap: () {
-              print('DISCOUNT TEXT: "${discountController.text}"');
-              Provider.of<PromoProvider>(context, listen: false).addCriteria({
-                'title': widget.isPromo == true
-                    ? 'Promo Code: ${promoController.text}'
-                    : 'The minimum Purchase is at least: \$${minController.text} and max Purchase is: \$${maxController.text}',
-                'desc': {
-                  'type': selectedType,
-                  'amount': double.parse(discountController.text),
-                },
-                'promo': promoController.text
-              });
-              print(Provider.of<PromoProvider>(context, listen: false)
-                  .criteriaList);
+              final provider =
+                  Provider.of<PromoProvider>(context, listen: false);
+
+              if (widget.targetType != null && selectedId != null) {
+                // Handle Target
+                provider.addTarget(PromotionTargetModel(
+                  targetType: widget.targetType,
+                  productId: widget.targetType == "PRODUCT" ? selectedId : null,
+                  collectionId:
+                      widget.targetType == "COLLECTION" ? selectedId : null,
+                ));
+              }
+
+              if (widget.isMinMax == true ||
+                  (widget.isPromo == true && promoController.text.isNotEmpty)) {
+                // Handle Criteria
+                String condition = "";
+                if (widget.isMinMax == true) {
+                  condition =
+                      "Min: \$${minController.text}, Max: \$${maxController.text}";
+                } else {
+                  condition = "Code: ${promoController.text}";
+                }
+
+                provider.addCriteria(PromotionCriteriaModel(
+                  condition: condition,
+                  action: "$selectedType ${discountController.text}%",
+                ));
+              }
+
               Get.back();
             },
             mBottom: 60,

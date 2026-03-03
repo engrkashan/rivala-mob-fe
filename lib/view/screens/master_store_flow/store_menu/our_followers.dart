@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/show_products/curated_brands.dart';
@@ -10,7 +11,8 @@ import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 import '../../../../controllers/providers/brands_provider.dart';
 
 class OurFollowers extends StatefulWidget {
-  const OurFollowers({super.key});
+  final int initialIndex;
+  const OurFollowers({super.key, this.initialIndex = 0});
 
   @override
   State<OurFollowers> createState() => _OurFollowersState();
@@ -19,83 +21,114 @@ class OurFollowers extends StatefulWidget {
 class _OurFollowersState extends State<OurFollowers> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kwhite,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return DefaultTabController(
+      length: 2,
+      initialIndex: widget.initialIndex,
+      child: Scaffold(
+        backgroundColor: kwhite,
+        appBar: AppBar(
+          backgroundColor: kwhite,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: kblack),
+            onPressed: () => Get.back(),
+          ),
+          bottom: TabBar(
+            labelColor: kblack,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: kblack,
+            tabs: const [
+              Tab(text: "Followers"),
+              Tab(text: "Following"),
+            ],
+          ),
+        ),
+        body: TabBarView(
           children: [
-            Consumer<BrandsProvider>(builder: (context, ref, _) {
-              return HeaderImageStack(
-                showContent: false,
-                store: ref.currentStore,
-              );
-            }),
-//
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-              child: TwoTextedColumn(
-                text1: 'Here are the People Who Think We’re Cool',
-                text2:
-                    'We like showing off our friends and family. Here are some of their greatest hits!',
-                color1: kheader,
-                color2: kbody,
-                weight1: FontWeight.w600,
-                size1: 18,
-                size2: 14,
-                useCustomFont: true,
-              ),
-            ),
-            Consumer<BrandsProvider>(builder: (context, ref, _) {
-              final followers = ref.currentStore?.followers;
-              if (followers == null || followers.isEmpty) {
-                return Text("No followers found");
-              }
-
-              return GridView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-                physics: const BouncingScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: followers.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 10,
-                    mainAxisExtent: 130),
-                itemBuilder: (context, index) {
-                  final brand = followers[index];
-                  return Bounce_widget(
-                    ontap: () {
-                      // Navigator.of(context)
-                      //     .push(CustomPageRoute(page: FollowerMaiProfile()));
-                    },
-                    widget: curated_brand_widget(
-                      networkImg: brand.logo,
-                      title: brand.name,
-                      desc: brand.username,
-                      useCustomFont: true,
-                    ),
-                  );
-                },
-              );
-            }),
-            SizedBox(
-              height: 30,
-            ),
-            Consumer<BrandsProvider>(builder: (context, ref, _) {
-              return StoreFotter(
-                store: ref.currentStore,
-              );
-            })
+            _buildFollowersList(context, true),
+            _buildFollowersList(context, false),
           ],
         ),
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: Padding(
-      //   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 90),
-      //   child: Store_Button_Row(),
-      // ),
+    );
+  }
+
+  Widget _buildFollowersList(BuildContext context, bool isFollowers) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Consumer<BrandsProvider>(builder: (context, ref, _) {
+            return HeaderImageStack(
+              showContent: false,
+              store: ref.currentStore,
+            );
+          }),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+            child: TwoTextedColumn(
+              text1: isFollowers
+                  ? 'Here are the People Who Think We’re Cool'
+                  : 'People We Are Currently Following',
+              text2: isFollowers
+                  ? 'We like showing off our friends and family. Here are some of their greatest hits!'
+                  : 'Check out the amazing brands and people we follow.',
+              color1: kheader,
+              color2: kbody,
+              weight1: FontWeight.w600,
+              size1: 18,
+              size2: 14,
+              useCustomFont: true,
+            ),
+          ),
+          Consumer<BrandsProvider>(builder: (context, ref, _) {
+            final list = isFollowers
+                ? ref.currentStore?.followers
+                : ref.currentStore?.followings;
+            if (list == null || list.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.all(22.0),
+                child: Center(
+                    child: Text(isFollowers
+                        ? "No followers found"
+                        : "Not following anyone yet")),
+              );
+            }
+
+            return GridView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: list.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 10,
+                  mainAxisExtent: 130),
+              itemBuilder: (context, index) {
+                final brand = list[index];
+                return Bounce_widget(
+                  ontap: () {
+                    // Navigate to follower/following profile
+                  },
+                  widget: curated_brand_widget(
+                    networkImg: brand.logo,
+                    title: brand.name,
+                    desc: brand.username,
+                    useCustomFont: true,
+                  ),
+                );
+              },
+            );
+          }),
+          SizedBox(height: 30),
+          Consumer<BrandsProvider>(builder: (context, ref, _) {
+            return StoreFotter(
+              store: ref.currentStore,
+            );
+          })
+        ],
+      ),
     );
   }
 }

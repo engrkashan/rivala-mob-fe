@@ -94,6 +94,10 @@ class _IndiviualLinkState extends State<CreateNewLink> {
                             delay: (index + 1) * 200,
                             isDelete: widget.hasDelete,
                             linkModel: linkItems[index],
+                            isActive: linkItems[index].status == 'active',
+                            onChanged: (val) {
+                              ref.toggleLinkStatus(index);
+                            },
                           ),
                         );
                       },
@@ -134,19 +138,23 @@ class _IndiviualLinkState extends State<CreateNewLink> {
   @override
   void initState() {
     super.initState();
-    context.read<LinkProvider>().loadLinks(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LinkProvider>().loadLinks(context);
+    });
   }
 }
 
 class add_link_container extends StatelessWidget {
   final int? delay;
   final String? title, link, editButtontext;
-  final bool? isRadio, isMainMenu, isDelete;
+  final bool? isRadio, isMainMenu, isDelete, isSelected; // Added isSelected
   final VoidCallback? onEditTap;
   final double? text1Size, text2Size;
   final int? maxlines;
   final Widget? leadingWidget;
   final LinkModel? linkModel;
+  final bool? isActive;
+  final ValueChanged<bool>? onChanged;
   const add_link_container({
     super.key,
     this.delay,
@@ -162,6 +170,9 @@ class add_link_container extends StatelessWidget {
     this.isDelete = false,
     this.leadingWidget,
     this.linkModel,
+    this.isSelected, // Added parameter
+    this.isActive,
+    this.onChanged,
   });
 
   @override
@@ -250,10 +261,14 @@ class add_link_container extends StatelessWidget {
                 SizedBox(
                   width: 8,
                 ),
-                if (isRadio == false && isMainMenu == false) SwitchButton(),
+                if (isRadio == false && isMainMenu == false)
+                  SwitchButton(
+                    isActive: isActive ?? true,
+                    onChanged: onChanged,
+                  ),
                 if (isRadio == true && isMainMenu == false)
                   CustomCheckBox(
-                    isActive: true,
+                    isActive: isSelected ?? true, // Use parameter
                     onTap: () {},
                     iscircle: true,
                     iconColor: ktertiary,

@@ -16,9 +16,28 @@ class AuthRepo {
     final response =
         await api.postResponse(endpoints: Endpoints.register, data: data);
     print("Thi is response $response");
+
+    if (response == null) {
+      throw ApiException(
+        message: "Registration failed: Server returned an empty response.",
+        response: null,
+        statusCode: 200,
+      );
+    }
+
     final token = response['accessToken'];
     final refreshToken = response['refreshToken'];
-    final userData = response['user'];
+    final userData =
+        response['seller'] ?? response['data']; // Check both common keys
+
+    if (userData == null) {
+      throw ApiException(
+        message: "Registration failed: Missing user data in response.",
+        response: jsonEncode(response),
+        statusCode: 200,
+      );
+    }
+
     final user = UserModel.fromJson(userData);
 
     if (token != null) {
@@ -37,8 +56,6 @@ class AuthRepo {
         endpoints: Endpoints.login,
         data: {"identifier": identifier, "password": password});
 
-    // 1. 🛑 CRITICAL NULL CHECK: If response is null, the body was empty,
-    // which is a failure for a login endpoint.
     if (response == null) {
       throw ApiException(
         message:
@@ -48,23 +65,24 @@ class AuthRepo {
       );
     }
 
-    // 2. Safely access keys now that 'response' is guaranteed to be a Map
     final token = response['accessToken'];
     final refreshToken = response['refreshToken'];
-    final userData = response['data'];
+    // Check multiple common keys for user data
+    final userData = response['seller'] ?? response['user'] ?? response['data'];
 
-    // 3. Add checks for missing keys if they are mandatory
     if (token == null || userData == null) {
       throw ApiException(
         message:
-            "Login failed: Missing 'accessToken' or user 'data' in the response.",
+            "Login failed: ${token == null ? "no accessToken found" : "user data not found"} in response.",
         response: jsonEncode(response),
         statusCode: 200,
       );
     }
 
     await session.saveAuthToken(token);
-    await session.saveRefreshToken(refreshToken);
+    if (refreshToken != null) {
+      await session.saveRefreshToken(refreshToken);
+    }
 
     final user = UserModel.fromJson(userData);
 
@@ -97,5 +115,23 @@ class AuthRepo {
   Future<void> resendSellerOtp({required String identifier}) async {
     final response = await api.postResponse(
         endpoints: Endpoints.resendVerification, data: {"email": identifier});
+  }
+
+  Future<UserModel> updateUser(UserModel user) async {
+    final response = await api.patchResponse(
+      endpoint: Endpoints.user,
+      data: user.toJson(),
+    );
+
+    final updatedData = response['user'] ?? response['data'] ?? response;
+    final updatedUser = UserModel.fromJson(updatedData);
+
+    // Preserve avatarUrl if backend returned null/empty but we had one in the input
+    if ((updatedUser.avatarUrl == null || updatedUser.avatarUrl!.isEmpty) &&
+        (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)) {
+      return updatedUser.copyWith(avatarUrl: user.avatarUrl);
+    }
+
+    return updatedUser;
   }
 }

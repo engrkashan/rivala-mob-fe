@@ -101,6 +101,9 @@ class PagesProvider extends ChangeNotifier {
       if (index != -1) {
         _pages[index] = updatedPage;
       }
+      if (_currentPage?.id == id) {
+        _currentPage = updatedPage;
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();

@@ -1,3 +1,4 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get/get.dart';
@@ -25,7 +26,7 @@ class _AddProductCollectionState extends State<AddProductCollection> {
     final desc = descCtrl.text.trim();
 
     if (name.isEmpty) {
-      Get.snackbar("Error", "Name is required");
+      AlertInfo.show(context: context, text: "Name is required");
       return;
     }
 
@@ -34,9 +35,9 @@ class _AddProductCollectionState extends State<AddProductCollection> {
 
     if (provider.error.isEmpty) {
       Get.back();
-      Get.snackbar("Success", "Collection created");
+      AlertInfo.show(context: context, text: "Collection created");
     } else {
-      Get.snackbar("Error", provider.error);
+      AlertInfo.show(context: context, text: provider.error);
     }
   }
 
@@ -72,8 +73,7 @@ class _AddProductCollectionState extends State<AddProductCollection> {
                 ),
                 MyTextField(
                   controller: descCtrl,
-                  hint:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
+                  hint: "Collection Ddescription",
                   label: 'Collection Description',
                   maxLines: 4,
                 ),

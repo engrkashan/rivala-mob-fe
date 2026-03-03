@@ -13,6 +13,9 @@ import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import 'package:provider/provider.dart';
+import 'package:rivala/controllers/providers/squads_provider.dart';
+import 'package:rivala/view/widgets/platform_dialog.dart';
 import '../../../models/product_model.dart';
 import '../../../models/store_model.dart';
 import '../../../models/user_model.dart';
@@ -22,12 +25,14 @@ class squad_members_container extends StatefulWidget {
   final String? commission;
   final int? delay;
   final List<UserModel>? members;
+  final String? squadId;
 
   const squad_members_container({
     super.key,
     this.delay,
     this.commission,
     this.members,
+    this.squadId,
   });
 
   @override
@@ -75,6 +80,8 @@ class _squad_members_containerState extends State<squad_members_container> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: squad_members_row(
+                    squadId: widget.squadId,
+                    userId: widget.members?[index].id,
                     owner: index == 0 ? true : false,
                     admin: index == 2 ? true : false,
                     title: widget.members?[index].name,
@@ -111,17 +118,24 @@ class _squad_members_containerState extends State<squad_members_container> {
 
 class squad_members_row extends StatelessWidget {
   final bool? owner, admin;
-  final String? title, img;
+  final String? title, img, squadId, userId;
 
   const squad_members_row(
-      {super.key, this.owner, this.admin, this.title, this.img});
+      {super.key,
+      this.owner,
+      this.admin,
+      this.title,
+      this.img,
+      this.squadId,
+      this.userId});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         CommonImageView(
-          url: dummyImage2,
+          url: img,
+          name: title,
           width: 30,
           height: 30,
           radius: 100,
@@ -142,15 +156,39 @@ class squad_members_row extends StatelessWidget {
               Row(
                 children: [
                   if (owner == false)
-                    buttonContainer(
-                      text: 'Remove Seller',
-                      bgColor: kred,
-                      radius: 5,
-                      vPadding: 4,
-                      textsize: 10,
-                      hPadding: 3,
-                      txtColor: kblack,
-                      weight: FontWeight.normal,
+                    Bounce_widget(
+                      ontap: () async {
+                        if (squadId == null || userId == null) return;
+                        final provider = context.read<SquadProvider>();
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => PlatformConfirmationDialog(
+                            title: "Remove Member",
+                            message:
+                                "Are you sure you want to delete this user?",
+                            confirmText: "Delete",
+                            isDestructive: true,
+                          ),
+                        );
+
+                        if (confirmed == true) {
+                          final squad = provider.singleSquad;
+                          if (squad != null) {
+                            squad.members?.removeWhere((m) => m.id == userId);
+                            await provider.updateSquad(squadId!, squad);
+                          }
+                        }
+                      },
+                      widget: buttonContainer(
+                        text: 'Remove Member',
+                        bgColor: kred,
+                        radius: 5,
+                        vPadding: 4,
+                        textsize: 10,
+                        hPadding: 3,
+                        txtColor: kblack,
+                        weight: FontWeight.normal,
+                      ),
                     ),
                   if (owner == false && admin == true) SizedBox(width: 3),
                   if (owner == false && admin == true)
@@ -184,6 +222,7 @@ class squad_seller extends StatefulWidget {
   final bool? isProduct;
   final List<StoreModel>? store;
   final List<ProductModel>? products;
+  final String? squadId;
   const squad_seller({
     super.key,
     this.delay,
@@ -191,6 +230,7 @@ class squad_seller extends StatefulWidget {
     this.isProduct = false,
     this.store,
     this.products,
+    this.squadId,
   });
 
   @override
@@ -249,6 +289,7 @@ class _squad_sellerState extends State<squad_seller> {
                   return Padding(
                       padding: const EdgeInsets.only(bottom: 5),
                       child: squad_seller_row(
+                        squadId: widget.squadId,
                         store: widget.store?[index],
                       ));
                 },
@@ -261,19 +302,20 @@ class _squad_sellerState extends State<squad_seller> {
                 itemBuilder: (context, index) {
                   return Padding(
                       padding: const EdgeInsets.only(bottom: 5),
-                      child:
-                          squad_seller_row(product: widget.products?[index]));
+                      child: squad_seller_row(
+                          squadId: widget.squadId,
+                          product: widget.products?[index]));
                 },
               ),
-            // SizedBox(
-            //   height: 15,
-            // ),
-            // MyText(
-            //   text: widget.isProduct == true ? '+ Add product' : '+ Add Brand',
-            //   size: 12,
-            //   color: kblue,
-            //   weight: FontWeight.w500,
-            // ),
+            SizedBox(
+              height: 15,
+            ),
+            MyText(
+              text: widget.isProduct == true ? '+ Add product' : '+ Add Brand',
+              size: 12,
+              color: kblue,
+              weight: FontWeight.w500,
+            ),
           ],
         ),
       ),
@@ -282,27 +324,23 @@ class _squad_sellerState extends State<squad_seller> {
 }
 
 //squad seller row
-class squad_seller_row extends StatefulWidget {
+class squad_seller_row extends StatelessWidget {
   final StoreModel? store;
   final ProductModel? product;
-  const squad_seller_row({super.key, this.store, this.product});
+  final String? squadId;
+  const squad_seller_row({super.key, this.store, this.product, this.squadId});
 
-  @override
-  State<squad_seller_row> createState() => _squad_seller_rowState();
-}
-
-class _squad_seller_rowState extends State<squad_seller_row> {
-  bool isActive2 = false;
   @override
   Widget build(BuildContext context) {
-    final bool isProduct = widget.product != null;
+    final bool isProduct = product != null;
     return Row(
       children: [
         CommonImageView(
-          url: isProduct ? widget.product?.image?.first : widget.store?.logoUrl,
-          imagePath: isProduct
-              ? Assets.imagesNutrition2 // fallback if product has no image
-              : widget.store?.logoUrl ?? Assets.imagesNutrition2,
+          url: isProduct ? product?.image?.first : store?.logoUrl,
+          // imagePath: isProduct
+          //     ? Assets.imagesNutrition2 // fallback if product has no image
+          //     : store?.logoUrl ?? Assets.imagesNutrition2,
+          name: isProduct ? product?.title : store?.name,
           radius: 8,
           height: 44,
           width: 44,
@@ -315,44 +353,59 @@ class _squad_seller_rowState extends State<squad_seller_row> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    MyText(
-                      text: isProduct
-                          ? (widget.product?.title ?? '')
-                          : (widget.store?.name ?? ''),
-                      size: 15,
-                      weight: FontWeight.w500,
-                    ),
-                    Bounce_widget(
-                      ontap: () {
-                        setState(() {
-                          isActive2 = !isActive2;
-                        });
-                      },
-                      widget: Icon(isActive2
-                          ? Icons.keyboard_arrow_down_rounded
-                          : Icons.keyboard_arrow_right_rounded),
-                    ),
-                  ],
+                child: MyText(
+                  text:
+                      isProduct ? (product?.title ?? '') : (store?.name ?? ''),
+                  size: 15,
+                  weight: FontWeight.w500,
                 ),
               ),
-              if (isActive2 == true)
-                Row(
-                  children: [
-                    buttonContainer(
-                      text: 'Remove Seller',
+              Row(
+                children: [
+                  Bounce_widget(
+                    ontap: () async {
+                      if (squadId == null) return;
+                      final provider = context.read<SquadProvider>();
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => PlatformConfirmationDialog(
+                          title: isProduct ? "Remove Product" : "Remove Seller",
+                          message: isProduct
+                              ? "Are you sure you want to delete this product?"
+                              : "Are you sure you want to delete this user?",
+                          confirmText: "Delete",
+                          isDestructive: true,
+                        ),
+                      );
+
+                      if (confirmed == true) {
+                        final squad = provider.singleSquad;
+                        if (squad != null) {
+                          if (isProduct) {
+                            squad.products
+                                ?.removeWhere((p) => p.id == product?.id);
+                          } else {
+                            squad.sellers
+                                ?.removeWhere((s) => s.id == store?.id);
+                          }
+                          await provider.updateSquad(squadId!, squad);
+                        }
+                      }
+                    },
+                    widget: buttonContainer(
+                      text: isProduct ? 'Remove Product' : 'Remove Seller',
                       bgColor: kred,
                       radius: 5,
-                      vPadding: 4,
-                      hPadding: 3,
-                      textsize: 10,
+                      vPadding: 6,
+                      hPadding: 10,
+                      textsize: 11,
                       txtColor: kblack,
-                      weight: FontWeight.normal,
+                      weight: FontWeight.w500,
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
               Divider(color: kgrey2),
             ],
           ),

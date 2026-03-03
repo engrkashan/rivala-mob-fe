@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/pages/pages_aboutUs.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/fullfillment/manage_shippment_method.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/fullfillment/manual_fulfillment.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
@@ -37,12 +36,12 @@ class _ActiveShoppingMethodsState extends State<ActiveShoppingMethods> {
       'text': 'FBA Amazon',
       'icon': Assets.imagesAmazon,
       'delay': 250,
-      'onTap': () => Get.to(
-            () => PagesAboutus(),
-            transition: Transition.downToUp,
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.easeInOut,
-          ),
+      // 'onTap': () => Get.to(
+      //       () => PagesAboutus(),
+      //       transition: Transition.downToUp,
+      //       duration: const Duration(milliseconds: 1000),
+      //       curve: Curves.easeInOut,
+      //     ),
     },
     {
       'text': 'Manual',

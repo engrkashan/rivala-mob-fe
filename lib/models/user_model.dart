@@ -83,4 +83,38 @@ class UserModel {
         "createdAt": createdAt?.toIso8601String(),
         "updatedAt": updatedAt?.toIso8601String(),
       };
+
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? username,
+    String? email,
+    String? password,
+    String? gender,
+    DateTime? birthday,
+    String? bio,
+    List<String>? profileLinks,
+    String? avatarUrl,
+    String? role,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      gender: gender ?? this.gender,
+      birthday: birthday ?? this.birthday,
+      bio: bio ?? this.bio,
+      profileLinks: profileLinks ?? this.profileLinks,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

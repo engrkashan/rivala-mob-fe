@@ -10,13 +10,38 @@ import '../../../../../../controllers/providers/order_provider.dart';
 import '../../../../../widgets/my_text_widget.dart';
 
 class OrderManagement extends StatefulWidget {
-  const OrderManagement({super.key});
+  final String? initialFilter;
+  const OrderManagement({super.key, this.initialFilter});
 
   @override
   State<OrderManagement> createState() => _OrderManagementState();
 }
 
 class _OrderManagementState extends State<OrderManagement> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialFilter != null) {
+      _searchController.text = widget.initialFilter!;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<OrderProvider>();
+      provider.loadStoreOrders().then((_) {
+        if (widget.initialFilter != null) {
+          provider.searchOrders(widget.initialFilter!);
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,11 +61,15 @@ class _OrderManagementState extends State<OrderManagement> {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     MyTextField(
+                      controller: _searchController,
                       hint: 'Search Order History',
                       prefixIcon: Image.asset(
                         Assets.imagesSearch,
                         width: 12,
                       ),
+                      onChanged: (val) {
+                        context.read<OrderProvider>().searchOrders(val);
+                      },
                     ),
                     ListView.builder(
                       shrinkWrap: true,
@@ -48,7 +77,8 @@ class _OrderManagementState extends State<OrderManagement> {
                       itemCount: orders.length,
                       itemBuilder: (context, index) {
                         if (ref.isLoading) {
-                          return Center(child: SingleChildScrollView());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         if (orders.isEmpty) {
                           return Center(
@@ -63,7 +93,7 @@ class _OrderManagementState extends State<OrderManagement> {
                         );
                       },
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 80,
                     )
                   ],
@@ -72,13 +102,5 @@ class _OrderManagementState extends State<OrderManagement> {
             ),
           ],
         ));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrderProvider>().loadStoreOrders();
-    });
   }
 }

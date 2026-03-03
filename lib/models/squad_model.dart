@@ -78,4 +78,24 @@ class SquadModel {
         "createdAt": createdAt?.toIso8601String(),
         "updatedAt": updatedAt?.toIso8601String(),
       };
+
+  Map<String, dynamic> toCreateJson() => {
+        "name": name,
+        "description": description,
+        "logo": logo,
+        "members": members?.map((m) => m.id).toList() ?? [],
+        "products": products?.map((p) => p.id).toList() ?? [],
+        "sellers": sellers?.map((s) => s.id).toList() ?? [],
+      };
+
+  Map<String, String> toCreateFields() => {
+        if (name != null) "name": name!,
+        if (description != null) "description": description!,
+        for (int i = 0; i < (members?.length ?? 0); i++)
+          "members[$i]": members![i].id!,
+        for (int i = 0; i < (products?.length ?? 0); i++)
+          "products[$i]": products![i].id!,
+        for (int i = 0; i < (sellers?.length ?? 0); i++)
+          "sellers[$i]": sellers![i].id!,
+      };
 }

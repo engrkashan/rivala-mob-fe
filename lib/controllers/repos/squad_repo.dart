@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:rivala/config/network/api_client.dart';
 import 'package:rivala/models/squad_model.dart';
 
@@ -13,9 +15,14 @@ class SquadRepo {
     return data.map((item) => SquadModel.fromJson(item)).toList();
   }
 
-  Future<void> createSquad(SquadModel squad) async {
-    final response =
-        await api.postResponse(endpoints: Endpoints.squads, data: squad);
+  Future<void> createSquad(SquadModel squad, {File? logoFile}) async {
+    print("Create squad in repo: ${squad.toJson()}");
+
+    final response = await api.multipartRequest(
+        endpoint: Endpoints.squads,
+        fields: squad.toCreateFields(),
+        file: logoFile,
+        method: "POST");
   }
 
   Future<SquadModel> getSquadById(String squadId) async {
@@ -24,6 +31,15 @@ class SquadRepo {
 
     final squad = response["squad"];
     return SquadModel.fromJson(squad);
+  }
+
+  Future<void> updateSquad(String id, SquadModel squad,
+      {File? logoFile}) async {
+    await api.multipartRequest(
+        endpoint: Endpoints.squadsById(id),
+        fields: squad.toCreateFields(),
+        file: logoFile,
+        method: "PATCH");
   }
 
   Future<void> deleteSquad(String squadId) async {

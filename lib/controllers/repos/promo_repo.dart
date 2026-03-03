@@ -15,4 +15,15 @@ class PromoRepo {
   Future<void> createPromo(PromotionModel model) async {
     await api.postResponse(endpoints: Endpoints.promotions, data: model);
   }
+
+  Future<dynamic> updatePromo(String id, Map<String, dynamic> data) async {
+    return await api.patchResponse(
+      endpoint: "${Endpoints.promotions}/$id",
+      data: data,
+    );
+  }
+
+  Future<void> deletePromo(String id) async {
+    await api.deleteRequest(endpoint: "${Endpoints.promotions}/$id");
+  }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:rivala/controllers/providers/cart_provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/cart_provider.dart';
 import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/cart_model.dart';
 import 'package:rivala/models/product_model.dart';
 import 'package:rivala/utils/color_utils.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
@@ -292,18 +293,23 @@ class _ProductDetailedDescriptionState
                         child: Row(
                           children: List.generate(recommended.prds?.length ?? 0,
                               (index) {
+                            final prd = recommended.prds![index];
+                            final String? firstImage =
+                                (prd.image?.isNotEmpty == true)
+                                    ? prd.image!.first
+                                    : null;
+
                             return Padding(
                               padding: const EdgeInsets.only(left: 22),
                               child: store_image_stack(
                                 quickbut: true,
-                                url: recommended.prds?[index].image?.first,
-                                title: recommended.prds?[index].title,
-                                price:
-                                    recommended.prds?[index].price.toString(),
+                                url: firstImage,
+                                title: prd.title,
+                                price: prd.price.toString(),
                                 singlePrice: true,
                                 onTap: () {
                                   Get.to(() => PostDisplay(
-                                        product: recommended.prds?[index],
+                                        product: prd,
                                       ));
                                 },
                               ),
@@ -483,34 +489,23 @@ class _ProductDetailedDescriptionState
                               icon: Assets.imagesBack2,
                             ),
                           ),
-                          SimpleExample(
-                            trackHeight: 40,
-                            callback: () {
-                              // ADD TO CART LOGIC
+                          InkWell(
+                            borderRadius: BorderRadius.circular(50),
+                            onTap: () {
                               context.read<CartProvider>().addToCart(
-                                  prd, _quantity,
-                                  size: selectedSize,
-                                  color: colors.isNotEmpty
-                                      ? colors.first
-                                      : null // Default color
+                                    CartItem(
+                                      product: widget.product,
+                                      quantity: _quantity,
+                                      size: selectedSize,
+                                    ),
                                   );
-                              Get.snackbar(
-                                "Success",
-                                "Added to bag",
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: kblack,
-                                colorText: kwhite,
-                                margin: const EdgeInsets.all(10),
-                                borderRadius: 10,
-                                duration: const Duration(seconds: 2),
-                              );
-                              // Get.to(() => ProductCheckout()); // Optional: go to cart immediately
+                              Get.to(() => ProductCheckout());
                             },
-                            stretchThumb: true,
-                            resetCurve: Curves.bounceOut,
-                            resetDuration: const Duration(milliseconds: 3000),
-                            // text: "Add to Bag", // Assuming widget supports text or needs mod
+                            child: SimpleExample(
+                              trackHeight: 40,
+                            ),
                           ),
+
                           // View Bag Button
                           GestureDetector(
                             onTap: () => Get.to(() => ProductCheckout()),

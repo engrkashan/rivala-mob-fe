@@ -23,22 +23,26 @@ class ProductSetup extends StatefulWidget {
 }
 
 class _ProductSetupState extends State<ProductSetup> {
+  bool isSubscriptionEnabled = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: kwhite,
-        appBar:
-            simpleAppBar(context: context,title: 'Product Setup', centerTitle: true, actions: [
-          Bounce_widget(
-              widget: Image.asset(
-            Assets.imagesClose,
-            width: 18,
-            height: 18,
-          )),
-          SizedBox(
-            width: 12,
-          )
-        ]),
+        appBar: simpleAppBar(
+            context: context,
+            title: 'Product Setup',
+            centerTitle: true,
+            actions: [
+              Bounce_widget(
+                  widget: Image.asset(
+                Assets.imagesClose,
+                width: 18,
+                height: 18,
+              )),
+              SizedBox(
+                width: 12,
+              )
+            ]),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -104,6 +108,12 @@ class _ProductSetupState extends State<ProductSetup> {
                       delay: 1000,
                       label: 'Available for Subscription',
                       hasSwitch: true,
+                      switchValue: isSubscriptionEnabled,
+                      onSwitchChanged: (val) {
+                        setState(() {
+                          isSubscriptionEnabled = val;
+                        });
+                      },
                       hint: 'Weekly',
                       items: [
                         'Monthly',
@@ -190,7 +200,9 @@ class _ProductSetupState extends State<ProductSetup> {
                       mBottom: 10,
                     ),
                   ),
-                  SizedBox(height: 23,),
+                  SizedBox(
+                    height: 23,
+                  ),
                   SlideAnimation(
                     delay: 1750,
                     child: TwoTextedColumn(
@@ -205,7 +217,9 @@ class _ProductSetupState extends State<ProductSetup> {
                       mBottom: 10,
                     ),
                   ),
-                    SizedBox(height: 23,),
+                  SizedBox(
+                    height: 23,
+                  ),
                   SlideAnimation(
                     delay: 1800,
                     child: TwoTextedColumn(
@@ -220,9 +234,11 @@ class _ProductSetupState extends State<ProductSetup> {
                       mBottom: 10,
                     ),
                   ),
-                    SizedBox(height: 23,),
+                  SizedBox(
+                    height: 23,
+                  ),
                   SlideAnimation(
-                    delay:1850,
+                    delay: 1850,
                     child: TwoTextedColumn(
                       text1: 'Attributes',
                       text2: '+ Add new attribute',
@@ -235,7 +251,9 @@ class _ProductSetupState extends State<ProductSetup> {
                       mBottom: 10,
                     ),
                   ),
-                    SizedBox(height: 23,),
+                  SizedBox(
+                    height: 23,
+                  ),
                   SlideAnimation(
                     delay: 1900,
                     child: TwoTextedColumn(
@@ -258,8 +276,8 @@ class _ProductSetupState extends State<ProductSetup> {
             ),
             Mybutton2(
               buttonText: 'Save Changes',
-           hpad: 22,
-          mbot: 30,
+              hpad: 22,
+              mbot: 30,
               ontap: () {
                 Get.to(() => GradientSuccessScreen());
               },
@@ -280,23 +298,23 @@ class square_image_stack extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-      Bounce_widget(
-        ontap: () {},
-        widget: CustomeContainer(
-          height: 150,
-          width: 150,
-          color: kbackground,
-          radius: 15,
-          mtop: 0,
-          widget: Center(
-              child: Image.asset(
-            Assets.imagesExportt,
-            color: ktertiary.withOpacity(0.5),
-            width: 70,
-            height: 69,
-          )),
-        ),
-      ),
+          Bounce_widget(
+            ontap: () {},
+            widget: CustomeContainer(
+              height: 150,
+              width: 150,
+              color: kbackground,
+              radius: 15,
+              mtop: 0,
+              widget: Center(
+                  child: Image.asset(
+                Assets.imagesExportt,
+                color: ktertiary.withOpacity(0.5),
+                width: 70,
+                height: 69,
+              )),
+            ),
+          ),
           Positioned(
               bottom: -15,
               left: -6,
@@ -313,14 +331,17 @@ class square_image_stack extends StatelessWidget {
 }
 
 class promo_row extends StatelessWidget {
-  final String? title,icon;
+  final String? title, icon;
   final int? delay;
   final bool? hasButton;
   final Color? iconColor;
   const promo_row({
     super.key,
     this.title,
-    this.delay, this.icon, this.hasButton=false, this.iconColor,
+    this.delay,
+    this.icon,
+    this.hasButton = false,
+    this.iconColor,
   });
 
   @override
@@ -336,7 +357,7 @@ class promo_row extends StatelessWidget {
             borderColor: ktertiary,
             widget: Center(
               child: Image.asset(
-              icon??  Assets.imagesPercent,
+                icon ?? Assets.imagesPercent,
                 width: 22,
                 height: 22,
                 color: iconColor,
@@ -344,39 +365,41 @@ class promo_row extends StatelessWidget {
             ),
           ),
           Expanded(
-              child:hasButton==false? MyText(
-            text:title?? 'Cyber Monday',
-            size: 15,
-            color: kblack,
-            paddingLeft: 13,
-          ):Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-MyText(
-            text:title?? 'Cyber Monday',
-            size: 15,
-            color: kblack,
-            paddingLeft: 13,
-            paddingBottom: 4,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 13),
-            child: Row(
-              children: [
-                buttonContainer(
-                  radius: 10,
-                  text: 'Edit',
-                  bgColor: ktertiary,
-                  txtColor: kwhite,
-                  vPadding: 1,
-                  hPadding: 8,
-                  textsize: 9,
-                ),
-              ],
-            ),
-          )
-            ],
-          )),
+              child: hasButton == false
+                  ? MyText(
+                      text: title ?? 'Cyber Monday',
+                      size: 15,
+                      color: kblack,
+                      paddingLeft: 13,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MyText(
+                          text: title ?? 'Cyber Monday',
+                          size: 15,
+                          color: kblack,
+                          paddingLeft: 13,
+                          paddingBottom: 4,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 13),
+                          child: Row(
+                            children: [
+                              buttonContainer(
+                                radius: 10,
+                                text: 'Edit',
+                                bgColor: ktertiary,
+                                txtColor: kwhite,
+                                vPadding: 1,
+                                hPadding: 8,
+                                textsize: 9,
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    )),
           CustomCheckBox(
             isActive: true,
             onTap: () {},

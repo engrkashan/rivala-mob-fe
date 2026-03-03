@@ -27,9 +27,9 @@ class FollowersManualAdd extends StatefulWidget {
 }
 
 class _FollowersManualAddState extends State<FollowersManualAdd> {
+  bool isActive = true;
   @override
   Widget build(BuildContext context) {
-    bool isActive = true;
     return Scaffold(
         backgroundColor: kwhite,
         appBar: simpleAppBar(
@@ -96,6 +96,7 @@ class _FollowersManualAddState extends State<FollowersManualAdd> {
                             buttonText:
                                 widget.follower == true ? 'Remove' : 'Unfollow',
                             imageUrl: followers.followers[index].logo,
+                            name: followers.followers[index].name,
                           ),
                         );
                       },
@@ -118,13 +119,14 @@ class _FollowersManualAddState extends State<FollowersManualAdd> {
 }
 
 class manual_add_row extends StatelessWidget {
-  final String? text1, text2, img, buttonText, imageUrl;
+  final String? text1, text2, img, buttonText, imageUrl, name;
   final Color? color1, color2;
   final double? size1, size2, mbot;
   final FontWeight? weight2;
   final bool? isFollowing, isButton;
   final VoidCallback? ontap;
   final FollowModel? follower;
+  final Widget? suffixWidget;
   const manual_add_row({
     super.key,
     this.text1,
@@ -142,6 +144,8 @@ class manual_add_row extends StatelessWidget {
     this.ontap,
     this.follower,
     this.imageUrl,
+    this.suffixWidget,
+    this.name,
   });
 
   @override
@@ -158,7 +162,8 @@ class manual_add_row extends StatelessWidget {
         children: [
           CommonImageView(
             url: imageUrl,
-            imagePath: img ?? Assets.imagesProfileicon,
+            imagePath: img,
+            name: name,
             width: 54,
             height: 54,
             radius: 100,
@@ -187,7 +192,7 @@ class manual_add_row extends StatelessWidget {
               radius: 5,
               bgColor: ktertiary,
             ),
-          if (isButton == false) MyText(text: '5m ago')
+          if (isButton == false) suffixWidget ?? SizedBox()
         ],
       ),
     );

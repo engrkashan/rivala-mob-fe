@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/promo_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/promotions_model.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
@@ -17,7 +18,8 @@ import 'add_criteria.dart';
 class StartNewPromo extends StatefulWidget {
   final Color? color;
   final String? buttonText;
-  const StartNewPromo({super.key, this.color, this.buttonText});
+  final PromotionModel? promo;
+  const StartNewPromo({super.key, this.color, this.buttonText, this.promo});
 
   @override
   State<StartNewPromo> createState() => _StartNewPromoState();
@@ -163,8 +165,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                 ),
                 MyTextField(
                   controller: description,
-                  hint:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.',
+                  hint: 'Promo Description',
                   label: 'Description',
                   suffixIcon: Image.asset(
                     Assets.imagesEdit,
@@ -244,19 +245,69 @@ class _StartNewPromoState extends State<StartNewPromo> {
                   },
                 ),
 
+                // Display Targets
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: context.watch<PromoProvider>().targetList.length,
+                    itemBuilder: (context, i) {
+                      final target =
+                          context.watch<PromoProvider>().targetList[i];
+                      final type = target.targetType ?? "PRODUCT";
+                      final id = target.productId ?? target.collectionId ?? "";
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MyText(
+                            text: 'Target #${i + 1}',
+                            size: 15,
+                            weight: FontWeight.w500,
+                            color: kblack,
+                            paddingBottom: 15,
+                          ),
+                          CustomeContainer(
+                            radius: 15,
+                            vpad: 10,
+                            hpad: 12,
+                            color: kblack.withOpacity(0.05),
+                            mbott: 20,
+                            widget: Row(
+                              children: [
+                                Image.asset(
+                                  type == "PRODUCT"
+                                      ? Assets.imagesProduct
+                                      : Assets.imagesCollection,
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: MyText(
+                                    text: 'Specific $type promo (ID: $id)',
+                                    size: 14,
+                                    color: ktertiary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+
+                // Display Criteria
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount:
                         context.watch<PromoProvider>().criteriaList.length,
                     itemBuilder: (context, i) {
-                      final item = context.watch<PromoProvider>().criteriaList;
-                      final title = item[i]['title'];
-                      final desc = item[i]['desc'];
-                      final type = desc['type'];
-                      final amount = desc['amount'];
-                      discount = amount;
-                      promo = item[i]['promo'];
+                      final criteria =
+                          context.watch<PromoProvider>().criteriaList[i];
+                      final cond = criteria.condition ?? "";
+                      final action = criteria.action ?? "";
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -268,7 +319,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                             paddingBottom: 15,
                           ),
                           Container(
-                            height: Get.height * 0.2,
+                            height: Get.height * 0.15, // Adjusted height
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
@@ -296,7 +347,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                                         hpad: 12,
                                         color: kblack.withOpacity(0.05),
                                         widget: MyText(
-                                          text: title,
+                                          text: cond,
                                           size: 14,
                                           color: ktertiary,
                                         ),
@@ -304,9 +355,6 @@ class _StartNewPromoState extends State<StartNewPromo> {
                                     )
                                   ],
                                 ),
-                                // Positioned(
-                                //   left: 40,
-                                //   child: Image.asset(Assets.imagesGradline,width: 4,height: 93,)),
                                 Positioned(
                                   top: 50,
                                   left: 0,
@@ -335,7 +383,7 @@ class _StartNewPromoState extends State<StartNewPromo> {
                                           hpad: 12,
                                           color: kblack.withOpacity(0.05),
                                           widget: MyText(
-                                            text: '$type ${amount.toString()}%',
+                                            text: action,
                                             size: 14,
                                             color: ktertiary,
                                           ),
@@ -365,20 +413,24 @@ class _StartNewPromoState extends State<StartNewPromo> {
           ),
           Consumer<PromoProvider>(builder: (context, ref, _) {
             return ref.isLoading
-                ? CircularProgressIndicator()
+                ? const Center(child: CircularProgressIndicator())
                 : MyButton(
                     buttonText: widget.buttonText ?? 'Add & save promo',
                     mBottom: 30,
                     mhoriz: 22,
                     onTap: () async {
                       await context.read<PromoProvider>().uploadPromo(
-                          title.text,
-                          description.text,
-                          startDate.text,
-                          endDate.text,
-                          status,
-                          promo,
-                          discount);
+                            id: widget.promo?.id, // Added id
+                            title: title.text,
+                            description: description.text,
+                            startDate: startDate.text,
+                            endDate: endDate.text,
+                            status: status,
+                            promo: promo,
+                            discount: discount,
+                            targetAudience:
+                                selectedIndex == 0 ? "CREATORS" : "SELLERS",
+                          );
                       Get.back();
                     },
                   );
@@ -392,9 +444,27 @@ class _StartNewPromoState extends State<StartNewPromo> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        Provider.of<PromoProvider>(context, listen: false).criteriaList.clear();
-      });
+      final provider = context.read<PromoProvider>();
+      if (widget.promo != null) {
+        provider
+            .setDataFromPromo(widget.promo); // Populate criteria and targets
+        title.text = widget.promo?.title ?? "";
+        description.text = widget.promo?.description ?? "";
+        startDate.text =
+            "${widget.promo?.startDate?.month}/${widget.promo?.startDate?.day}/${widget.promo?.startDate?.year}";
+        endDate.text =
+            "${widget.promo?.endDate?.month}/${widget.promo?.endDate?.day}/${widget.promo?.endDate?.year}";
+        status = widget.promo?.status == "ACTIVE"
+            ? "Live"
+            : widget.promo?.status == "INACTIVE"
+                ? "Off"
+                : widget.promo?.status ?? "Live";
+        discount = widget.promo?.discount ?? 0;
+        promo = widget.promo?.promoCode ?? "";
+        selectedIndex = widget.promo?.targetAudience == "CREATORS" ? 0 : 1;
+      } else {
+        provider.clearData(); // Clear only for new promo
+      }
     });
   }
 }

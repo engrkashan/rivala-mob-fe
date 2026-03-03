@@ -5,19 +5,17 @@ import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/cart_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/ordering/checkout_detail.dart';
-
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
-
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/dummyimage.dart';
 import 'package:rivala/view/widgets/store_widgets/image_layout_widget.dart';
-
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+
+import '../../../../../models/cart_model.dart';
 
 class ProductCheckout extends StatelessWidget {
   const ProductCheckout({super.key});
@@ -94,7 +92,10 @@ class ProductCheckout extends StatelessWidget {
                             child: BagItemsRow(
                               title: item.product.title,
                               desc: item.product.store?.name,
-                              img: item.product.image?.first,
+                              img: (item.product.image != null &&
+                                      item.product.image!.isNotEmpty)
+                                  ? item.product.image!.first
+                                  : null,
                               size: 54,
                               showAmount: false,
                               cartItem: item,
@@ -225,16 +226,23 @@ class BagItemsRow extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     if (index != null) {
-                      context.read<CartProvider>().removeFromCart(index!);
+                      // context.read<CartProvider>().removeFromCart();
                     }
                   },
-                  child: row_widget(
-                    icon: Assets.imagesTrash,
-                    iconSize: 12,
-                    title: 'remove',
-                    texSize: 10,
-                    textColor: kgreyy,
-                    useCustomFont: true,
+                  child: InkWell(
+                    onTap: () {
+                      context
+                          .read<CartProvider>()
+                          .removeFromCart(cartItem!.product.id!);
+                    },
+                    child: row_widget(
+                      icon: Assets.imagesTrash,
+                      iconSize: 12,
+                      title: 'remove',
+                      texSize: 13,
+                      textColor: kred,
+                      useCustomFont: true,
+                    ),
                   ),
                 ),
                 SizedBox(

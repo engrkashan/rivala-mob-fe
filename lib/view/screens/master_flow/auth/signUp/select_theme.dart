@@ -12,6 +12,7 @@ import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../../../controllers/providers/brands_provider.dart';
 import '../../../../../controllers/providers/theme_provider.dart';
 import '../../../../../generated/assets.dart';
 import '../../../../../models/theme_model.dart';
@@ -36,6 +37,7 @@ class _SelectThemeState extends State<SelectTheme> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ThemeProvider>().loadAllThemes();
+      context.read<ThemeProvider>().loadAttachedTheme();
     });
   }
 
@@ -67,14 +69,79 @@ class _SelectThemeState extends State<SelectTheme> {
             child: Consumer<ThemeProvider>(
               builder: (context, theme, _) {
                 final themes = theme.themes;
-                if (themes.isEmpty) {
-                  return Center(
-                      child:
-                          Text("No themes available")); // or a loading widget
-                }
                 if (theme.isLoading) {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
+                if (themes.isEmpty) {
+                  return Center(child: Text("No themes available"));
+                }
+
+                Widget buildThemeItem(ThemeModel currentTheme) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Column(
+                      children: [
+                        MyText(
+                          text: currentTheme.name ?? "",
+                          size: 16,
+                          weight: FontWeight.w600,
+                          color: kblack2,
+                          paddingBottom: 20,
+                        ),
+                        theme_stack_image(
+                          theme: currentTheme,
+                          height: 370,
+                          actionButton: SizedBox(
+                            width: 120,
+                            height: 35,
+                            child: MyButton(
+                              buttonText:
+                                  theme.attachedThemeId == currentTheme.id
+                                      ? "Detach"
+                                      : "Attach",
+                              fontSize: 14,
+                              onTap: () async {
+                                final brands = context.read<BrandsProvider>();
+                                if (theme.attachedThemeId == currentTheme.id) {
+                                  await theme.detach();
+                                } else {
+                                  await theme.attach(currentTheme.id!);
+                                }
+                                await theme.loadAttachedTheme();
+                                // Refresh store so themeId updates in profile
+                                await brands.loadCurrentStore();
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            color_picker(),
+                            SizedBox(width: 8),
+                            color_picker(
+                                bgColor: hexToColor(currentTheme.color1 ?? "")),
+                            SizedBox(width: 8),
+                            color_picker(
+                                bgColor: hexToColor(currentTheme.color2 ?? "")),
+                            SizedBox(width: 8),
+                            color_picker(
+                                bgColor: hexToColor(currentTheme.color2 ?? "")),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (themes.length == 1) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: buildThemeItem(themes[0]),
+                  );
+                }
+
                 return ListView(
                   shrinkWrap: true,
                   children: [
@@ -84,12 +151,11 @@ class _SelectThemeState extends State<SelectTheme> {
                     CarouselSlider.builder(
                       carouselController: _carouselController,
                       options: CarouselOptions(
-                        autoPlay: true,
-                        autoPlayAnimationDuration: Duration(milliseconds: 300),
-                        height: Get.height,
+                        autoPlay: false,
+                        height: 490,
                         enlargeFactor: 0.1,
                         viewportFraction: 0.7,
-                        enableInfiniteScroll: true,
+                        enableInfiniteScroll: false,
                         enlargeCenterPage: true,
                         onPageChanged: (index, reason) {
                           setState(() {
@@ -99,42 +165,7 @@ class _SelectThemeState extends State<SelectTheme> {
                       ),
                       itemCount: themes.length,
                       itemBuilder: (context, index, realIndex) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Column(
-                            children: [
-                              MyText(
-                                text: themes[index].name ?? "",
-                                size: 16,
-                                weight: FontWeight.w600,
-                                color: kblack2,
-                                paddingBottom: 20,
-                              ),
-                              theme_stack_image(
-                                theme: themes[index],
-                              ),
-                              SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  color_picker(),
-                                  SizedBox(width: 8),
-                                  color_picker(
-                                      bgColor: hexToColor(
-                                          themes[index].color1 ?? "")),
-                                  SizedBox(width: 8),
-                                  color_picker(
-                                      bgColor: hexToColor(
-                                          themes[index].color2 ?? "")),
-                                  SizedBox(width: 8),
-                                  color_picker(
-                                      bgColor: hexToColor(
-                                          themes[index].color2 ?? "")),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
+                        return buildThemeItem(themes[index]);
                       },
                     ),
                   ],
@@ -163,6 +194,7 @@ class theme_stack_image extends StatelessWidget {
   final double? height, width;
   final bool? isedit;
   final ThemeModel? theme;
+  final Widget? actionButton;
   const theme_stack_image({
     super.key,
     this.title,
@@ -172,71 +204,77 @@ class theme_stack_image extends StatelessWidget {
     this.width,
     this.isedit = false,
     this.theme,
+    this.actionButton,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: isedit == false
-                  ? [
-                      BoxShadow(
-                        color: kblack.withOpacity(0.25),
-                        blurRadius: 6,
-                        spreadRadius: 6,
-                        offset: Offset(4, 4),
-                      ),
-                    ]
-                  : []),
-          child: CommonImageView(
-            url: theme?.coverImage,
-            imagePath: theme?.coverImage ?? Assets.imagesDummyImg,
-            file: context.read<MediaProvider>().selectedImage,
-            height: height ?? 400,
-            width: width ?? 250,
-            radius: 15,
-          ),
-        ),
-        Positioned(
-          top: 20,
-          child: Column(
-            children: [
-              MyText(
-                text: theme?.name ?? 'Headline',
-                color: kwhite,
-                size: 32,
-                weight: FontWeight.bold,
-                paddingBottom: 5,
+    return Consumer<MediaProvider>(
+      builder: (context, mediaProvider, _) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: isedit == false
+                      ? [
+                          BoxShadow(
+                            color: kblack.withOpacity(0.25),
+                            blurRadius: 6,
+                            spreadRadius: 6,
+                            offset: Offset(4, 4),
+                          ),
+                        ]
+                      : []),
+              child: CommonImageView(
+                url: theme?.coverImage,
+                imagePath: theme?.coverImage ?? Assets.imagesDummyImg,
+                file: mediaProvider.selectedImage,
+                height: height ?? 400,
+                width: width ?? 250,
+                radius: 15,
               ),
-              MyText(
-                text: theme?.bodyFont ?? 'Subheader',
-                color: kwhite,
-                size: 16,
-                weight: FontWeight.w400,
-                paddingBottom: 8,
+            ),
+            Positioned(
+              top: 20,
+              child: Column(
+                children: [
+                  MyText(
+                    text: theme?.name ?? 'Headline',
+                    color: kwhite,
+                    size: 32,
+                    weight: FontWeight.bold,
+                    paddingBottom: 5,
+                  ),
+                  MyText(
+                    text: theme?.bodyFont ?? 'Subheader',
+                    color: kwhite,
+                    size: 16,
+                    weight: FontWeight.w400,
+                    paddingBottom: 8,
+                  ),
+                  if (actionButton != null) actionButton!,
+                ],
               ),
-            ],
-          ),
-        ),
-        if (isedit == true)
-          Positioned(
-              bottom: 10,
-              right: 10,
-              child: Bounce_widget(
-                  ontap: () async {
-                    await context.read<MediaProvider>().pickImage();
-                    await context.read<MediaProvider>().upload();
-                  },
-                  widget: Image.asset(
-                    Assets.imagesEdit3,
-                    width: 39,
-                    height: 39,
-                  )))
-      ],
+            ),
+            if (isedit == true)
+              Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Bounce_widget(
+                      ontap: () async {
+                        await mediaProvider.pickImage();
+                        await mediaProvider.upload();
+                      },
+                      widget: Image.asset(
+                        Assets.imagesEdit3,
+                        width: 39,
+                        height: 39,
+                      )))
+          ],
+        );
+      },
     );
   }
 }

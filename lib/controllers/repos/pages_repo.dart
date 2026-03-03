@@ -8,14 +8,14 @@ class PagesRepo {
   /// Get page by ID
   Future<PageModel> getPageById(String id) async {
     final response = await api.getResponse(endpoints: Endpoints.pagesById(id));
-    return PageModel.fromJson(response);
+    return PageModel.fromJson(response['page']);
   }
 
   /// Get page by Slug
   Future<PageModel> getPageBySlug(String slug) async {
     final response =
         await api.getResponse(endpoints: Endpoints.pagesBySlug(slug));
-    return PageModel.fromJson(response);
+    return PageModel.fromJson(response['page']);
   }
 
   /// List all pages for the seller's store

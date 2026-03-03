@@ -61,6 +61,11 @@ class Endpoints {
   static String messagesWithId(String id) => "/messages/$id";
   static const String messagesHistory = "/messages/history";
   static const String messagesUnread = "/messages/unread";
+  static const String initiateChat = "/messages/initiate";
+  static const String reactToMessage = "/messages/react";
+  static String clearChat(String clearId) => "/messages/clear/$clearId";
+  static const String chatUsers = "/messages/users";
+  static String markAsRead(String chatId) => "/messages/read/$chatId";
 
 //   =======Notifications================
   static const String notifications = "/notification";
@@ -86,7 +91,10 @@ class Endpoints {
 
 //   =========orders==============
   static const String orders = "/orders";
+  static const String createOrder = "/orders/buyer";
   static String orderById(String id) => "/orders/$id";
+  // Track order by order number or email (backend handles logic)
+  static String trackOrder(String orderNumber) => "/orders/track/$orderNumber";
 //   ========buyerOrder========
   static const String buyerOrder = "/orders/buyer";
   static String buyerOrderById(String id) => "/orders/buyer/$id";
@@ -105,6 +113,7 @@ class Endpoints {
 //   ==========paymentMethods===========
   static const String paymentMethods = "/paymentMethods";
   static String paymentMethodsById(String id) => "/paymentMethods/$id";
+  static const String paymentIntent = "/payments/create-intent";
 
 //   =======payments============
 //   static const String payment = "/payments";
@@ -131,6 +140,7 @@ class Endpoints {
   static String productReview(String id) => "/products/$id/reviews";
   static String productRecommendations(String id) =>
       "/products/$id/recommendations";
+  static const String searchProducts = "/products/search-text";
 
 //   ========promotions========
   static const String promotions = "/promotions";

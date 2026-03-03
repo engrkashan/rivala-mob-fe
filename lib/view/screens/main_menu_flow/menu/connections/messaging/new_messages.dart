@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
-import 'package:rivala/controllers/providers/follow_provider.dart';
+import 'package:rivala/controllers/providers/user/seller_provider.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/connections/messaging/chats.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -22,7 +22,7 @@ class _NewMessagesState extends State<NewMessages> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FollowProvider>().loadFollowings();
+      context.read<SellerProvider>().loadAllUsers();
     });
   }
 
@@ -43,44 +43,46 @@ class _NewMessagesState extends State<NewMessages> {
               radius: 0,
               bordercolor: ktransparent,
               marginBottom: 0,
+              onChanged: (e) {
+                context.read<SellerProvider>().searchSellers(e);
+              },
             ),
             Divider(
               color: kgrey2,
             ),
             Expanded(
-              child: Consumer<FollowProvider>(
+              child: Consumer<SellerProvider>(
                 builder: (context, ref, _) {
                   if (ref.isLoading) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  if (ref.following.isEmpty) {
+                  if (ref.filteredSeller.isEmpty) {
                     return Center(child: MyText(text: "No contacts found"));
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 22),
                     physics: const BouncingScrollPhysics(),
-                    itemCount: ref.followers.length,
+                    itemCount: ref.filteredSeller.length,
                     itemBuilder: (context, index) {
-                      final follower = ref.followers[index];
+                      final user = ref.filteredSeller[index];
                       return Padding(
                           padding: const EdgeInsets.only(bottom: 15),
                           child: Bounce_widget(
                             ontap: () {
                               Get.to(() => Chats(
-                                  receiverId: follower.id ?? "",
-                                  title: follower.name));
+                                  receiverId: user.id ?? "", title: user.name));
                             },
                             widget: Row(
                               children: [
                                 CommonImageView(
-                                  url: follower.logo,
+                                  url: user.avatarUrl,
                                   width: 30,
                                   height: 30,
                                   radius: 100,
                                 ),
                                 MyText(
-                                  text: follower.name ?? "",
+                                  text: user.name ?? "",
                                   size: 15,
                                   paddingLeft: 10,
                                 )

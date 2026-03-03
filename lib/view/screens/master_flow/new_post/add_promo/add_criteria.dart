@@ -39,6 +39,7 @@ class AddCriteria extends StatelessWidget {
               PromoCode(
                 title: 'Product Promo',
                 isPromo: true,
+                targetType: "PRODUCT", // NEW
               ),
               isScrollControlled: true);
         }
@@ -54,6 +55,7 @@ class AddCriteria extends StatelessWidget {
               PromoCode(
                 title: 'Collection Promo',
                 isPromo: true,
+                targetType: "COLLECTION", // NEW
               ),
               isScrollControlled: true);
         }

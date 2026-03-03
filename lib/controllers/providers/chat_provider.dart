@@ -3,8 +3,17 @@ import 'package:rivala/controllers/repos/chat_repo.dart';
 import 'package:rivala/models/chat_model.dart';
 
 class ChatProvider extends ChangeNotifier {
-  List<ChatModel> _chats = [];
-  List<ChatModel> get chats => _chats;
+  List<MessageModel> _chats = [];
+  List<MessageModel> get chats => _chats;
+
+  Map<String, int>? _unreadChats;
+  Map<String, int>? get unreadChats => _unreadChats;
+
+  List<ChatUser> _allChats = [];
+  List<ChatUser> get allChats => _allChats;
+
+  ChatModel? _initiateChat;
+  ChatModel? get initiateChat => _initiateChat;
 
   // List<ChatModel> _filteredChats = [];
   // List<ChatModel> get filteredChats => _filteredChats;
@@ -15,8 +24,8 @@ class ChatProvider extends ChangeNotifier {
   bool _isSending = false;
   bool get isSending => _isSending;
 
-  String _error = "";
-  String get error => _error;
+  String? _error;
+  String? get error => _error;
 
   final ChatRepo _repo = ChatRepo();
 
@@ -30,10 +39,10 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadMessages(String receiverId) async {
+  Future<void> loadMessages(String chatId) async {
     setLoading(true);
     try {
-      final messages = await _repo.getMessages(receiverId);
+      final messages = await _repo.getMessages(chatId);
       _chats = messages;
       // _filteredChats = _chats;
       _error = "";
@@ -44,12 +53,13 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String content, String receiverId) async {
+  Future<void> sendMessage(String chatId, String content) async {
     if (content.isEmpty) return;
     setSending(true);
     try {
-      final newMessage = await _repo.sendMessage(receiverId, content);
+      final newMessage = await _repo.sendMessage(chatId, content);
       _chats.add(newMessage);
+      getAllChats();
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -59,17 +69,47 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // Unread messages logic
-  List<ChatModel> _unreadMessages = [];
-  List<ChatModel> get unreadMessages => _unreadMessages;
-
   Future<void> loadUnreadMessages() async {
     try {
       final messages = await _repo.getUnreadMessages();
-      _unreadMessages = messages;
+      _unreadChats = messages;
       notifyListeners();
     } catch (e) {
       print("Error loading unread messages: $e");
+    }
+  }
+
+  Future<void> getInitiateChat(String receiverId) async {
+    setLoading(true);
+    try {
+      _initiateChat = await _repo.initiateChat(receiverId);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> getAllChats() async {
+    setLoading(true);
+    try {
+      _allChats = await _repo.getChats();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _allChats = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> markAsRead(String chatId) async {
+    try {
+      await _repo.markAsRead(chatId);
+      loadUnreadMessages();
+    } catch (e) {
+      _error = e.toString();
     }
   }
 }

@@ -27,7 +27,9 @@ class RevenueProvider extends ChangeNotifier {
       revenueResponse = RevenueResponse.fromJson(res);
 
       _error = '';
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print("Error fetching revenue: $e");
+      print("StackTrace: $stackTrace");
       _error = e.toString();
     } finally {
       setLoading(false);

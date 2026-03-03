@@ -7,6 +7,7 @@ import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/controllers/providers/squads_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/store_model.dart';
+import 'package:rivala/models/product_model.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_tags.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -96,6 +97,9 @@ class _AddSquadMembersState extends State<AddSquadMembers> {
               if (widget.isBrand! && !widget.isProduct!) {
                 context.read<BrandsProvider>().searchBrands(text);
               }
+              if (widget.isProduct! && !widget.isBrand!) {
+                context.read<ProductProvider>().searchProducts(text);
+              }
             },
           ),
           // MEMBERS LIST
@@ -141,22 +145,16 @@ class _AddSquadMembersState extends State<AddSquadMembers> {
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () {
-                            product.toggleMember(
-                                prd); // toggles selection & notifies listeners
+                        child: tags_search_row(
+                          size: 54,
+                          hpad: 0,
+                          bgColor: ktransparent,
+                          isProduct: true,
+                          product: prd,
+                          isSelected: isSelected,
+                          onItemSelected: (p) {
+                            product.toggleMember(p as ProductModel);
                           },
-                          child: tags_search_row(
-                            size: 54,
-                            hpad: 0,
-                            bgColor: ktransparent,
-                            image: (prd.image != null && prd.image!.isNotEmpty)
-                                ? prd.image!.first
-                                : null,
-                            title: prd.title,
-                            tags: prd.store?.name,
-                            isSelected: isSelected, // pass directly
-                          ),
                         ),
                       );
                     },

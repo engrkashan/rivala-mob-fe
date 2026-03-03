@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/import_csv.dart';
@@ -7,34 +8,45 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
-class AddAttribute extends StatelessWidget {
-  const AddAttribute({super.key});
+class AddAttribute extends StatefulWidget {
+  final Map<String, dynamic>? initialData;
+  const AddAttribute({super.key, this.initialData});
+
+  @override
+  State<AddAttribute> createState() => _AddAttributeState();
+}
+
+class _AddAttributeState extends State<AddAttribute> {
+  late TextEditingController nameCtrl;
+  List<Map<String, dynamic>> variants = [];
+
+  @override
+  void initState() {
+    super.initState();
+    nameCtrl = TextEditingController(text: widget.initialData?['name'] ?? '');
+    if (widget.initialData?['variants'] != null) {
+      variants =
+          List<Map<String, dynamic>>.from(widget.initialData!['variants']);
+    } else {
+      // Add one empty row by default
+      _addVariant();
+    }
+  }
+
+  void _addVariant() {
+    setState(() {
+      variants.add({
+        'attribute': '',
+        'price': '',
+        'available': 'Yes',
+        'onHand': '',
+        'sku': '',
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> tableData = [
-      {
-        'attribute': 'Size',
-        'price': '\$25.99',
-        'available': 'Yes',
-        'onHand': '1,200',
-        'sku': 'ATH-SNK-BLK-10',
-      },
-      {
-        'attribute': 'Color',
-        'price': '\$25.99',
-        'available': 'No',
-        'onHand': '5,000',
-        'sku': 'ORG-CFL-500ML',
-      },
-      {
-        'attribute': 'Fabric',
-        'price': '\$50.99',
-        'available': 'Edit',
-        'onHand': '251',
-        'sku': 'LTH-BLT-BLK-32',
-      },
-    ];
     Color getAvailabilityColor(String status) {
       switch (status) {
         case 'Yes':
@@ -62,15 +74,15 @@ class AddAttribute extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ContainerAppbar(
-                  title: 'Variants',
-                  textColor: kblack,
-                  icon: Assets.imagesClose2
-                ),
+                    title: 'Variants',
+                    textColor: kblack,
+                    icon: Assets.imagesClose2),
                 SizedBox(
                   height: 20,
                 ),
                 MyTextField(
-                  hint: 'Size',
+                  controller: nameCtrl,
+                  hint: 'e.g. Size or Color',
                   label: 'Variant Name',
                 ),
                 SingleChildScrollView(
@@ -82,8 +94,8 @@ class AddAttribute extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Row(
                           children: const [
-                            SizedBox(
-                                width: 90), // Skip header for icon+attribute
+                            HeaderCell(text: 'Value', width: 90),
+                            SizedBox(width: 10),
                             HeaderCell(text: 'Price', width: 80),
                             SizedBox(width: 10),
                             HeaderCell(text: 'Available', width: 60),
@@ -91,80 +103,102 @@ class AddAttribute extends StatelessWidget {
                             HeaderCell(text: 'On Hand', width: 60),
                             SizedBox(width: 10),
                             HeaderCell(text: 'SKU', width: 100),
+                            SizedBox(width: 30), // Match delete icon space
                           ],
                         ),
                       ),
 
                       // ✅ Data Rows
-                      ...tableData.map((row) {
+                      ...variants.asMap().entries.map((entry) {
+                        int i = entry.key;
+                        var row = entry.value;
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
                             children: [
-                              // Attribute Cell
+                              // Attribute Cell (Value)
                               SizedBox(
-                                width: 70,
-                                child: MyText(
-                                  text: row['attribute'],
-                                  size: 11,
-                                  weight: FontWeight.bold,
-                                  color: kblack,
+                                width: 90,
+                                child: MyTextField(
+                                  hint: 'M',
+                                  marginBottom: 0,
+                                  contentvPad: 8,
+                                  iscenter: true,
+                                  onChanged: (v) => row['attribute'] = v,
+                                  // In a real app, use a controller or handle state better
+                                  // For now, updating map directly as it's a small list
                                 ),
                               ),
+                              const SizedBox(width: 10),
                               // Price
-                              Container(
+                              SizedBox(
                                 width: 80,
-                                alignment: Alignment.center,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: kgrey2,
-                                  borderRadius: BorderRadius.circular(6),
+                                child: MyTextField(
+                                  hint: '25.99',
+                                  marginBottom: 0,
+                                  contentvPad: 8,
+                                  iscenter: true,
+                                  onChanged: (v) => row['price'] = v,
                                 ),
-                                child: MyText(text: row['price'], size: 10),
                               ),
                               const SizedBox(width: 10),
                               // Available
-                              Container(
-                                width: 60,
-                                alignment: Alignment.center,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: getAvailabilityColor(row['available']),
-                                  borderRadius: BorderRadius.circular(6),
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    row['available'] = row['available'] == 'Yes'
+                                        ? 'No'
+                                        : 'Yes';
+                                  });
+                                },
+                                child: Container(
+                                  width: 60,
+                                  alignment: Alignment.center,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        getAvailabilityColor(row['available']),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: MyText(
+                                      text: row['available'],
+                                      color: kblack,
+                                      size: 10),
                                 ),
-                                child: MyText(
-                                    text: row['available'],
-                                    color: kblack,
-                                    size: 10),
                               ),
                               const SizedBox(width: 10),
                               // On Hand
-                              Container(
+                              SizedBox(
                                 width: 60,
-                                alignment: Alignment.center,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: kgrey2,
-                                  borderRadius: BorderRadius.circular(6),
+                                child: MyTextField(
+                                  hint: '100',
+                                  marginBottom: 0,
+                                  contentvPad: 8,
+                                  iscenter: true,
+                                  onChanged: (v) => row['onHand'] = v,
                                 ),
-                                child: MyText(text: row['onHand'], size: 10),
                               ),
                               const SizedBox(width: 10),
                               // SKU
-                              Container(
+                              SizedBox(
                                 width: 100,
-                                alignment: Alignment.center,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: kgrey2,
-                                  borderRadius: BorderRadius.circular(6),
+                                child: MyTextField(
+                                  hint: 'SKU-001',
+                                  marginBottom: 0,
+                                  contentvPad: 8,
+                                  iscenter: true,
+                                  onChanged: (v) => row['sku'] = v,
                                 ),
-                                child: MyText(text: row['sku'], size: 10),
                               ),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: kred, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    variants.removeAt(i);
+                                  });
+                                },
+                              )
                             ],
                           ),
                         );
@@ -179,10 +213,17 @@ class AddAttribute extends StatelessWidget {
                   size: 12,
                   paddingBottom: 30,
                   paddingTop: 20,
+                  onTap: _addVariant,
                 ),
                 MyButton(
                   buttonText: 'Save variant',
                   mBottom: 30,
+                  onTap: () {
+                    Get.back(result: {
+                      'name': nameCtrl.text.trim(),
+                      'variants': variants,
+                    });
+                  },
                 )
               ],
             ))));

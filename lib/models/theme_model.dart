@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:rivala/models/store_model.dart';
 import 'package:rivala/models/user_model.dart';
 
 ThemeModel themeModelFromJson(String str) =>
@@ -27,7 +26,7 @@ class ThemeModel {
   bool? isCustom;
   UserModel? creator;
   DateTime? createdAt;
-  StoreModel? store;
+  // Store is not parsed to avoid circular dependency
 
   ThemeModel({
     this.id,
@@ -44,7 +43,6 @@ class ThemeModel {
     this.isCustom,
     this.creator,
     this.createdAt,
-    this.store,
   }) {
     /// Normalize all color fields as #RRGGBB
     colorDark = _normalizeColor(colorDark);
@@ -76,8 +74,6 @@ class ThemeModel {
         createdAt: json["createdAt"] == null
             ? null
             : DateTime.parse(json["createdAt"]),
-        store:
-            json["store"] == null ? null : StoreModel.fromJson(json["store"]),
       );
 
   /// -----------------------
@@ -98,7 +94,6 @@ class ThemeModel {
         "isCustom": isCustom,
         "creator": creator?.toJson(),
         "createdAt": createdAt?.toIso8601String(),
-        "store": store?.toJson(),
       };
 
   /// -----------------------

@@ -16,6 +16,8 @@ String orderModelToJson(OrderModel data) => json.encode(data.toJson());
 
 class OrderModel {
   String? id;
+  String? orderNumber;
+
   DateTime? createdAt;
   DateTime? updatedAt;
   String? buyerId;
@@ -31,6 +33,7 @@ class OrderModel {
 
   OrderModel({
     this.id,
+    this.orderNumber,
     this.createdAt,
     this.updatedAt,
     this.buyerId,
@@ -46,6 +49,8 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
         id: json["id"],
+        orderNumber: json["orderNumber"],
+
         createdAt: json["createdAt"] == null
             ? null
             : DateTime.parse(json["createdAt"]),
@@ -77,14 +82,16 @@ class OrderModel {
             ? null
             : List<OrdersItem>.from(
                 json["OrderItem"].map((x) => OrdersItem.fromJson(x))),
-        buyer: json["buyer"] == null
-            ? null
-            : UserModel.fromJson(
-                json["buyer"].map((x) => UserModel.fromJson(x))),
+        buyer: json["buyer"] != null
+            ? UserModel.fromJson(json["buyer"])
+            : json["buyerDetails"] != null
+                ? UserModel.fromJson(json["buyerDetails"])
+                : null,
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        "orderNumber": orderNumber,
         "createdAt": createdAt?.toIso8601String(),
         "updatedAt": updatedAt?.toIso8601String(),
         "buyerId": buyerId,

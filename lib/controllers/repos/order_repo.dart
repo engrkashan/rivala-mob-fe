@@ -25,9 +25,9 @@ class OrderRepo {
     // Ideally the backend returns the created order
     try {
       final res =
-          await api.postResponse(endpoints: Endpoints.orders, data: data);
+          await api.postResponse(endpoints: Endpoints.createOrder, data: data);
       if (res != null) {
-        // If response is the order object directly
+        // If response is the order object directly99
         if (res is Map<String, dynamic> && res.containsKey('id')) {
           return OrderModel.fromJson(res);
         }
@@ -47,6 +47,27 @@ class OrderRepo {
     final list = res['orders'] as List;
 
     return list.map((e) => OrderModel.fromJson(e)).toList();
+  }
+
+  /// Track order via public tracking endpoint (by order number or email)
+  /// Backend returns: { order: {...}, buyerDetails: {...} }
+  Future<OrderModel?> trackOrder({
+    required String orderNumber,
+    String? email,
+  }) async {
+    try {
+      final res = await api.getResponse(
+        endpoints: Endpoints.trackOrder(orderNumber),
+        query: email != null && email.isNotEmpty ? {'email': email} : null,
+      );
+
+      if (res is Map<String, dynamic> && res.containsKey('order')) {
+        return OrderModel.fromJson(res['order']);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<OrderModel?> fetchOrderById(String id) async {

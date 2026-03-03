@@ -63,9 +63,15 @@ class ApiClient {
   }
 
   dynamic _handleResponse(http.Response res) {
-    print("url ${res.request?.url}");
-    print("Status: ${res.statusCode}");
-    print("body: ${res.body}");
+    print("--------------------------------------------------");
+    print("API RESPONSE LOG");
+    print("URL: ${res.request?.url}");
+    print("METHOD: ${res.request?.method}");
+    print("STATUS CODE: ${res.statusCode}");
+    print(
+        "BODY (truncated): ${res.body.length > 500 ? res.body.substring(0, 500) + '...' : res.body}");
+    print("--------------------------------------------------");
+
     if (res.statusCode >= 200 && res.statusCode <= 300) {
       if (res.body.isEmpty) return null;
       return jsonDecode(res.body);
@@ -139,6 +145,17 @@ class ApiClient {
     return _handleResponse(response);
   }
 
+  Future<dynamic> putResponse({required String endpoints, dynamic data}) async {
+    final url = Uri.parse(ApiConfig.baseUrl + endpoints);
+    final response = await http.put(
+      url,
+      headers: await _headers(),
+      body: data != null ? jsonEncode(data) : null,
+    );
+
+    return _handleResponse(response);
+  }
+
   Future<dynamic> deleteRequest({required String endpoint}) async {
     final url = Uri.parse(ApiConfig.baseUrl + endpoint);
 
@@ -173,16 +190,80 @@ class ApiClient {
 
     if (response.statusCode == 401) {
       final refreshed = await _refreshToken();
-      if (!refreshed)
+      if (!refreshed) {
         throw ApiException(message: "Session expired", response: null);
+      }
 
       /// retry upload
       request.headers["Authorization"] =
           "Bearer ${await session.getAuthToken()}";
-      return await request.send();
+      response = await request.send();
     }
 
-    return response;
+    final respBody = await response.stream.bytesToString();
+    print("--------------------------------------------------");
+    print("UPLOAD MEDIA LOG");
+    print("URL: $url");
+    print("STATUS CODE: ${response.statusCode}");
+    print(
+        "BODY (truncated): ${respBody.length > 500 ? respBody.substring(0, 500) + '...' : respBody}");
+    print("--------------------------------------------------");
+
+    // Reconstruct the response since we consumed the stream
+    return http.StreamedResponse(
+      Stream.fromIterable([respBody.codeUnits]),
+      response.statusCode,
+      contentLength: respBody.length,
+      request: response.request,
+      headers: response.headers,
+      isRedirect: response.isRedirect,
+      persistentConnection: response.persistentConnection,
+      reasonPhrase: response.reasonPhrase,
+    );
+  }
+
+  Future<dynamic> multipartRequest(
+      {required String endpoint,
+      required Map<String, String> fields,
+      File? file,
+      String method = "POST"}) async {
+    final url = Uri.parse(ApiConfig.baseUrl + endpoint);
+    var request = http.MultipartRequest(method, url);
+
+    request.headers.addAll(await _headers());
+    request.fields.addAll(fields);
+
+    if (file != null) {
+      final mimeType = lookupMimeType(file.path);
+      final splitMime = mimeType?.split('/') ?? ['application', 'octet-stream'];
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "file",
+          file.path,
+          contentType: MediaType(splitMime[0], splitMime[1]),
+        ),
+      );
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 401) {
+      final refreshed = await _refreshToken();
+      if (!refreshed) {
+        throw ApiException(message: "Session expired", response: null);
+      }
+      request.headers["Authorization"] =
+          "Bearer ${await session.getAuthToken()}";
+      response = await request.send();
+    }
+
+    final respBody = await response.stream.bytesToString();
+
+    // Quick parse to mock _handleResponse
+    final fakeResponse =
+        http.Response(respBody, response.statusCode, request: response.request);
+    return _handleResponse(fakeResponse);
   }
 }
 

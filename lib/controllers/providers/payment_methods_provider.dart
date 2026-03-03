@@ -5,9 +5,16 @@ import 'package:rivala/models/payment_method_model.dart';
 class PaymentMethodsProvider extends ChangeNotifier {
   final _paymentMethodsRepo = PaymentMethodsRepo();
 
+  String detectCardBrand(String cardNumber) {
+    if (cardNumber.startsWith('4')) return 'visa';
+    if (cardNumber.startsWith('5')) return 'mastercard';
+    return 'unknown';
+  }
+
   bool _isLoading = false;
   String? _error;
   List<PaymentMethodModel>? _paymentMethods;
+  int _selectedIndex = 0;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -15,6 +22,14 @@ class PaymentMethodsProvider extends ChangeNotifier {
 
   void setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  PaymentMethodModel? get selectedMethod =>
+      _paymentMethods!.isEmpty ? null : _paymentMethods?[_selectedIndex];
+
+  void selectMethod(int index) {
+    _selectedIndex = index;
     notifyListeners();
   }
 

@@ -89,8 +89,8 @@ class SquadProvider extends ChangeNotifier {
       String name, String summary, BuildContext context) async {
     setLoading(true);
     try {
-      // Upload logo first
-      await context.read<MediaProvider>().upload();
+      // Squad logo file
+      final logoFile = context.read<MediaProvider>().selectedImage;
 
       // Create SquadModel with proper nested objects
       SquadModel squad = SquadModel(
@@ -109,16 +109,33 @@ class SquadProvider extends ChangeNotifier {
             .selectedBrands
             .map((b) => StoreModel(id: b.id, name: b.name))
             .toList(),
-        logo: context.read<MediaProvider>().uploadedUrl,
         createdAt: DateTime.now(),
       );
 
-      await _repo.createSquad(squad);
+      await _repo.createSquad(squad, logoFile: logoFile);
       await getSquads();
       print("Squad created successfully");
+      _error = null;
       clear();
     } catch (e) {
       print("Error while creating squad: $e");
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updateSquad(String id, SquadModel squad,
+      {BuildContext? context}) async {
+    setLoading(true);
+    try {
+      final logoFile = context?.read<MediaProvider>().selectedImage;
+      await _repo.updateSquad(id, squad, logoFile: logoFile);
+      await loadSingleSquad(id); // Reload to get fresh data
+      _error = null;
+    } catch (e) {
+      print("Error while updating squad: $e");
+      _error = e.toString();
     } finally {
       setLoading(false);
     }

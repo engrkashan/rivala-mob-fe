@@ -30,8 +30,19 @@ class BrandsRepo {
     return list.map((item) => StoreModel.fromJson(item)).toList();
   }
 
-  Future<void> updateStore(StoreModel store) async {
-    final res = api.patchResponse(endpoint: Endpoints.stores, data: store);
+  Future<StoreModel> updateStore(StoreModel store) async {
+    print("updateStore in repo: ${store.toJson()}");
+    final res =
+        await api.patchResponse(endpoint: Endpoints.stores, data: store);
+    final updatedStore = StoreModel.fromJson(res['store']);
+    print("updatedStore $updatedStore");
+    // Preserve logoUrl if backend returned null but we had one in input
+    if ((updatedStore.logoUrl == null || updatedStore.logoUrl!.isEmpty) &&
+        (store.logoUrl != null && store.logoUrl!.isNotEmpty)) {
+      return updatedStore.copyWith(logoUrl: store.logoUrl);
+    }
+
+    return updatedStore;
   }
 
   Future<StoreModel> getStoreBySlug(String slug) async {

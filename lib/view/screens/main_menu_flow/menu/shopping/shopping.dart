@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get/get.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
@@ -19,41 +18,28 @@ class Shopping extends StatefulWidget {
 }
 
 class _ShoppingState extends State<Shopping> {
- 
   int selectedIndex = -1;
   @override
   Widget build(BuildContext context) {
-     List<Map<String, dynamic>> mainMenuItems = [
-    {
-      'textt': 'Orders',
-      'icon': Assets.imagesOrders,
-      'delay': 100,
-      'ontap': () => 
-       Navigator.of(context).push(CustomPageRoute(page:LoginGuestAccount()),)
-      // Get.to(
-      //       () => LoginGuestAccount(),
-      //       transition: Transition.downToUp,
-      //       duration: const Duration(milliseconds: 1000),
-      //       curve: Curves.easeInOut,
-      //     ),
-    },
-    {
-      'textt': 'Subscriptions',
-      'icon': Assets.imagesSubscription,
-      'delay': 250,
-      'ontap': () =>
-             Navigator.of(context).push(CustomPageRoute(page:SubscriptionManagement()),)
-      //  Get.to(
-      //       () => SubscriptionManagement(),
-      //       transition: Transition.downToUp,
-      //       duration: const Duration(milliseconds: 1500),
-      //       curve: Curves.easeInOut,
-      //     ),
-    },
-  ];
+    List<Map<String, dynamic>> mainMenuItems = [
+      {
+        'textt': 'Orders',
+        'icon': Assets.imagesOrders,
+        'delay': 100,
+        'ontap': () => Navigator.of(context)
+            .push(CustomPageRoute(page: LoginGuestAccount())),
+      },
+      {
+        'textt': 'Subscriptions',
+        'icon': Assets.imagesSubscription,
+        'delay': 250,
+        'ontap': () => Navigator.of(context)
+            .push(CustomPageRoute(page: SubscriptionManagement())),
+      },
+    ];
     return Scaffold(
         backgroundColor: kwhite,
-        appBar: simpleAppBar(context: context,actions: [
+        appBar: simpleAppBar(context: context, actions: [
           circular_icon_container(),
           SizedBox(
             width: 12,
@@ -121,14 +107,19 @@ class ShoppingRow extends StatelessWidget {
   final bool isSelected;
   final bool? justIcon;
   final FontWeight? weight;
-final double? textSize,mleft,mrigth;
+  final double? textSize, mleft, mrigth;
   const ShoppingRow({
     super.key,
     this.icon,
     this.textt,
     this.ontap,
     this.delay,
-    required this.isSelected, this.textSize, this.mleft, this.weight, this.justIcon=false, this.mrigth,
+    required this.isSelected,
+    this.textSize,
+    this.mleft,
+    this.weight,
+    this.justIcon = false,
+    this.mrigth,
   });
 
   @override
@@ -143,29 +134,34 @@ final double? textSize,mleft,mrigth;
                 topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
             gradient: isSelected ? kgradmainmenu : null,
           ),
-          margin: EdgeInsets.only(left:mleft?? 30, right: isSelected ? 0 :mrigth?? 20),
+          margin: EdgeInsets.only(
+              left: mleft ?? 30, right: isSelected ? 0 : mrigth ?? 20),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
           child: Row(
             children: [
-              if(justIcon==true)
-              Image.asset(icon??Assets.imagesBankinfo,width:26 ,height: 26,),
-              if(justIcon==false)
-              circular_icon_container(
-                size: 50,
-                iconSize: 22,
-                icon: icon,
-                iconColor: isSelected ? kwhite : kblue2,
-                bgColor: isSelected
-                    ? kwhite.withOpacity(0.09)
-                    : kmenuGreen.withOpacity(0.1),
-              ),
+              if (justIcon == true)
+                Image.asset(
+                  icon ?? Assets.imagesBankinfo,
+                  width: 26,
+                  height: 26,
+                ),
+              if (justIcon == false)
+                circular_icon_container(
+                  size: 50,
+                  iconSize: 22,
+                  icon: icon,
+                  iconColor: isSelected ? kwhite : kblue2,
+                  bgColor: isSelected
+                      ? kwhite.withOpacity(0.09)
+                      : kmenuGreen.withOpacity(0.1),
+                ),
               const SizedBox(width: 10),
               Expanded(
                   child: MyText(
                 text: textt ?? 'Orders',
-                size:textSize?? 18,
+                size: textSize ?? 18,
                 color: isSelected ? kwhite : kdargrey,
-                weight:weight?? FontWeight.bold,
+                weight: weight ?? FontWeight.bold,
               )),
               Icon(
                 Icons.keyboard_arrow_right_rounded,

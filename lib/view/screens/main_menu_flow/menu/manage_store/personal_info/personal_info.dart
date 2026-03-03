@@ -27,6 +27,35 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
   final email = TextEditingController();
   final bio = TextEditingController();
   final birthday = TextEditingController();
+  String? selectedGender;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: kblue,
+              onPrimary: kwhite,
+              onSurface: kblack,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        birthday.text =
+            "${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,7 +98,6 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                           ),
                           MyTextField(
                             controller: name,
-                            hint: current?.name,
                             label: 'Name',
                             suffixIcon: Image.asset(
                               Assets.imagesEdit,
@@ -82,7 +110,6 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                           ),
                           MyTextField(
                             controller: username,
-                            hint: current?.owner?.username,
                             label: 'Handle',
                             suffixIcon: Image.asset(
                               Assets.imagesEdit,
@@ -95,7 +122,6 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                           ),
                           MyTextField(
                             controller: email,
-                            hint: current?.owner?.email,
                             label: 'Email Address',
                             suffixIcon: Image.asset(
                               Assets.imagesEdit,
@@ -113,10 +139,14 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                               items: ['(Optional)', 'Male', 'Female'],
                               selectedValue:
                                   current?.owner?.gender ?? '(Optional)',
-                              onChanged: (w) {}),
+                              onChanged: (val) {
+                                if (val != null && val != '(Optional)') {
+                                  current?.owner?.gender = val;
+                                }
+                                current?.owner?.gender = val;
+                              }),
                           MyTextField(
-                            hint:
-                                "${current?.owner?.birthday?.year}/${current?.owner?.birthday?.month}/${current?.owner?.birthday?.day}",
+                            hint: "MM/DD/YYYY",
                             label: 'Birthday',
                             filledColor: kblack.withOpacity(0.05),
                             suffixIcon: Image.asset(
@@ -125,11 +155,12 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                               height: 20,
                             ),
                             delay: 1200,
+                            readOnly: true,
+                            ontapp: () => _selectDate(context),
                             bordercolor: ktransparent,
                             controller: birthday,
                           ),
                           MyTextField(
-                            hint: current?.owner?.bio,
                             label: 'Store Bio',
                             controller: bio,
                             suffixIcon: Image.asset(
@@ -150,18 +181,51 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
                             mBottom: 40,
                             mhoriz: 22,
                             onTap: () async {
+                              final mediaProvider =
+                                  context.read<MediaProvider>();
+                              if (mediaProvider.selectedImage != null) {
+                                await mediaProvider.upload();
+                              }
+
+                              DateTime? parsedBirthday;
+                              if (birthday.text.isNotEmpty) {
+                                try {
+                                  // Expecting MM/DD/YYYY format from the picker if used
+                                  final parts = birthday.text.split('/');
+                                  if (parts.length == 3) {
+                                    parsedBirthday = DateTime(
+                                        int.parse(parts[2]),
+                                        int.parse(parts[0]),
+                                        int.parse(parts[1]));
+                                  }
+                                } catch (e) {
+                                  print("Error parsing birthday: $e");
+                                }
+                              }
+
                               await store.updateStore(StoreModel(
-                                  name: name.text.trim(),
-                                  logoUrl: context
-                                          .read<MediaProvider>()
-                                          .uploadedUrl ??
+                                  id: current?.id,
+                                  name: name.text.trim().isEmpty
+                                      ? current?.name
+                                      : name.text.trim(),
+                                  logoUrl: mediaProvider.uploadedUrl ??
                                       current?.logoUrl,
                                   owner: UserModel(
-                                    username: username.text.trim(),
-                                    email: email.text.trim(),
-                                    bio: bio.text.trim(),
+                                    username: username.text.trim().isEmpty
+                                        ? current?.owner?.username
+                                        : username.text.trim(),
+                                    email: email.text.trim().isEmpty
+                                        ? current?.owner?.email
+                                        : email.text.trim(),
+                                    bio: bio.text.trim().isEmpty
+                                        ? current?.owner?.bio
+                                        : bio.text.trim(),
+                                    birthday: parsedBirthday ??
+                                        current?.owner?.birthday,
+                                    gender: current?.owner?.gender,
+                                    
                                   )));
-                              Navigator.pop(context);
+                              if (mounted) Navigator.pop(context);
                             },
                           ),
                           SizedBox(
@@ -190,8 +254,23 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BrandsProvider>().loadCurrentStore();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final storeProvider = context.read<BrandsProvider>();
+      _populateFields(storeProvider.currentStore);
+      await storeProvider.loadCurrentStore();
+      _populateFields(storeProvider.currentStore);
     });
+  }
+
+  void _populateFields(StoreModel? current) {
+    if (current == null) return;
+    if (name.text.isEmpty) name.text = current.name ?? '';
+    if (username.text.isEmpty) username.text = current.owner?.username ?? '';
+    if (email.text.isEmpty) email.text = current.owner?.email ?? '';
+    if (bio.text.isEmpty) bio.text = current.owner?.bio ?? '';
+    if (birthday.text.isEmpty && current.owner?.birthday != null) {
+      birthday.text =
+          "${current.owner!.birthday!.month.toString().padLeft(2, '0')}/${current.owner!.birthday!.day.toString().padLeft(2, '0')}/${current.owner!.birthday!.year}";
+    }
   }
 }

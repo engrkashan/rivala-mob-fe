@@ -86,34 +86,45 @@ class _my_order_containerState extends State<my_order_container> {
             SizedBox(
               height: 20,
             ),
+            Builder(
+              builder: (context) {
+                double totalItemsPrice = order?.orderItems?.fold(
+                        0.0,
+                        (sum, item) =>
+                            sum! + (item.price ?? 0) * (item.quantity ?? 0)) ??
+                    0.0;
+                return Row(
+                  children: [
+                    if (totalItemsPrice > 0) ...[
+                      MyText(
+                        text: 'AMOUNT: ',
+                        size: 11,
+                        weight: FontWeight.w500,
+                      ),
+                      MyText(
+                        text: "$totalItemsPrice",
+                        size: 11,
+                        weight: FontWeight.w400,
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
             Row(
               children: [
                 MyText(
-                  text: 'AMOUNT: ',
+                  text: 'ORDER NUMBER: ',
                   size: 11,
                   weight: FontWeight.w500,
                 ),
                 MyText(
-                  text: "${order?.payment?.amount}",
+                  text: order?.orderNumber ?? '2249821585154',
                   size: 11,
                   weight: FontWeight.w400,
                 )
               ],
             ),
-            // Row(
-            //   children: [
-            //     MyText(
-            //       text: 'ORDER NUMBER: ',
-            //       size: 11,
-            //       weight: FontWeight.w500,
-            //     ),
-            //     MyText(
-            //       text: order?.id ?? '2249821585154',
-            //       size: 11,
-            //       weight: FontWeight.w400,
-            //     )
-            //   ],
-            // ),
             if (widget.hasfulfuill == true)
               // Row(
               //   children: [
@@ -161,6 +172,7 @@ class _my_order_containerState extends State<my_order_container> {
                       },
                       child: CommonImageView(
                         url: order?.product?.image?[index],
+                        name: order?.product?.title,
                         radius: 50,
                         width: 60,
                       ),

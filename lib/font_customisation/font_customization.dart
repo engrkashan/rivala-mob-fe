@@ -5,13 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+final FontController fontController = FontController();
 
-
-final FontController fontController=FontController()
-;
 class FontController extends GetxController {
-   var selectedFont = ''.obs; // Holds the currently selected font
-    var fontLoaded = false.obs; 
+  var selectedFont = ''.obs; // Holds the currently selected font
+  var fontLoaded = false.obs;
   void selectFont(String fontFamily) {
     selectedFont.value = fontFamily; // Update selected font globally
 
@@ -43,9 +41,16 @@ class FontController extends GetxController {
 
       for (String url in fontFamilies[fontName]!) {
         final response = await http.get(Uri.parse(url));
+        print("--------------------------------------------------");
+        print("FONT DOWNLOAD LOG");
+        print("URL: $url");
+        print("STATUS CODE: ${response.statusCode}");
+        print("--------------------------------------------------");
+
         if (response.statusCode == 200) {
           final fontLoader = FontLoader(fontName);
-          fontLoader.addFont(Future.value(ByteData.sublistView(response.bodyBytes)));
+          fontLoader
+              .addFont(Future.value(ByteData.sublistView(response.bodyBytes)));
           await fontLoader.load();
 
           log("Font loaded");
@@ -60,6 +65,3 @@ class FontController extends GetxController {
     }
   }
 }
-
-
-

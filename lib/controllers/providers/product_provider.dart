@@ -4,6 +4,8 @@ import 'package:rivala/config/network/endpoints.dart';
 import 'package:rivala/controllers/repos/products_repo.dart';
 import 'package:rivala/models/product_model.dart';
 
+import '../debouncer.dart';
+
 class ProductProvider extends ChangeNotifier {
   final _productRepo = ProductsRepo();
 
@@ -12,6 +14,8 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel>? _prds;
   // Stores all product lists by type
   final Map<String, List<ProductModel>> _productsByType = {};
+
+  List<ProductModel>? searchProductsList;
 
   List<ProductReview>? _prdReviews;
 
@@ -45,21 +49,46 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createProduct(ProductModel product) async {
+  Future<ProductModel?> createProduct(ProductModel product) async {
     setLoading(true);
+    print("Create products in provider: ${product.toJson()}");
     try {
       final response = await ApiClient().postResponse(
         endpoints: Endpoints.products,
         data: product.toJson(),
       );
 
-      final created = ProductModel.fromJson(response.data['product']);
-      _filteredPrds!.add(created);
+      final productData = response['product'] ??
+          response['data']?['product'] ??
+          response['data'];
+
+      if (productData != null) {
+        final created = ProductModel.fromJson(productData);
+
+        // Ensure lists are initialized
+        _prds ??= [];
+        _filteredPrds ??= [];
+
+        // Avoid duplicates if already added by some other logic
+        if (!_prds!.any((p) => p.id == created.id)) {
+          _prds!.add(created);
+        }
+
+        if (!_filteredPrds!.any((p) => p.id == created.id)) {
+          _filteredPrds!.add(created);
+        }
+        _error = null;
+        setLoading(false);
+        return created;
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();
+      debugPrint("Error in createProduct: $e");
+      // rethrow;
     }
     setLoading(false);
+    return null;
   }
 
   Future<void> loadForYou(String id) async {
@@ -171,11 +200,45 @@ class ProductProvider extends ChangeNotifier {
     try {
       await _productRepo.deleteProduct(id);
       _error = null;
-      await loadAllProducts(); // Refresh list
+      await loadCurrentProducts(); // Refresh "My Products" list
     } catch (e) {
       _error = e.toString();
     } finally {
       setLoading(false);
     }
+  }
+
+  Future<void> getSearchProducts(String query) async {
+    setLoading(true);
+    try {
+      searchProductsList = await _productRepo.searchProducts(query);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      searchProductsList = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  final _debouncer = Debouncer(milliseconds: 400);
+  final _cache = <String, List<ProductModel>>{};
+
+  String _lastQuery = "";
+
+  void onSearchChanged(String query) {
+    if (query.trim().length < 2 || query == _lastQuery) return;
+
+    _debouncer.run(() async {
+      _lastQuery = query;
+
+      // 🔁 Cache hit
+      if (_cache.containsKey(query)) {
+        searchProductsList = _cache[query];
+        notifyListeners();
+        return;
+      }
+      getSearchProducts(query);
+    });
   }
 }

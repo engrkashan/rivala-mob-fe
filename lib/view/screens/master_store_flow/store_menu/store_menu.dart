@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/view/widgets/color_converter.dart';
+import 'package:rivala/controllers/providers/product_provider.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/collection_grid.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/product_detailed_description.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/my_links.dart';
 import 'package:rivala/view/screens/master_store_flow/store_menu/our_followers.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -20,32 +24,17 @@ class StoreMenu extends StatefulWidget {
 
 class _StoreMenuState extends State<StoreMenu> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().loadCurrentProducts();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
-      // {
-      //   "text": "About Us",
-      //   "ontap": () {
-      //     Navigator.of(context).push(CustomPageRoute(page: AboutUs()));
-      //     //  Get.to(() => AboutUs());
-      //   }
-      // },
-      // {
-      //   "text": "Shared Products",
-      //   "ontap": () {
-      //     Navigator.of(context).push(CustomPageRoute(page: SharedProducts()));
-      //   }
-      // },
-      // {
-      //   "text": "Our Posts",
-      //   "ontap": () {
-      //     Navigator.of(context).push(CustomPageRoute(
-      //         page: CollectionGrid(
-      //       text1: 'What We’ve Been Up To',
-      //       text2:
-      //           'Australian designed swimwear.⁣Worldwide shipping. Ethically made.',
-      //     )));
-      //   }
-      // },
+      // ....existing commented out items...
       {
         "text": "Our Followers",
         "ontap": () {
@@ -53,7 +42,7 @@ class _StoreMenuState extends State<StoreMenu> {
         }
       },
       {
-        "text": "Who We’re Following",
+        "text": "Who We're Following",
         "ontap": () {
           Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
         }
@@ -65,8 +54,10 @@ class _StoreMenuState extends State<StoreMenu> {
         }
       },
     ];
+    final themeColor = widget.store?.theme?.colorDark;
+    final bgColor = themeColor != null ? hexToColor(themeColor) : kheader;
     return Scaffold(
-        backgroundColor: kheader,
+        backgroundColor: bgColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -91,12 +82,6 @@ class _StoreMenuState extends State<StoreMenu> {
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  // CommonImageView(
-                  //   url: widget.store?.name,
-                  //   width: 100,
-                  //   height: 100,
-                  //   radius: 100,
-                  // ),
                   MyText(
                     text: widget.store?.name ?? 'Store Name',
                     size: 26,
@@ -106,27 +91,30 @@ class _StoreMenuState extends State<StoreMenu> {
                     paddingBottom: 20,
                     useCustomFont: true,
                   ),
-                  ExpandableSelectionTile(
-                      title: 'Our Products',
-                      options: [],
-                      storeName: widget.store?.name,
-                      store: widget.store
-                      // options: [
-                      //   {"text": "New Arrivals", "onTap": () {
-                      //      Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                      //   }},
-                      //   // {
-                      //   //   "text": "Men",
-                      //   //   "onTap": () {
-                      //   //      Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                      //   //     // Get.to(() => StoreMainProfile());
-                      //   //   }
-                      //   // },
-                      //   // {"text": "Women", "onTap": () {
-                      //   //    Navigator.of(context).push(CustomPageRoute(page:StoreMainProfile()));
-                      //   // }},
-                      // ],
-                      ),
+                  Consumer<ProductProvider>(
+                    builder: (context, productProvider, _) {
+                      final products = productProvider.prds ?? [];
+                      return ExpandableSelectionTile(
+                        title: 'Our Products',
+                        options: products
+                            .map((p) => {
+                                  "text": p.title ?? 'Untitled',
+                                  "onTap": () {
+                                    Navigator.of(context).push(
+                                      CustomPageRoute(
+                                        page: ProductDetailedDescription(
+                                          product: p,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                })
+                            .toList(),
+                        storeName: widget.store?.name,
+                        store: widget.store,
+                      );
+                    },
+                  ),
                   ListView.builder(
                     shrinkWrap: true,
                     padding: const EdgeInsets.symmetric(horizontal: 18),

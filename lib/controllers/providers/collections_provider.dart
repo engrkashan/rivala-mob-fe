@@ -31,15 +31,16 @@ class CollectionProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> setCollection(
-      String name, String desc, BuildContext context) async {
+  Future<void> setCollection(String name, String desc, BuildContext context,
+      {List<String>? productIds}) async {
     setLoading(true);
-    final prdId = context
-        .read<ProductProvider>()
-        .selectedMembers
-        .map((e) => e.id)
-        .whereType<String>() // removes nulls and casts to String
-        .toList();
+    final prdId = productIds ??
+        context
+            .read<ProductProvider>()
+            .selectedMembers
+            .map((e) => e.id)
+            .whereType<String>() // removes nulls and casts to String
+            .toList();
 
     try {
       final col = await CollectionsRepo().createCollection(name, desc, prdId);
@@ -67,10 +68,6 @@ class CollectionProvider extends ChangeNotifier {
 
   Future<void> addProductToCollection(
       String collectionId, String productId) async {
-    // Ideally we fetch the specific collection first to get its current products,
-    // but for now we assume we can just send the update if we want to add one.
-    // Or we simply update the local list if we have it.
-
     // Find collection
     final index = _allCollections.indexWhere((c) => c.id == collectionId);
     if (index == -1) return;
@@ -79,6 +76,9 @@ class CollectionProvider extends ChangeNotifier {
     final currentIds = col.products?.map((p) => p.id!).toList() ?? [];
     if (!currentIds.contains(productId)) {
       currentIds.add(productId);
+    } else {
+      // Already exists
+      return;
     }
 
     setLoading(true);
@@ -89,6 +89,61 @@ class CollectionProvider extends ChangeNotifier {
         "productIds": currentIds
       });
       // Update local (reload to be safe or update local model)
+      await loadAllCollections();
+      _error = '';
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> removeProductFromCollection(
+      String collectionId, String productId) async {
+    final index = _allCollections.indexWhere((c) => c.id == collectionId);
+    if (index == -1) return;
+
+    final col = _allCollections[index];
+    final currentIds = col.products?.map((p) => p.id!).toList() ?? [];
+
+    if (currentIds.contains(productId)) {
+      currentIds.remove(productId);
+    } else {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await CollectionsRepo().updateCollection(collectionId, {
+        "name": col.name,
+        "description": col.description,
+        "productIds": currentIds
+      });
+      await loadAllCollections();
+      _error = '';
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updateCollectionDetails(
+      String collectionId, String name, String description) async {
+    final index = _allCollections.indexWhere((c) => c.id == collectionId);
+    if (index == -1) return;
+
+    final col = _allCollections[index];
+
+    // Check if anything actually changed to avoid unnecessary API calls
+    if (col.name == name && col.description == description) return;
+
+    final currentIds = col.products?.map((p) => p.id!).toList() ?? [];
+
+    setLoading(true);
+    try {
+      await CollectionsRepo().updateCollection(collectionId,
+          {"name": name, "description": description, "productIds": currentIds});
       await loadAllCollections();
       _error = '';
     } catch (e) {

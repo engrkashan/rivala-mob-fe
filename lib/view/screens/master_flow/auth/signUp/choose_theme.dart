@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/brands_provider.dart';
+import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/theme_model.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/create_links.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/link_success.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
+import 'package:rivala/view/widgets/color_converter.dart' hide colorToHex;
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
@@ -23,6 +28,39 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
   List<Color> selectedColors = List.filled(5, Colors.black);
   List<TextEditingController> colorControllers =
       List.generate(5, (index) => TextEditingController(text: "#000000"));
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final brandsProvider = context.read<BrandsProvider>();
+      final themeProvider = context.read<ThemeProvider>();
+
+      // Try to find the current theme from all themes using themeId from store
+      final store = brandsProvider.currentStore;
+      if (store != null && store.themeId != null) {
+        final currentTheme =
+            themeProvider.themes.firstWhereOrNull((t) => t.id == store.themeId);
+        if (currentTheme != null) {
+          _initializeWithTheme(currentTheme);
+        }
+      }
+    });
+  }
+
+  void _initializeWithTheme(ThemeModel theme) {
+    setState(() {
+      selectedColors[0] = hexToColor(theme.colorDark ?? "#000000");
+      selectedColors[1] = hexToColor(theme.color1 ?? "#000000");
+      selectedColors[2] = hexToColor(theme.color2 ?? "#000000");
+      selectedColors[3] = hexToColor(theme.color3 ?? "#000000");
+      selectedColors[4] = hexToColor(theme.colorLight ?? "#000000");
+
+      for (int i = 0; i < 5; i++) {
+        colorControllers[i].text = colorToHex(selectedColors[i]);
+      }
+    });
+  }
 
   void _openColorPicker(int index) {
     Color tempColor = selectedColors[index];
@@ -109,7 +147,7 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
                     selectedColors.length,
                     (index) => Column(
                           children: [
-                            color_palette_row("Header Color $index", index),
+                            color_palette_row(_getColorTitle(index), index),
                             const SizedBox(height: 15),
                           ],
                         )),
@@ -119,7 +157,25 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
                 Mybutton2(
                   buttonText: 'Save',
                   mbot: 30,
-                  ontap: () {
+                  ontap: () async {
+                    final themeProvider = context.read<ThemeProvider>();
+                    final brandsProvider = context.read<BrandsProvider>();
+
+                    final newTheme =
+                        await themeProvider.addCustomTheme(ThemeModel(
+                      colorDark: colorToHex(selectedColors[0]),
+                      color1: colorToHex(selectedColors[1]),
+                      color2: colorToHex(selectedColors[2]),
+                      color3: colorToHex(selectedColors[3]),
+                      colorLight: colorToHex(selectedColors[4]),
+                    ));
+
+                    if (newTheme != null && newTheme.id != null) {
+                      await themeProvider.attach(newTheme.id!);
+                      await brandsProvider
+                          .loadCurrentStore(); // Refresh store data (themeId)
+                    }
+
                     Get.to(() => GradientSuccessScreen(
                           title: 'Well done!',
                           desc: 'Now, let’s import your links.',
@@ -128,7 +184,7 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
                             Get.to(() => MasterCreateLink());
                           },
                           skipTap: () {
-                        MAsterLinkSuccess();
+                            MAsterLinkSuccess();
                           },
                         ));
                   },
@@ -139,6 +195,23 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
         ],
       ),
     );
+  }
+
+  String _getColorTitle(int index) {
+    switch (index) {
+      case 0:
+        return "Header Color";
+      case 1:
+        return "Subheader Color";
+      case 2:
+        return "Body Text Color";
+      case 3:
+        return "Button Color";
+      case 4:
+        return "Button Text Color";
+      default:
+        return "Color $index";
+    }
   }
 
   Row color_palette_row(String title, int index) {
@@ -179,7 +252,7 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
                       Color(int.parse(value.replaceFirst('#', '0xff')));
                 });
               } catch (e) {
-                selectedColors[index] = Colors.black;
+                // Fallback handled by keeping current color
               }
             },
           ),

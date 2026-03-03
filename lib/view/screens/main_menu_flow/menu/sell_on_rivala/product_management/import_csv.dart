@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/import_product_provider.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/products_added_success.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/my_button.dart';
@@ -15,52 +17,78 @@ class ImportCsv extends StatefulWidget {
 }
 
 class _ImportCsvState extends State<ImportCsv> {
+  bool applyCommission = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kwhite,
-      appBar: simpleAppBar(context: context,title: 'Import Products', centerTitle: true),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                ProductTable(),
-                SizedBox(
-                  height: 30,
-                ),
-                Row(
+      appBar: simpleAppBar(
+          context: context, title: 'Import Products', centerTitle: true),
+      body: Consumer<ImportProductProvider>(
+        builder: (context, provider, child) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+                  physics: const BouncingScrollPhysics(),
                   children: [
-                    Expanded(
-                      child: MyText(
-                        text: 'Apply 15% commission to all products',
-                        size: 15,
-                        color: kblack,
-                        weight: FontWeight.w500,
-                      ),
+                    ProductTable(tableData: provider.importedProducts),
+                    const SizedBox(
+                      height: 30,
                     ),
-                    SwitchButton(
-                      scale: 0.6,
-                      isActive: true,
-                    )
+                    Row(
+                      children: [
+                        Expanded(
+                          child: MyText(
+                            text: 'Apply 15% commission to all products',
+                            size: 15,
+                            color: kblack,
+                            weight: FontWeight.w500,
+                          ),
+                        ),
+                        SwitchButton(
+                          scale: 0.6,
+                          isActive: applyCommission,
+                          onChanged: (val) {
+                            setState(() {
+                              applyCommission = val;
+                            });
+                          },
+                        )
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: MyButton(
-        buttonText: 'Add products',
-        mhoriz: 22,
-        mBottom: 50,
-        onTap: () {
-          Get.to(()=>ProductsAddedSuccess());
+      floatingActionButton: Consumer<ImportProductProvider>(
+        builder: (context, provider, child) {
+          return MyButton(
+            buttonText: 'Add products',
+            mhoriz: 22,
+            mBottom: 50,
+            onTap: () async {
+              bool success = await provider.saveImportedProducts();
+              if (success) {
+                Get.to(() => const ProductsAddedSuccess());
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Failed to add products. Please try again.',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: kred.withOpacity(0.7),
+                  colorText: kwhite,
+                );
+              }
+            },
+          );
         },
       ),
     );
@@ -68,64 +96,9 @@ class _ImportCsvState extends State<ImportCsv> {
 }
 
 class ProductTable extends StatelessWidget {
-  final List<Map<String, dynamic>> tableData = [
-    {
-      'attribute': 'Size',
-      'checked': true,
-      'price': '\$25.99',
-      'available': 'Yes',
-      'onHand': '1,200',
-      'sku': 'ATH-SNK-BLK-10',
-    },
-    {
-      'attribute': 'Color',
-      'checked': true,
-      'price': '\$25.99',
-      'available': 'No',
-      'onHand': '5,000',
-      'sku': 'ORG-CFL-500ML',
-    },
-    {
-      'attribute': 'Fabric',
-      'checked': true,
-      'price': '\$50.99',
-      'available': 'Edit',
-      'onHand': '251',
-      'sku': 'LTH-BLT-BLK-32',
-    },
-    {
-      'attribute': 'Fabric',
-      'checked': false,
-      'price': '\$50.99',
-      'available': 'Edit',
-      'onHand': '251',
-      'sku': 'LTH-BLT-BLK-32',
-    },
-    {
-      'attribute': 'Fabric',
-      'checked': false,
-      'price': '\$50.99',
-      'available': 'Edit',
-      'onHand': '251',
-      'sku': 'LTH-BLT-BLK-32',
-    },
-    {
-      'attribute': 'Fabric',
-      'checked': false,
-      'price': '\$50.99',
-      'available': 'Edit',
-      'onHand': '251',
-      'sku': 'LTH-BLT-BLK-32',
-    },
-    {
-      'attribute': 'Fabric',
-      'checked': false,
-      'price': '\$50.99',
-      'available': 'Edit',
-      'onHand': '251',
-      'sku': 'LTH-BLT-BLK-32',
-    },
-  ];
+  final List<Map<String, dynamic>> tableData;
+
+  const ProductTable({super.key, required this.tableData});
 
   Color getAvailabilityColor(String status) {
     switch (status) {
@@ -140,105 +113,194 @@ class ProductTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ImportProductProvider>(context, listen: false);
+
+    if (tableData.isEmpty) {
+      return Center(child: MyText(text: 'No products imported.'));
+    }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(
         children: [
           // ✅ Header Row
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8.0),
             child: Row(
-              children: const [
+              children: [
                 SizedBox(width: 90), // Skip header for icon+attribute
                 HeaderCell(text: 'Price', width: 80),
                 SizedBox(width: 10),
                 HeaderCell(text: 'Available', width: 60),
                 SizedBox(width: 10),
-                HeaderCell(text: 'On Hand', width: 60),
+                HeaderCell(text: 'On Hand', width: 80),
                 SizedBox(width: 10),
-                HeaderCell(text: 'SKU', width: 100),
+                HeaderCell(text: 'SKU', width: 120),
               ],
             ),
           ),
 
           // ✅ Data Rows
-          ...tableData.map((row) {
+          ...List.generate(tableData.length, (index) {
+            final row = tableData[index];
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 children: [
-                  // Attribute Cell
+                  // Attribute Cell (Radio/Selection)
                   SizedBox(
                     width: 90,
-                    child: Row(
-                      children: [
-                        Icon(
-                          row['checked'] ? Icons.check_circle : Icons.add,
-                          color: row['checked'] ? Colors.green : Colors.black,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 6),
-                        MyText(
-                          text: row['attribute'],
-                          size: 11,
-                          weight: FontWeight.bold,
-                          color: kblack,
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () => provider.toggleProductSelection(index),
+                      child: Row(
+                        children: [
+                          Icon(
+                            row['checked'] == true
+                                ? Icons.check_circle
+                                : Icons.circle_outlined,
+                            color:
+                                row['checked'] == true ? Colors.green : kgrey2,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 6),
+                          MyText(
+                            text: row['attribute'] ?? '',
+                            size: 11,
+                            weight: FontWeight.bold,
+                            color: kblack,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  // Price
-                  Container(
+                  // Price (Editable)
+                  EditableCell(
                     width: 80,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: kgrey2,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: MyText(text: row['price'], size: 10),
+                    initialValue: row['price']?.toString() ?? '',
+                    onChanged: (val) =>
+                        provider.updateProductField(index, 'price', val),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    prefix: '',
                   ),
                   const SizedBox(width: 10),
-                  // Available
-                  Container(
-                    width: 60,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: getAvailabilityColor(row['available']),
-                      borderRadius: BorderRadius.circular(6),
+                  // Available (Toggleable)
+                  GestureDetector(
+                    onTap: () => provider.toggleAvailability(index),
+                    child: Container(
+                      width: 60,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: getAvailabilityColor(row['available'] ?? ''),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: MyText(
+                        text: row['available'] ?? '',
+                        color: Colors.white,
+                        size: 10,
+                        weight: FontWeight.bold,
+                      ),
                     ),
-                    child:
-                        MyText(text: row['available'], color: kblack, size: 10),
                   ),
                   const SizedBox(width: 10),
-                  // On Hand
-                  Container(
-                    width: 60,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: kgrey2,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: MyText(text: row['onHand'], size: 10),
+                  // On Hand (Editable)
+                  EditableCell(
+                    width: 80,
+                    initialValue: row['onHand']?.toString() ?? '',
+                    onChanged: (val) =>
+                        provider.updateProductField(index, 'onHand', val),
+                    keyboardType: TextInputType.number,
                   ),
                   const SizedBox(width: 10),
-                  // SKU
-                  Container(
-                    width: 100,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: kgrey2,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: MyText(text: row['sku'], size: 10),
+                  // SKU (Editable)
+                  EditableCell(
+                    width: 120,
+                    initialValue: row['sku']?.toString() ?? '',
+                    onChanged: (val) =>
+                        provider.updateProductField(index, 'sku', val),
+                    keyboardType: TextInputType.text,
                   ),
                 ],
               ),
             );
-          }).toList(),
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class EditableCell extends StatefulWidget {
+  final double width;
+  final String initialValue;
+  final Function(String) onChanged;
+  final TextInputType keyboardType;
+  final String? prefix;
+
+  const EditableCell({
+    super.key,
+    required this.width,
+    required this.initialValue,
+    required this.onChanged,
+    this.keyboardType = TextInputType.text,
+    this.prefix,
+  });
+
+  @override
+  State<EditableCell> createState() => _EditableCellState();
+}
+
+class _EditableCellState extends State<EditableCell> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(EditableCell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue &&
+        _controller.text != widget.initialValue) {
+      _controller.text = widget.initialValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: widget.width,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: kgrey2.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: kgrey2, width: 0.5),
+      ),
+      child: Row(
+        children: [
+          if (widget.prefix != null)
+            Text(widget.prefix!, style: const TextStyle(fontSize: 10)),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              style: const TextStyle(fontSize: 10),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 8),
+              ),
+              keyboardType: widget.keyboardType,
+              onChanged: widget.onChanged,
+            ),
+          ),
         ],
       ),
     );
@@ -249,7 +311,7 @@ class ProductTable extends StatelessWidget {
 class HeaderCell extends StatelessWidget {
   final String text;
   final double width;
-  const HeaderCell({required this.text, required this.width});
+  const HeaderCell({super.key, required this.text, required this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +321,7 @@ class HeaderCell extends StatelessWidget {
         text: text,
         size: 11,
         textAlign: TextAlign.center,
-        weight: FontWeight.normal,
+        weight: FontWeight.bold,
         color: kblack,
       ),
     );

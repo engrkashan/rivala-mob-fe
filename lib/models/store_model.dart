@@ -5,6 +5,7 @@ import 'package:rivala/models/collection_model.dart';
 import 'package:rivala/models/product_model.dart';
 import 'package:rivala/models/link_model.dart';
 import 'package:rivala/models/follow_model.dart';
+import 'package:rivala/models/theme_model.dart';
 
 StoreModel storeModelFromJson(String str) =>
     StoreModel.fromJson(json.decode(str));
@@ -23,6 +24,7 @@ class StoreModel {
   String? updatedAt;
 
   UserModel? owner;
+  ThemeModel? theme;
   List<CollectionModel> collections;
   List<ProductModel> products;
   List<LinkModel> links;
@@ -40,6 +42,7 @@ class StoreModel {
     this.createdAt,
     this.updatedAt,
     this.owner,
+    this.theme,
     List<CollectionModel>? collections,
     List<ProductModel>? products,
     List<LinkModel>? links,
@@ -64,6 +67,7 @@ class StoreModel {
     String? createdAt,
     String? updatedAt,
     UserModel? owner,
+    ThemeModel? theme,
     List<CollectionModel>? collections,
     List<ProductModel>? products,
     List<LinkModel>? links,
@@ -81,6 +85,7 @@ class StoreModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       owner: owner ?? this.owner,
+      theme: theme ?? this.theme,
       collections: collections ?? this.collections,
       products: products ?? this.products,
       links: links ?? this.links,
@@ -103,6 +108,7 @@ class StoreModel {
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"],
       owner: json["owner"] != null ? UserModel.fromJson(json["owner"]) : null,
+      theme: json["theme"] != null ? ThemeModel.fromJson(json["theme"]) : null,
       collections: (json["collections"] as List?)
               ?.map((e) => CollectionModel.fromJson(e))
               .toList() ??

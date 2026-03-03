@@ -66,6 +66,7 @@ class PurchaseOptsWidget extends StatelessWidget {
 
 class ProductQuantity extends StatefulWidget {
   final double? vpad, hpad, iconSize, dpadv, dpadh, radius, midDistance;
+  final int? initialValue;
   final Function(int)? onChanged;
 
   const ProductQuantity(
@@ -77,6 +78,7 @@ class ProductQuantity extends StatefulWidget {
       this.dpadh,
       this.radius,
       this.midDistance,
+      this.initialValue,
       this.onChanged});
 
   @override
@@ -84,7 +86,13 @@ class ProductQuantity extends StatefulWidget {
 }
 
 class _ProductQuantityState extends State<ProductQuantity> {
-  int quantity = 1;
+  late int quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    quantity = widget.initialValue ?? 1;
+  }
 
   // Function to update quantity
   void updateQuantity(bool isIncrement) {

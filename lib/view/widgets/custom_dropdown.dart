@@ -26,7 +26,9 @@ class CustomDropDown extends StatelessWidget {
       this.iconPad,
       this.radius,
       this.useCustomFont,
-      this.vpad});
+      this.vpad,
+      this.switchValue,
+      this.onSwitchChanged});
 
   final List<dynamic> items;
   final String selectedValue;
@@ -37,6 +39,8 @@ class CustomDropDown extends StatelessWidget {
   final int? delay;
   double? mBottom, hintsize, iconSize, vpad, hpad, iconPad, radius;
   bool? hasIcon = false, hasSwitch = false, useCustomFont;
+  final bool? switchValue;
+  final ValueChanged<bool>? onSwitchChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -63,13 +67,16 @@ class CustomDropDown extends StatelessWidget {
               if (hasSwitch == true)
                 SwitchButton(
                   scale: 0.6,
-                  isActive: true,
+                  isActive: switchValue ?? true,
+                  onChanged: onSwitchChanged,
                 )
             ],
           ),
           DropdownButtonHideUnderline(
             child: DropdownButton2(
-              items: items
+              items: (items.contains(selectedValue)
+                      ? items
+                      : [...items, selectedValue])
                   .map(
                     (item) => DropdownMenuItem<dynamic>(
                       value: item,

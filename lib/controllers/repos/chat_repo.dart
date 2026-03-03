@@ -6,32 +6,45 @@ import '../../config/network/endpoints.dart';
 class ChatRepo {
   ApiClient api = ApiClient();
 
-  Future<List<ChatModel>> getMessages(String receiverId) async {
+  Future<List<MessageModel>> getMessages(String chatId) async {
     final res = await api.getResponse(
       endpoints: Endpoints.messagesHistory,
-      query: {
-        "receiverId": receiverId,
-      },
+      query: {"chatId": chatId},
     );
-    final list = res['messages'] as List;
-    return list.map((item) => ChatModel.fromJson(item)).toList();
+    final list = res['users'] as List;
+    return list.map((item) => MessageModel.fromJson(item)).toList();
   }
 
-  Future<ChatModel> sendMessage(String receiverId, String content) async {
-    print("Receiver ID: $receiverId, Content: $content");
+  Future<ChatModel> initiateChat(String receiverId) async {
+    final res = await api.postResponse(
+        endpoints: Endpoints.initiateChat, data: {"receiverId": receiverId});
+
+    return ChatModel.fromJson(res['chat']);
+  }
+
+  Future<MessageModel> sendMessage(String chatId, String content) async {
     final res = await api.postResponse(
       endpoints: Endpoints.messages,
       data: {
-        "receiverId": receiverId,
+        "chatId": chatId,
         "content": content,
       },
     );
-    return ChatModel.fromJson(res['message']);
+    return MessageModel.fromJson(res['message']);
   }
 
-  Future<List<ChatModel>> getUnreadMessages() async {
+  Future<Map<String, int>> getUnreadMessages() async {
     final res = await api.getResponse(endpoints: Endpoints.messagesUnread);
-    final list = res['unreadMessages'] as List;
-    return list.map((item) => ChatModel.fromJson(item)).toList();
+    return Map<String, int>.from(res['unreadCounts'] ?? {});
+  }
+
+  Future<List<ChatUser>> getChats() async {
+    final res = await api.getResponse(endpoints: Endpoints.chatUsers);
+    final list = res['users'] as List;
+    return list.map((item) => ChatUser.fromJson(item)).toList();
+  }
+
+  Future<void> markAsRead(String chatId) async {
+    await api.postResponse(endpoints: Endpoints.markAsRead(chatId));
   }
 }

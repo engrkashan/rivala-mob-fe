@@ -1,14 +1,15 @@
 import 'dart:io';
+
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:rivala/view/screens/master_flow/new_post/select_post_filters.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:path/path.dart' as path;
 
 // class ImagePickerController extends GetxController {
 //   var selectedImages = <File>[].obs;
@@ -37,7 +38,8 @@ class ImagePickerController extends GetxController {
   Map<String, dynamic> selectedVideoData = {};
   String selectedVideoFilter = 'normal';
   RxBool isLoading = false.obs;
-String? get selectedVideoThumbnail => selectedVideoData['thumbnail'] as String?;
+  String? get selectedVideoThumbnail =>
+      selectedVideoData['thumbnail'] as String?;
 
   Future<Uint8List?> generateVideoThumbnail(String videoPath) async {
     return await VideoThumbnail.thumbnailData(
@@ -158,7 +160,9 @@ String? get selectedVideoThumbnail => selectedVideoData['thumbnail'] as String?;
   }
 
   Future<void> pickImageFromCamera() async {
-    final result = await _picker.pickImage(source: ImageSource.camera);
+    final result = await _picker.pickImage(
+      source: ImageSource.camera,
+    );
     if (result != null && result.path.isNotEmpty) {
       final files = File(result.path);
       selectedMedia.value = [files];
@@ -177,7 +181,7 @@ String? get selectedVideoThumbnail => selectedVideoData['thumbnail'] as String?;
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi'],
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
     );
 
     if (result != null && result.files.isNotEmpty) {

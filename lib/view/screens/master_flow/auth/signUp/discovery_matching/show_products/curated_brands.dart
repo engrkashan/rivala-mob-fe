@@ -134,6 +134,7 @@ class curated_brand_widget extends StatelessWidget {
         CommonImageView(
           imagePath: img,
           url: networkImg,
+          name: title,
           width: size ?? 77,
           height: size ?? 77,
           fit: fit ?? BoxFit.contain,

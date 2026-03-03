@@ -15,6 +15,8 @@ class PostDetailOptRow extends StatelessWidget {
   final VoidCallback? ontap;
   final int? delay;
   final List<String>? tags; // Can be 1, 2, or 3 tags
+  final bool? switchValue;
+  final ValueChanged<bool>? onSwitchChanged;
 
   const PostDetailOptRow({
     super.key,
@@ -29,6 +31,8 @@ class PostDetailOptRow extends StatelessWidget {
     this.addedText,
     this.isFeatured,
     this.tagIcon,
+    this.switchValue,
+    this.onSwitchChanged,
   });
 
   @override
@@ -58,7 +62,12 @@ class PostDetailOptRow extends StatelessWidget {
                       paddingLeft: 13,
                     ),
                   ),
-                  if (hasIcon == false) SwitchButton(scale: 0.7),
+                  if (hasIcon == false)
+                    SwitchButton(
+                      scale: 0.7,
+                      isActive: switchValue ?? true,
+                      onChanged: onSwitchChanged,
+                    ),
                   if (hasIcon == true && hasText == false)
                     Image.asset(
                       Assets.imagesForward,
@@ -112,12 +121,17 @@ class TagsWidget extends StatelessWidget {
   final Color? bgColor, fontColor;
   final bool? useCustomFont;
   const TagsWidget(
-      {super.key, this.tagIcon, this.tag, this.bgColor, this.fontColor, this.useCustomFont=false});
+      {super.key,
+      this.tagIcon,
+      this.tag,
+      this.bgColor,
+      this.fontColor,
+      this.useCustomFont = false});
 
   @override
   Widget build(BuildContext context) {
     return CustomeContainer(
-      borderColor: fontColor??ktransparent,
+      borderColor: fontColor ?? ktransparent,
       color: bgColor ?? ktertiary,
       radius: 50,
       vpad: 3,

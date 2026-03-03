@@ -3,11 +3,9 @@ import 'package:rivala/main.dart';
 import 'package:rivala/models/user_model.dart';
 
 import '../../repos/auth_repo.dart';
-import '../media_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _authRepo = locator<AuthRepo>();
-  final _mediaProvider = locator<MediaProvider>();
 
   bool _isLoading = false;
   bool _isLoggedIn = false;
@@ -50,7 +48,8 @@ class AuthProvider extends ChangeNotifier {
       required String email,
       required String password,
       String? birthday,
-      String? bio}) async {
+      String? bio,
+      String? avatarUrl}) async {
     setLoading(true);
     notifyListeners();
 
@@ -62,7 +61,7 @@ class AuthProvider extends ChangeNotifier {
       "password": password,
       "birthday": birthday,
       "bio": bio,
-      "avatarUrl": _mediaProvider.uploadedUrl
+      "avatarUrl": avatarUrl
     };
 
     try {

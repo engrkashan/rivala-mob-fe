@@ -57,105 +57,271 @@ class _CommissionEarnedState extends State<CommissionEarned> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.hascart == true)
+          if (provider.isLoading)
+            Expanded(child: Center(child: CircularProgressIndicator()))
+          else if (provider.error != null && provider.error!.isNotEmpty)
+            Expanded(
+                child: Center(
+                    child: Text('Error: ${provider.error}',
+                        style: TextStyle(color: Colors.red))))
+          else
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.hascart == true)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MyText(
+                            text: widget.title ?? 'Commissions Paid',
+                            size: 22,
+                            color: kblack,
+                            weight: FontWeight.w600,
+                          ),
+                          circular_icon_container(
+                            size: 45,
+                            iconSize: 22,
+                          ),
+                        ],
+                      ),
+                    MyGradientText(
+                      text:
+                          '\$${revenue?.summary.totalRevenue.toStringAsFixed(2) ?? '0.00'}',
+                      size: 35,
+                      weight: FontWeight.w600,
+                    ),
+                    SizedBox(height: 20),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        MyText(
-                          text: widget.title ?? 'Commissions Paid',
-                          size: 22,
-                          color: kblack,
-                          weight: FontWeight.w600,
+                        Expanded(
+                          child: _buildSummaryCard(
+                            'Earned',
+                            revenue?.summary.earnedRevenue ?? 0.0,
+                            Colors.green.withOpacity(0.1),
+                            Colors.green,
+                          ),
                         ),
-                        circular_icon_container(
-                          size: 45,
-                          iconSize: 22,
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: _buildSummaryCard(
+                            'Pending',
+                            revenue?.summary.pendingRevenue ?? 0.0,
+                            Colors.orange.withOpacity(0.1),
+                            Colors.orange,
+                          ),
                         ),
                       ],
                     ),
-                  MyGradientText(
-                    text:
-                        '\$${revenue?.summary.totalRevenue.toStringAsFixed(2) ?? '0.00'}',
-                    size: 35,
-                    weight: FontWeight.w600,
-                  ),
-                  SizedBox(height: 30),
-                  // Add Key here
-                  CustomDateSelector(
-                    key: ValueKey('customDateSelector'),
-                    selectedIndex: selectedDateIndex,
-                    onChanged: (index, range) {
-                      setState(() {
-                        selectedDateIndex = index;
-                        customDateRange = range;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      row_widget(
-                        onTap: () {
-                          Get.bottomSheet(
-                            SearchCriteriaProducts(hasCheckbox: false),
-                            isScrollControlled: true,
-                          );
-                        },
-                        icon: Assets.imagesFilter,
-                        iconSize: 18,
-                        texSize: 13,
-                        title: 'Filter report',
+                    SizedBox(height: 30),
+                    // Add Key here
+                    CustomDateSelector(
+                      key: ValueKey('customDateSelector'),
+                      selectedIndex: selectedDateIndex,
+                      onChanged: (index, range) {
+                        setState(() {
+                          selectedDateIndex = index;
+                          customDateRange = range;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        row_widget(
+                          onTap: () {
+                            Get.bottomSheet(
+                              SearchCriteriaProducts(hasCheckbox: false),
+                              isScrollControlled: true,
+                            );
+                          },
+                          icon: Assets.imagesFilter,
+                          iconSize: 18,
+                          texSize: 13,
+                          title: 'Filter report',
+                        ),
+                        row_widget(
+                          icon: Assets.imagesCsv,
+                          iconSize: 18,
+                          texSize: 13,
+                          title: 'CSV Export',
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    // Add Key here
+                    LineGraph(
+                      key: ValueKey(
+                          'lineGraph_${selectedDateIndex}_${customDateRange?.start.toString()}'),
+                      graph: revenue?.graph ?? [],
+                    ),
+                    if (revenue != null && revenue.orders.isNotEmpty) ...[
+                      SizedBox(height: 20),
+                      MyText(
+                        text: "Recent Orders",
+                        size: 18,
+                        weight: FontWeight.w600,
+                        paddingBottom: 15,
                       ),
-                      row_widget(
-                        icon: Assets.imagesCsv,
-                        iconSize: 18,
-                        texSize: 13,
-                        title: 'CSV Export',
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: revenue.orders.length,
+                        separatorBuilder: (_, __) => SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          return _buildOrderCard(revenue.orders[index]);
+                        },
                       ),
                     ],
-                  ),
-                  SizedBox(height: 20),
-                  // Add Key here
-                  LineGraph(
-                    key: ValueKey(
-                        'lineGraph_${selectedDateIndex}_${customDateRange?.start.toString()}'),
-                    graph: revenue?.graph ?? [],
-                  ),
-                  MyText(
-                    text:
-                        'Last updated: ${DateFormat('MM/dd/yyyy').format(DateTime.now())}',
-                    size: 11,
-                    color: kblack.withOpacity(0.5),
-                    paddingBottom: 20,
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    MyText(
+                      text:
+                          'Last updated: ${DateFormat('MM/dd/yyyy').format(revenue?.summary.lastUpdated ?? DateTime.now())}',
+                      size: 11,
+                      color: kblack.withOpacity(0.5),
+                      paddingBottom: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(
+      String title, double amount, Color bgColor, Color textColor) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MyText(
+            text: title,
+            size: 12,
+            color: kblack.withOpacity(0.6),
+            weight: FontWeight.w500,
+          ),
+          SizedBox(height: 5),
+          MyText(
+            text: '\$${amount.toStringAsFixed(2)}',
+            size: 18,
+            color: textColor,
+            weight: FontWeight.bold,
           ),
         ],
       ),
     );
   }
 
-  double _calculateTotalCommission(List orders) {
-    double total = 0;
-    for (var order in orders) {
-      if (order.orderItems != null) {
-        for (var item in order.orderItems!) {
-          total +=
-              (item.price ?? 0) * (item.quantity ?? 0) * COMMISSION_PERCENTAGE;
-        }
-      }
+  Widget _buildOrderCard(RevenueOrder order) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kwhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kblack.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: kblack.withOpacity(0.02),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              MyText(
+                text: order.id, // Order ID/Number
+                size: 14,
+                weight: FontWeight.bold,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(order.status).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: MyText(
+                  text: order.status,
+                  size: 10,
+                  color: _getStatusColor(order.status),
+                  weight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Divider(height: 20, color: kblack.withOpacity(0.05)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MyText(
+                    text: order.customer,
+                    size: 12,
+                    weight: FontWeight.w500,
+                  ),
+                  SizedBox(height: 2),
+                  MyText(
+                    text: DateFormat('MMM dd, yyyy').format(order.createdAt),
+                    size: 10,
+                    color: kblack.withOpacity(0.5),
+                  ),
+                ],
+              ),
+              MyText(
+                text: '\$${order.totalAmount.toStringAsFixed(2)}',
+                size: 14,
+                weight: FontWeight.bold,
+                color: kgreen2,
+              ),
+            ],
+          ),
+          if (order.products.isNotEmpty) ...[
+            SizedBox(height: 8),
+            MyText(
+              text:
+                  '${order.products.length} item(s): ${order.products.map((e) => e.title).join(", ")}',
+              size: 11,
+              color: kblack.withOpacity(0.6),
+              maxLines: 1,
+              textOverflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'COMPLETED':
+      case 'PAID':
+        return Colors.green;
+      case 'PENDING':
+      case 'PROCESSING':
+        return Colors.orange;
+      case 'CANCELLED':
+        return Colors.red;
+      default:
+        return kblack;
     }
-    return total;
   }
 }
 

@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/controller_instances.dart';
 import 'package:rivala/controllers/navbar_controller.dart';
+import 'package:rivala/controllers/providers/brands_provider.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/store_model.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 
@@ -19,15 +22,18 @@ class PersistentBottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<PersistentBottomNavBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  StoreModel? currentStore;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       // showCaseController.initShowCase(context);
       _animationController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 500),
       );
+      await context.read<BrandsProvider>().loadCurrentStore();
+      currentStore = context.read<BrandsProvider>().currentStore;
     });
   }
 
@@ -51,7 +57,7 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
       'label': 'discovery',
       'icon': Assets.imagesChat,
     },
-    {'label': 'storemenu', 'icon': Assets.imagesProfileicon, 'width': 47},
+    {'label': 'storemenu', 'width': 47},
     {
       'label': 'mainmenu',
       'icon': Assets.imagesMenuu,
@@ -153,10 +159,11 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
     );
   }
 
-  Widget _buildNavItem(int index, {double? width}) {
-    if (index == 2) return const SizedBox(); // FAB handles Discovery
+  Widget _buildNavItem(int index) {
+    if (index == 2) return const SizedBox();
 
     bool isSelected = navBarController.currentIndex.value == index;
+
     return Padding(
       padding: const EdgeInsets.only(top: 5.0, right: 5, left: 5),
       child: InkWell(
@@ -164,15 +171,61 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CommonImageView(
-              imagePath: _items[index]['icon'],
-              width: width ?? 25,
-              fit: BoxFit.contain,
-            ),
+            index == 3 ? _buildStoreIcon(isSelected) : _buildNormalIcon(index),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildNormalIcon(int index) {
+    return CommonImageView(
+      imagePath: _items[index]['icon'],
+      width: 25,
+      fit: BoxFit.contain,
+    );
+  }
+
+  Widget _buildStoreIcon(bool isSelected) {
+    final store = context.watch<BrandsProvider>().currentStore;
+
+    // Safety fallback
+    if (store == null) {
+      return CommonImageView(
+        imagePath: Assets.imagesProfileicon,
+        width: 25,
+        fit: BoxFit.contain,
+      );
+    }
+
+    final hasLogo = store.logoUrl != null && store.logoUrl!.trim().isNotEmpty;
+
+    return hasLogo
+        ? ClipOval(
+            child: CommonImageView(
+              url: store.logoUrl!,
+              width: 25,
+              fit: BoxFit.contain,
+            ),
+          )
+        : Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: kgrey2,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                "${store.name?[0].toUpperCase()}", // 👈 FIRST LETTER
+                style: const TextStyle(
+                  color: kblack2,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
   }
 
   void _onItemTapped(int index) {

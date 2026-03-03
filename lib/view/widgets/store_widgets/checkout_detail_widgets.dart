@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
-import 'package:rivala/view/screens/master_store_flow/store_home/ordering/checkout.dart';
+import 'package:rivala/controllers/providers/cart_provider.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/ordering/choose_existing_cards.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/ordering/order_confirmation.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -13,6 +14,9 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
+
+import '../../../controllers/providers/payment_methods_provider.dart';
+import '../../../generated/assets.dart';
 
 class order_summary_container extends StatelessWidget {
   final bool? placeOrder;
@@ -268,109 +272,261 @@ class shipping_method_list extends StatelessWidget {
 
 ///payment
 
-class payment_method_list extends StatelessWidget {
+class payment_method_list extends StatefulWidget {
   final String? title;
   final RxBool showPaymentMethod;
-  const payment_method_list(
-      {super.key, required this.showPaymentMethod, this.title});
+  payment_method_list({super.key, required this.showPaymentMethod, this.title});
+
+  @override
+  State<payment_method_list> createState() => _payment_method_listState();
+}
+
+class _payment_method_listState extends State<payment_method_list> {
+  final _cardFormKey = GlobalKey<FormState>();
+
+  bool isVisa(String input) {
+    return RegExp(r'^4[0-9]{12}(?:[0-9]{3})?$').hasMatch(input);
+  }
+
+  bool isMasterCard(String input) {
+    return RegExp(
+      r'^(5[1-5][0-9]{14}|2(2[2-9][0-9]{12}|[3-6][0-9]{13}|7[01][0-9]{12}|720[0-9]{12}))$',
+    ).hasMatch(input);
+  }
+
+  bool luhnCheck(String cardNumber) {
+    int sum = 0;
+    bool alternate = false;
+
+    for (int i = cardNumber.length - 1; i >= 0; i--) {
+      int n = int.parse(cardNumber[i]);
+
+      if (alternate) {
+        n *= 2;
+        if (n > 9) n -= 9;
+      }
+
+      sum += n;
+      alternate = !alternate;
+    }
+
+    return sum % 10 == 0;
+  }
+
+  String? cardNumberValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Card number is required';
+    }
+
+    final number = value.replaceAll(' ', '');
+
+    if (!(isVisa(number) || isMasterCard(number))) {
+      return 'Only Visa or MasterCard allowed';
+    }
+
+    if (!luhnCheck(number)) {
+      return 'Invalid card number';
+    }
+
+    return null;
+  }
+
+  String? cvcValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'CVC is required';
+    }
+
+    if (!RegExp(r'^[0-9]{3,4}$').hasMatch(value)) {
+      return 'Invalid CVC';
+    }
+
+    return null;
+  }
+
+  String? nameValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Name on card is required';
+    }
+
+    if (value.trim().length < 3) {
+      return 'Enter full name';
+    }
+
+    return null;
+  }
+
+  bool showAddNewCardForm = false;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Bounce_widget(
-              ontap: () {
-                showPaymentMethod.value = !showPaymentMethod.value;
-              },
-              widget: shipping_opt_container(
-                title: title,
-                border: ktertiary.withOpacity(0.6),
-                singleText: true,
-                isActive: showPaymentMethod.value,
-              )),
-          if (showPaymentMethod.value) ...{
-            SizedBox(
-              height: 10,
-            ),
+    final paymentProvider = context.read<PaymentMethodsProvider>();
 
-            MyText(
-              text: '> Use pre-existing card',
-              color: kblue,
-              size: 14,
-              paddingLeft: 18,
-              paddingBottom: 10,
-              useCustomFont: true,
-              onTap: () {
-                Get.to(() => ChooseExistingCards());
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: MyTextField(
-                hint: 'Card number',
-                radius: 8,
-                contentvPad: 10,
-                useCustomFont: true,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: MyTextField(
-                hint: 'Security Code',
-                radius: 8,
-                contentvPad: 10,
-                useCustomFont: true,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: MyTextField(
-                hint: 'Name on Card',
-                radius: 8,
-                contentvPad: 10,
-                useCustomFont: true,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: MyTextField(
-                hint: 'State',
-                radius: 8,
-                contentvPad: 10,
-                useCustomFont: true,
-              ),
-            ),
-            MyText(
-              text: '+ Save card',
-              color: kdarkgrey,
-              size: 14,
-              paddingLeft: 18,
-              paddingBottom: 10,
-              useCustomFont: true,
-            ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10),
-            //   child: ListView.builder(
-            //     padding: EdgeInsets.all(0),
-            //     shrinkWrap: true,
-            //     physics: const NeverScrollableScrollPhysics(),
-            //     itemCount: 3,
-            //     itemBuilder: (context, Index) {
-            //       return Padding(
-            //         padding: const EdgeInsets.only(bottom: 15),
-            //         child: shipping_opt_container(
-            //           border: kgrey2,
-            //           isFree: Index == 0 ? true : false,
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // )
-          }
-        ],
-      ),
+    return Consumer<CartProvider>(
+      builder: (context, cartProvider, _) {
+        final selectedCard = cartProvider.selectedCard;
+        final hasSelectedCard = selectedCard != null &&
+            selectedCard.isNotEmpty &&
+            !showAddNewCardForm;
+
+        String? cardBrand;
+        String? cardImage;
+
+        if (hasSelectedCard) {
+          cardBrand = paymentProvider.detectCardBrand(selectedCard);
+          cardImage = cardBrand == 'mastercard'
+              ? Assets.imagesMastercard
+              : Assets.imagesVisa;
+        }
+
+        return Form(
+          key: _cardFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// ---- HEADER (Rx ONLY HERE) ----
+              Obx(() {
+                return Bounce_widget(
+                  ontap: () {
+                    widget.showPaymentMethod.value =
+                        !widget.showPaymentMethod.value;
+                  },
+                  widget: shipping_opt_container(
+                    title: widget.title,
+                    border: ktertiary.withOpacity(0.6),
+                    singleText: true,
+                    isActive: widget.showPaymentMethod.value,
+                  ),
+                );
+              }),
+
+              /// ---- BODY (PROVIDER) ----
+              Obx(() {
+                if (!widget.showPaymentMethod.value) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    MyText(
+                      text: hasSelectedCard
+                          ? '> Select another card'
+                          : '> Use pre-existing card',
+                      color: kblue,
+                      size: 14,
+                      paddingLeft: 18,
+                      paddingBottom: 10,
+                      useCustomFont: true,
+                      onTap: () async {
+                        await Get.to(() => ChooseExistingCards());
+                      },
+                    ),
+                    if (hasSelectedCard) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: choose_card(
+                          showIsActive: false,
+                          img: cardImage!,
+                          title:
+                              '$cardBrand •••• ${selectedCard!.substring(selectedCard.length - 4)}',
+                        ),
+                      ),
+                      MyText(
+                        text: '+ Add new card',
+                        onTap: () {
+                          setState(() {
+                            showAddNewCardForm = true;
+                          });
+                        },
+                      ),
+                    ] else ...[
+                      _AddCardForm(
+                        formKey: _cardFormKey,
+                        onSave: (cardNumber, cvc, name) async {
+                          await context
+                              .read<CartProvider>()
+                              .saveCard(cardNumber);
+
+                          setState(() {
+                            showAddNewCardForm = false;
+                          });
+                        },
+                        cardNumberValidator: cardNumberValidator,
+                        cvcValidator: cvcValidator,
+                        nameValidator: nameValidator,
+                      ),
+                    ],
+                  ],
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AddCardForm extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final Function(String, String, String) onSave;
+  final String? Function(String?) cardNumberValidator;
+  final String? Function(String?) cvcValidator;
+  final String? Function(String?) nameValidator;
+
+  const _AddCardForm({
+    required this.formKey,
+    required this.onSave,
+    required this.cardNumberValidator,
+    required this.cvcValidator,
+    required this.nameValidator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cardNumber = TextEditingController();
+    final cvc = TextEditingController();
+    final name = TextEditingController();
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: MyTextField(
+            controller: cardNumber,
+            hint: 'Card number',
+            validator: cardNumberValidator,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: MyTextField(
+            controller: cvc,
+            hint: 'Security Code',
+            validator: cvcValidator,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: MyTextField(
+            controller: name,
+            hint: 'Name on Card',
+            validator: nameValidator,
+          ),
+        ),
+        MyText(
+          text: '+ Save card',
+          onTap: () {
+            if (!formKey.currentState!.validate()) return;
+            onSave(
+              cardNumber.text.trim(),
+              cvc.text.trim(),
+              name.text.trim(),
+            );
+          },
+        ),
+      ],
     );
   }
 }

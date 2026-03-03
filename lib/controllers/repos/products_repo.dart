@@ -12,7 +12,8 @@ class ProductsRepo {
       'type': type,
     });
 
-    final list = response['products'] as List;
+    final list =
+        (response['products'] ?? response['data']?['products']) as List? ?? [];
 
     return list.map((item) => ProductModel.fromJson(item)).toList();
   }
@@ -21,7 +22,8 @@ class ProductsRepo {
     final response =
         await api.getResponse(endpoints: Endpoints.productRecommendations(id));
 
-    final list = response['products'] as List;
+    final list =
+        (response['products'] ?? response['data']?['products']) as List? ?? [];
     return list.map((item) => ProductModel.fromJson(item)).toList();
   }
 
@@ -34,16 +36,13 @@ class ProductsRepo {
     return list.map((item) => ProductReview.fromJson(item)).toList();
   }
 
-  // Future<List<ProductModel>> getSearchedProducts() async {
-  //   final response = await api.postResponse(
-  //     endpoints: Endpoints.searchProduct,
-  //   );
-  // }
-
   Future<List<ProductModel>> getMyProducts() async {
     final response = await api.getResponse(endpoints: Endpoints.myProducts);
 
-    final list = response['products'] as List;
+    final list = (response['products'] ??
+            response['data']?['products'] ??
+            response['data']) as List? ??
+        [];
 
     return list.map((item) => ProductModel.fromJson(item)).toList();
   }
@@ -51,21 +50,35 @@ class ProductsRepo {
   Future<List<ProductModel>> getAllProducts() async {
     final response = await api.getResponse(endpoints: Endpoints.products);
 
-    final list = response['products'] as List;
+    final list = (response['products'] ??
+            response['data']?['products'] ??
+            response['data']) as List? ??
+        [];
 
     return list.map((item) => ProductModel.fromJson(item)).toList();
   }
 
   Future<void> postProduct(ProductModel product) async {
-    await api.postResponse(endpoints: Endpoints.products, data: product);
+    await api.postResponse(
+        endpoints: Endpoints.products, data: product.toJson());
   }
 
   Future<void> updateProduct(ProductModel product) async {
     await api.patchResponse(
-        endpoint: Endpoints.productsById(product.id!), data: product);
+        endpoint: Endpoints.productsById(product.id!), data: product.toJson());
   }
 
   Future<void> deleteProduct(String id) async {
     await api.deleteRequest(endpoint: Endpoints.productsById(id));
+  }
+
+  Future<List<ProductModel>> searchProducts(String query) async {
+    final response = await api
+        .getResponse(endpoints: Endpoints.searchProducts, query: {"q": query});
+    final list = (response['products'] ??
+            response['data']?['products'] ??
+            response['data']) as List? ??
+        [];
+    return list.map((item) => ProductModel.fromJson(item)).toList();
   }
 }

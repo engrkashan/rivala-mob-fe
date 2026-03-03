@@ -15,6 +15,7 @@ class CommonImageView extends StatelessWidget {
   double? radius;
   final BoxFit fit;
   final String placeHolder;
+  final String? name;
 
   CommonImageView({
     this.url,
@@ -25,7 +26,8 @@ class CommonImageView extends StatelessWidget {
     this.width,
     this.radius = 0.0,
     this.fit = BoxFit.cover,
-    this.placeHolder = 'assets/images/no_image_found.png',
+    this.placeHolder = 'assets/images/dummyImg.png',
+    this.name,
   });
 
   @override
@@ -109,6 +111,33 @@ class CommonImageView extends StatelessWidget {
         ),
       );
     }
-    return SizedBox();
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: kgrey3,
+        borderRadius: (radius ?? 0) > 0 ? BorderRadius.circular(radius!) : null,
+        shape: (radius ?? 0) > 0 ? BoxShape.rectangle : BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          _getInitials(name),
+          style: TextStyle(
+            color: kwhite,
+            fontWeight: FontWeight.bold,
+            fontSize: (height ?? 54) / 2.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getInitials(String? name) {
+    if (name == null || name.isEmpty) return "";
+    List<String> parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
   }
 }

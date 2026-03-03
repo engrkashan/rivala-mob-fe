@@ -20,7 +20,7 @@ class Chats extends StatefulWidget {
 
 class _ChatsState extends State<Chats> {
   final TextEditingController _controller = TextEditingController();
-
+  String chatId = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +67,7 @@ class _ChatsState extends State<Chats> {
                   final userId = context.read<AuthProvider>().currentUserId;
                   context
                       .read<ChatProvider>()
-                      .sendMessage(_controller.text, widget.receiverId);
+                      .sendMessage(chatId, _controller.text);
                   _controller.clear();
                 },
               ),
@@ -79,8 +79,19 @@ class _ChatsState extends State<Chats> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChatProvider>().loadMessages(widget.receiverId);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<ChatProvider>();
+      await provider.getInitiateChat(widget.receiverId);
+
+      final chat = provider.initiateChat;
+      if (chat == null) {
+        print("Failed to initiate chat");
+        return;
+      }
+
+      chatId = chat.id;
+      provider.loadMessages(chatId);
+      provider.markAsRead(chatId);
     });
   }
 }

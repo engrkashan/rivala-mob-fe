@@ -36,7 +36,6 @@ class _MasterSignInState extends State<MasterSignIn>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -131,7 +130,7 @@ class _MasterSignInState extends State<MasterSignIn>
                             color: ktertiary,
                           )),
                           MyText(
-                            text: '  Or continue with phone number  ',
+                            text: '  Or continue',
                             color: ktertiary,
                             size: 14,
                           ),
@@ -145,11 +144,11 @@ class _MasterSignInState extends State<MasterSignIn>
                         height: 30,
                       ),
                       MyTextField(
-                        hint: 'Enter Phone Number',
+                        hint: 'Enter Phone Number/email/username',
                         useOutlinedBorder: true,
                         iscenter: true,
                         radius: 50,
-                        keyboardType: TextInputType.phone,
+                        keyboardType: TextInputType.emailAddress,
                         controller: phoneCon,
                       ),
                       if (showPasswordField)

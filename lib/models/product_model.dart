@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:collection/collection.dart'; // For deep equality on lists
 import 'package:rivala/models/store_model.dart';
 import 'package:rivala/models/user_model.dart';
+import 'package:rivala/models/promotions_model.dart';
+import 'package:rivala/models/collection_model.dart';
 
 class ProductModel {
   final String? id;
@@ -26,6 +28,8 @@ class ProductModel {
   final String? storeId;
   final List<String>? sizes;
   final List<String>? colors;
+  final List<PromotionModel>? promotions;
+  final List<CollectionModel>? collections;
   final List<ProductReview>? reviews; // Fixed typo: review → reviews
 
   /// Const constructor
@@ -51,6 +55,8 @@ class ProductModel {
     this.storeId,
     this.sizes,
     this.colors,
+    this.promotions,
+    this.collections,
     this.reviews,
   });
 
@@ -89,6 +95,12 @@ class ProductModel {
       sizes: _parseSizeList(json['sizes']),
       // Colors: handle both [{hexCode: "#FF0000"}] and ["#FF0000"]
       colors: _parseColorList(json['hexCode'] ?? json['colors']),
+      promotions: (json['promotions'] as List<dynamic>?)
+          ?.map((e) => PromotionModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      collections: (json['collections'] as List<dynamic>?)
+          ?.map((e) => CollectionModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       // Reviews
       reviews: (json['reviews'] as List<dynamic>?)
           ?.map((e) => ProductReview.fromJson(e as Map<String, dynamic>))
@@ -99,6 +111,12 @@ class ProductModel {
   // Helper methods for flexible parsing
   static List<String>? _parseImageList(dynamic data) {
     if (data == null) return null;
+
+    // ✅ Handle single image string
+    if (data is String) {
+      return [data];
+    }
+
     if (data is List) {
       return data
           .map((e) {
@@ -109,6 +127,7 @@ class ProductModel {
           .whereType<String>()
           .toList();
     }
+
     return null;
   }
 
@@ -175,6 +194,10 @@ class ProductModel {
 
       'sizes': sizes?.map((size) => {'size': size}).toList() ?? [],
       'colors': colors?.map((hex) => {'hexCode': hex}).toList() ?? [],
+      if (promotions != null)
+        'promotions': promotions!.map((e) => e.toJson()).toList(),
+      if (collections != null)
+        'collections': collections!.map((e) => e.toJson()).toList(),
     }..removeWhere((key, value) => value == null);
   }
 
@@ -201,6 +224,8 @@ class ProductModel {
     String? storeId,
     List<String>? sizes,
     List<String>? colors,
+    List<PromotionModel>? promotions,
+    List<CollectionModel>? collections,
     List<ProductReview>? reviews,
   }) {
     return ProductModel(
@@ -225,6 +250,8 @@ class ProductModel {
       storeId: storeId ?? this.storeId,
       sizes: sizes ?? this.sizes,
       colors: colors ?? this.colors,
+      promotions: promotions ?? this.promotions,
+      collections: collections ?? this.collections,
       reviews: reviews ?? this.reviews,
     );
   }

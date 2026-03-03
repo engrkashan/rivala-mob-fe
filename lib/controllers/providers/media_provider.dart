@@ -18,14 +18,21 @@ class MediaProvider extends ChangeNotifier {
   }
 
   Future<void> upload({File? url}) async {
+    uploadedUrl = null; // Clear previous state
     setLoading(true);
     try {
+      if (selectedImage == null && url == null) {
+        print("No image selected for upload, skipping.");
+        return;
+      }
       uploadedUrl = await _mediaRepo.uploadFile(file: selectedImage ?? url!);
-      print("Uploaded image url: $uploadedUrl");
+      print("Uploaded image url in mediaProvider: $uploadedUrl");
     } catch (e) {
       print("error while uploading: $e");
+      rethrow;
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   final ImagePicker _picker = ImagePicker();

@@ -88,6 +88,14 @@ class _PromotionsMainState extends State<PromotionsMain> {
           ],
         ));
   }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PromoProvider>().setPromos();
+    });
+  }
 }
 
 class promotions_container extends StatefulWidget {
@@ -171,7 +179,15 @@ class _promotions_containerState extends State<promotions_container> {
             Row(
               children: [
                 buttonContainer(
-                  text: 'Pause Promo',
+                  onTap: () async {
+                    if (promo?.id != null) {
+                      await context
+                          .read<PromoProvider>()
+                          .togglePromoStatus(promo!.id!, promo.status ?? "");
+                    }
+                  },
+                  text:
+                      promo?.status == "PAUSED" ? 'Live Promo' : 'Pause Promo',
                   bgColor: korange,
                   radius: 5,
                   vPadding: 4,
@@ -184,7 +200,25 @@ class _promotions_containerState extends State<promotions_container> {
                   width: 10,
                 ),
                 buttonContainer(
-                  text: 'Delete Product',
+                  onTap: () {
+                    Get.defaultDialog(
+                      title: "Delete Promotion",
+                      middleText:
+                          "Are you sure you want to delete this promotion?",
+                      textConfirm: "Yes",
+                      textCancel: "No",
+                      confirmTextColor: kwhite,
+                      onConfirm: () async {
+                        if (promo?.id != null) {
+                          Get.back(); // close dialog
+                          await context
+                              .read<PromoProvider>()
+                              .deletePromo(promo!.id!);
+                        }
+                      },
+                    );
+                  },
+                  text: 'Delete Promo',
                   bgColor: kred,
                   radius: 5,
                   vPadding: 4,
@@ -196,26 +230,20 @@ class _promotions_containerState extends State<promotions_container> {
               ],
             ),
             MyText(
-              text: '> Edit promo',
-              size: 12,
-              weight: FontWeight.w500,
-              color: kblue,
-              paddingTop: 15,
-              onTap: () {
-                Get.to(() => EditExistingProducts());
-              },
-            )
+                text: '> Edit promo',
+                size: 12,
+                weight: FontWeight.w500,
+                color: kblue,
+                paddingTop: 15,
+                onTap: () {
+                  Get.to(() => StartNewPromo(
+                        buttonText: 'Update Promo',
+                        promo: promo,
+                      ));
+                })
           }
         ],
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PromoProvider>().setPromos();
-    });
   }
 }

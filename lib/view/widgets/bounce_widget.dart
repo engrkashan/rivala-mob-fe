@@ -14,6 +14,6 @@ class Bounce_widget extends StatelessWidget {
     return Bounce(
         child: widget,
         duration: Duration(milliseconds: duration ?? 200),
-        onPressed: ontap??(){});
+        onPressed: ontap ?? () {});
   }
 }
