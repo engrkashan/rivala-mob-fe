@@ -132,7 +132,7 @@ class curated_brand_widget extends StatelessWidget {
     return Column(
       children: [
         CommonImageView(
-          imagePath: img,
+          // imagePath: img,
           url: networkImg,
           name: title,
           width: size ?? 77,

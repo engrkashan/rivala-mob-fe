@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/new_post/add_promo/search_criteria_products.dart';
@@ -13,11 +16,37 @@ import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
 
-class PromoBanner extends StatelessWidget {
+class PromoBanner extends StatefulWidget {
   final String? title, buttonText;
-  final VoidCallback? onbuttonTap;
+  final Function(Map<String, dynamic>)? onbuttonTap;
   final bool? hasCalender;
-  const PromoBanner({super.key, this.title, this.buttonText, this.onbuttonTap, this.hasCalender=true});
+  const PromoBanner({
+    super.key,
+    this.title,
+    this.buttonText,
+    this.onbuttonTap,
+    this.hasCalender = true,
+  });
+
+  @override
+  State<PromoBanner> createState() => _PromoBannerState();
+}
+
+class _PromoBannerState extends State<PromoBanner> {
+  final TextEditingController _header1Controller = TextEditingController();
+  final TextEditingController _header2Controller = TextEditingController();
+  final TextEditingController _bodyController = TextEditingController();
+  File? _imageFile;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +69,7 @@ class PromoBanner extends StatelessWidget {
                   height: 15,
                 ),
                 ContainerAppbar(
-                  title: title ?? 'Pop Up Banner Editor',
+                  title: widget.title ?? 'Pop Up Banner Editor',
                   icon: Assets.imagesClose2,
                   textColor: kblack,
                   isCenter: true,
@@ -54,7 +83,7 @@ class PromoBanner extends StatelessWidget {
                   color: kblue,
                   weight: FontWeight.w500,
                   onTap: () {
-                        Get.back();
+                    Get.back();
                     Get.bottomSheet(
                         SearchCriteriaProducts(
                           title: 'Ad Archive',
@@ -73,27 +102,39 @@ class PromoBanner extends StatelessWidget {
                   paddingBottom: 15,
                 ),
                 Bounce_widget(
-                  ontap: () {},
+                  ontap: _pickImage,
                   widget: CustomeContainer(
                     radius: 15,
                     color: kgrey4,
                     vpad: 25,
                     widget: Center(
-                        child: Image.asset(
-                      Assets.imagesUpload,
-                      width: 70,
-                      height: 70,
-                    )),
+                        child: _imageFile != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.file(
+                                  _imageFile!,
+                                  width: 150,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Image.asset(
+                                Assets.imagesUpload,
+                                width: 70,
+                                height: 70,
+                              )),
                   ),
                 ),
                 SizedBox(
                   height: 20,
                 ),
                 MyTextField(
+                  controller: _header1Controller,
                   hint: 'Type header here',
                   label: 'Header 1',
                 ),
                 MyTextField(
+                  controller: _header2Controller,
                   hint: 'Type header here',
                   label: 'Header 2',
                 ),
@@ -154,6 +195,7 @@ class PromoBanner extends StatelessWidget {
                   height: 5,
                 ),
                 MyTextField(
+                  controller: _bodyController,
                   hint:
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore. Lorem ipsum dolor sit amet.',
                   maxLines: 5,
@@ -168,7 +210,7 @@ class PromoBanner extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             MyText(
-                              text: '20/100',
+                              text: '${_bodyController.text.length}/100',
                               color: ktertiary,
                               paddingRight: 3,
                             ),
@@ -183,30 +225,38 @@ class PromoBanner extends StatelessWidget {
                     ),
                   ),
                 ),
-                if(hasCalender==true)...{
-                MyText(
-                  text: 'Set Start & End Date',
-                  size: 15,
-                  color: kblack,
-                  weight: FontWeight.w500,
-                  paddingTop: 30,
-                  paddingBottom: 15,
-                ),
-                MyCalender(),
-                calender_row(
-                  title: 'Start',
-                ),
-                calender_row(),
+                if (widget.hasCalender == true) ...{
+                  MyText(
+                    text: 'Set Start & End Date',
+                    size: 15,
+                    color: kblack,
+                    weight: FontWeight.w500,
+                    paddingTop: 30,
+                    paddingBottom: 15,
+                  ),
+                  MyCalender(),
+                  calender_row(
+                    title: 'Start',
+                  ),
+                  calender_row(),
                 },
                 SizedBox(
                   height: 15,
                 ),
                 MyButton(
-                  buttonText: buttonText ?? 'Save ad',
-                  onTap: onbuttonTap ??
-                      () {
-                            Get.back();
-                      },
+                  buttonText: widget.buttonText ?? 'Save ad',
+                  onTap: () {
+                    if (widget.onbuttonTap != null) {
+                      widget.onbuttonTap!({
+                        "header1": _header1Controller.text,
+                        "header2": _header2Controller.text,
+                        "body": _bodyController.text,
+                        "image": _imageFile?.path ?? "",
+                        // Add dates if needed
+                      });
+                    }
+                    Get.back();
+                  },
                 ),
                 SizedBox(
                   height: 70,

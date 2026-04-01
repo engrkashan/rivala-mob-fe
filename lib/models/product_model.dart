@@ -112,16 +112,13 @@ class ProductModel {
   static List<String>? _parseImageList(dynamic data) {
     if (data == null) return null;
 
-    // ✅ Handle single image string
-    if (data is String) {
-      return [data];
-    }
+    if (data is String) return [data];
 
     if (data is List) {
       return data
           .map((e) {
             if (e is String) return e;
-            if (e is Map<String, dynamic>) return e['url'] as String?;
+            if (e is Map) return e['url']?.toString();
             return null;
           })
           .whereType<String>()
@@ -133,11 +130,13 @@ class ProductModel {
 
   static List<String>? _parseSizeList(dynamic data) {
     if (data == null) return null;
+    if (data is String) return [data];
+
     if (data is List) {
       return data
           .map((e) {
             if (e is String) return e;
-            if (e is Map<String, dynamic>) return e['size'] as String?;
+            if (e is Map) return e['size']?.toString();
             return null;
           })
           .whereType<String>()
@@ -148,11 +147,13 @@ class ProductModel {
 
   static List<String>? _parseColorList(dynamic data) {
     if (data == null) return null;
+    if (data is String) return [data];
+
     if (data is List) {
       return data
           .map((e) {
             if (e is String) return e;
-            if (e is Map<String, dynamic>) return e['hexCode'] as String?;
+            if (e is Map) return e['hexCode']?.toString();
             return null;
           })
           .whereType<String>()

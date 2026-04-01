@@ -36,10 +36,6 @@ class CommonImageView extends StatelessWidget {
   }
 
   Widget _buildImageView() {
-    final int? safeMemWidth =
-        width != null ? width!.clamp(100, 400).toInt() : 400;
-    final int? safeMemHeight =
-        height != null ? height!.clamp(100, 400).toInt() : 400;
     if (svgPath != null && svgPath!.isNotEmpty) {
       return Container(
         height: height,
@@ -72,12 +68,6 @@ class CommonImageView extends StatelessWidget {
           width: width,
           fit: fit,
           imageUrl: url!,
-          // Memory optimization: Resize image in memory to display size
-          memCacheWidth: safeMemWidth,
-          memCacheHeight: safeMemHeight,
-          // Disk optimization: Don't store massive original images if not needed
-          maxWidthDiskCache: safeMemWidth,
-          maxHeightDiskCache: safeMemHeight,
           placeholder: (context, url) => Container(
             height: 23,
             width: 23,

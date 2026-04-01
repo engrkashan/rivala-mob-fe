@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/controllers/providers/brands_provider.dart';
+import 'package:rivala/controllers/providers/media_provider.dart';
 import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/theme_model.dart';
@@ -161,8 +162,10 @@ class _MasterChooseThemeState extends State<MasterChooseTheme> {
                     final themeProvider = context.read<ThemeProvider>();
                     final brandsProvider = context.read<BrandsProvider>();
 
+                    final mediaProvider = context.read<MediaProvider>();
                     final newTheme =
                         await themeProvider.addCustomTheme(ThemeModel(
+                      coverImage: mediaProvider.uploadedUrl,
                       colorDark: colorToHex(selectedColors[0]),
                       color1: colorToHex(selectedColors[1]),
                       color2: colorToHex(selectedColors[2]),

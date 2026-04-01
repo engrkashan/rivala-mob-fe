@@ -1,6 +1,7 @@
 import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/controllers/providers/pages_provider.dart';
 import 'package:rivala/controllers/providers/collections_provider.dart';
@@ -200,10 +201,12 @@ class _AddPageSectionState extends State<AddPageSection> {
                     desc:
                         "Rivale will automatically feature all of your recently liked posts to this section",
                     img: Assets.imagesCustomlike,
-                    ontap: () {
-                      Get.back();
-                      AlertInfo.show(context: context, text: "Coming soon!");
-                    },
+                    ontap: () => _addSection({
+                      "title": "Recent Likes",
+                      "type": "RECENT_LIKES",
+                      "isVisible": true,
+                      "settings": {"heading": "Recent Likes"}
+                    }),
                     delay: 300,
                   ),
                   SizedBox(height: 15),
@@ -212,10 +215,12 @@ class _AddPageSectionState extends State<AddPageSection> {
                     desc:
                         "Rivale will automatically feature all of your recently shared posts to this section",
                     img: Assets.imagesCustomsharw,
-                    ontap: () {
-                      Get.back();
-                      AlertInfo.show(context: context, text: "Coming soon!");
-                    },
+                    ontap: () => _addSection({
+                      "title": "Recent Shares",
+                      "type": "RECENT_SHARES",
+                      "isVisible": true,
+                      "settings": {"heading": "Recent Shares"}
+                    }),
                     delay: 450,
                   ),
                   SizedBox(height: 15),
@@ -225,8 +230,21 @@ class _AddPageSectionState extends State<AddPageSection> {
                         "Highlight special offers, announcements, or promotions to visitors",
                     img: Assets.imagesCustompromo,
                     ontap: () {
-                      Get.back();
-                      Get.bottomSheet(PromoBanner(), isScrollControlled: true);
+                      Get.bottomSheet(PromoBanner(
+                        onbuttonTap: (data) {
+                          _addSection({
+                            "title": "Promo Banner",
+                            "type": "PROMOTION_BANNER",
+                            "isVisible": true,
+                            "settings": {
+                              "heading": data["header1"],
+                              "subheading": data["header2"],
+                              "body": data["body"],
+                              "image": data["image"],
+                            }
+                          });
+                        },
+                      ), isScrollControlled: true);
                     },
                     delay: 600,
                   ),
@@ -237,11 +255,24 @@ class _AddPageSectionState extends State<AddPageSection> {
                         "A temporary window displaying promotions or messages over website content",
                     img: Assets.imagesCustompromo,
                     ontap: () {
-                      Get.back();
                       Get.bottomSheet(
                           PromoBanner(
                             title: 'Pop Up Ad Editor',
                             buttonText: 'Save banner',
+                            onbuttonTap: (data) {
+                              _addSection({
+                                "title": "Promo Pop Up",
+                                "type":
+                                    "PROMOTION_POPUP", // Adjust based on your enum if different
+                                "isVisible": true,
+                                "settings": {
+                                  "heading": data["header1"],
+                                  "subheading": data["header2"],
+                                  "body": data["body"],
+                                  "image": data["image"],
+                                }
+                              });
+                            },
                           ),
                           isScrollControlled: true);
                     },
@@ -322,13 +353,21 @@ class _AddPageSectionState extends State<AddPageSection> {
                     desc:
                         "Add photos, videos, GIFs, and the like to your storefront",
                     img: Assets.imagesCustommedia,
-                    ontap: () {
-                      _addSection({
-                        "title": "Media",
-                        "type": "MEDIA",
-                        "isVisible": true,
-                        "settings": {"image": "", "heading": "Media"}
-                      });
+                    ontap: () async {
+                      final picker = ImagePicker();
+                      final pickedFile =
+                          await picker.pickImage(source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        _addSection({
+                          "title": "Media",
+                          "type": "MEDIA",
+                          "isVisible": true,
+                          "settings": {
+                            "image": pickedFile.path,
+                            "heading": "Media"
+                          }
+                        });
+                      }
                     },
                     delay: 1200,
                   ),

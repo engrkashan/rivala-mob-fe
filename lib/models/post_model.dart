@@ -3,21 +3,23 @@ import 'package:rivala/models/user_model.dart';
 
 class PostModel {
   final String? id;
-  final String? content;
+  final String? title;
+  final String? description;
   final List<String>? media;
   final int? likeCount;
   final int? commentCount;
-  final UserModel? owner;
+  final UserModel? author;
   final ProductModel? product;
   final DateTime? createdAt;
 
   PostModel({
     this.id,
-    this.content,
+    this.title,
+    this.description,
     this.media,
     this.likeCount,
     this.commentCount,
-    this.owner,
+    this.author,
     this.product,
     this.createdAt,
   });
@@ -25,11 +27,20 @@ class PostModel {
   factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
       id: json['id'],
-      content: json['content'],
-      media: (json['media'] as List?)?.map((e) => e.toString()).toList(),
+      title: json['title'] ?? json['content'],
+      description: json['description'],
+      media: (json['media'] as List?)?.map((e) {
+        if (e is String) return e;
+        if (e is Map) return e['url']?.toString() ?? '';
+        return e.toString();
+      }).toList(),
       likeCount: json['likeCount'],
       commentCount: json['commentCount'],
-      owner: json['user'] != null ? UserModel.fromJson(json['user']) : null,
+      author: (json['author'] != null)
+          ? UserModel.fromJson(json['author'])
+          : (json['user'] != null)
+              ? UserModel.fromJson(json['user'])
+              : null,
       product: json['product'] != null
           ? ProductModel.fromJson(json['product'])
           : null,

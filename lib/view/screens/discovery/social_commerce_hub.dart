@@ -171,6 +171,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 separatorBuilder: (_, __) => const SizedBox(width: 16),
                 itemBuilder: (_, index) {
                   final p = products[index];
+                  // print("Product Images ${p.image?.first ?? ""}");
                   return GestureDetector(
                     onTap: () => Get.to(
                       () => ProductDetailedDescription(product: p),
@@ -184,6 +185,67 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                           : null,
                       title: p.title ?? "Product",
                       desc: "@${p.owner?.username ?? 'user'}",
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPostSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          child: row_widget(
+            title: "Discover Posts",
+            texSize: 20,
+            weight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 180,
+          child: Consumer<PostProvider>(
+            builder: (_, postProv, __) {
+              final posts = postProv.posts;
+
+              if (posts.isEmpty && postProv.isLoading) {
+                return _SkeletonProductRow();
+              }
+
+              if (posts.isEmpty) {
+                return const SizedBox(
+                  height: 150,
+                  child: Center(child: Text("No posts found")),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.only(left: 22),
+                scrollDirection: Axis.horizontal,
+                itemCount: posts.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, index) {
+                  final p = posts[index];
+                  final thumbnail =
+                      (p.media?.isNotEmpty ?? false) ? p.media!.first : null;
+
+                  return GestureDetector(
+                    onTap: () {
+                      // Future: Navigate to Post detailed view
+                    },
+                    child: curated_brand_widget(
+                      size: 135,
+                      radius: 20,
+                      fit: BoxFit.cover,
+                      networkImg: thumbnail,
+                      title: p.title ?? "Post",
+                      desc: "@${p.author?.username ?? 'user'}",
                     ),
                   );
                 },
@@ -266,6 +328,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
             title: "High Earning Products",
             iconAsset: Assets.imagesEarned,
           ),
+          _buildPostSection(),
           _buildProductSection(
             feedKey: "back-to-school",
             title: "Back to School",

@@ -13,6 +13,7 @@ import 'package:rivala/view/screens/master_flow/new_post/add_location/add_locati
 import 'package:rivala/view/screens/master_flow/new_post/post_expiry/post_expiration.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_tags.dart';
 import 'package:rivala/view/screens/master_flow/new_post/tag_collection/tag_collection.dart';
+import 'package:rivala/controllers/providers/media_provider.dart';
 import 'package:rivala/view/screens/master_flow/new_post/video_play_screen.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -218,6 +219,7 @@ class _PostDetailsState extends State<PostDetails> {
                                       color: kblack,
                                     )),
                                     barrierDismissible: false,
+                                    navigatorKey: Get.key, // Use root navigator
                                   );
 
                                   final filteredPath =
@@ -337,43 +339,74 @@ class _PostDetailsState extends State<PostDetails> {
               mbot: 30,
               hpad: 22,
               ontap: () async {
-                List<String> list = [];
-                // final mediaList = controller.selectedMedia;
-                // for (final file in mediaList) {
-                //   await context.read<MediaProvider>().upload(url: file);
-                //   list.add(context.read<MediaProvider>().uploadedUrl!);
-                // }
-                await context.read<PostProvider>().createPost({
-                  "title": titleController.text,
-                  "description": desc.text,
-                  "media": list,
-                  "taggedProducts":
-                      Provider.of<PostProvider>(context, listen: false)
-                          .tagProducts
-                          .map((e) => e?.id)
-                          .toList(),
-                  "taggedCollection":
-                      Provider.of<PostProvider>(context, listen: false)
-                          .tagCollections
-                          .map((e) => e?.id)
-                          .toList(),
-                  "locations": null
-                });
-                final error = context.watch<PostProvider>().error;
+                // Show loading dialog
+                Get.dialog(
+                  const Center(
+                      child: CircularProgressIndicator(
+                    color: kblack,
+                  )),
+                  barrierDismissible: false,
+                  navigatorKey: Get.key,
+                );
 
-                if (error != null && error.isNotEmpty) {
-                  AlertInfo.show(context: context, text: error);
+                try {
+                  List<Map<String, String>> mediaDataList = [];
+                  final mediaList = controller.selectedMedia;
+                  for (final file in mediaList) {
+                    await context.read<MediaProvider>().upload(url: file);
+                    final uploadedUrl =
+                        context.read<MediaProvider>().uploadedUrl;
+                    if (uploadedUrl != null) {
+                      final ext = file.path.split('.').last.toLowerCase();
+                      final isVideo = ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv']
+                          .contains(ext);
+                      mediaDataList.add({
+                        "url": uploadedUrl,
+                        "type": isVideo ? "VIDEO" : "IMAGE"
+                      });
+                    }
+                  }
+
+                  await context.read<PostProvider>().createPost({
+                    "title": titleController.text,
+                    "description": desc.text,
+                    "media": mediaDataList,
+                    "taggedProducts":
+                        Provider.of<PostProvider>(context, listen: false)
+                            .tagProducts
+                            .map((e) => e?.id)
+                            .toList(),
+                    "taggedCollection":
+                        Provider.of<PostProvider>(context, listen: false)
+                            .tagCollections
+                            .map((e) => e?.id)
+                            .toList(),
+                    "locations": null
+                  });
+
+                  // Close loading dialog
+                  Get.back();
+
+                  final error = context.read<PostProvider>().error;
+                  if (error != null && error.isNotEmpty) {
+                    AlertInfo.show(context: Get.context!, text: error);
+                  } else {
+                    Get.to(() => GradientSuccessScreen(
+                          title: 'Congratulations!',
+                          textSize: 32,
+                          desc: 'Now let’s share your post.',
+                          buttontext: 'Share your post!',
+                          ontap: () {
+                            Get.to(() => PersistentBottomNavBar());
+                          },
+                        ));
+                  }
+                } catch (e) {
+                  Get.back(); // ensure loader is closed
+                  AlertInfo.show(
+                      context: Get.context!,
+                      text: "Failed to upload media: $e");
                 }
-                Get.to(() => GradientSuccessScreen(
-                      title: 'Congratulations!',
-                      textSize: 32,
-                      desc: 'Now let’s share your post.',
-                      buttontext: 'Share your post!',
-                      ontap: () {
-                        Get.to(() => PersistentBottomNavBar());
-                      },
-                      // hasSkip: false,
-                    ));
               },
             )
           ],

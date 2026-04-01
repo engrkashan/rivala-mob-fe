@@ -55,8 +55,8 @@ class _PostDisplayState extends State<PostDisplay> {
     }
 
     final store = prd?.store;
-    final owner = post?.owner;
-    final title = post?.content ?? prd?.title ?? 'Post Details';
+    final owner = post?.author;
+    final title = post?.title ?? prd?.title ?? 'Post Details';
     final likes = post?.likeCount?.toString() ?? '0';
     final comments = post?.commentCount?.toString() ?? '0';
 

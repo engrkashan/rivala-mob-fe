@@ -1,3 +1,4 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -73,7 +74,7 @@ class _PostExpirationState extends State<PostExpiration> {
                     readOnly: true,
                     ontapp: () async {
                       final date = await showDatePicker(
-                        context: context,
+                        context: Get.context!,
                         initialDate: selectedDate ?? DateTime.now(),
                         firstDate: DateTime.now(),
                         lastDate: DateTime(2100),
@@ -82,7 +83,7 @@ class _PostExpirationState extends State<PostExpiration> {
                       if (date == null) return;
 
                       final time = await showTimePicker(
-                        context: context,
+                        context: Get.context!,
                         initialTime: selectedTime ?? TimeOfDay.now(),
                       );
 
@@ -125,7 +126,8 @@ class _PostExpirationState extends State<PostExpiration> {
               },
               ontap: () {
                 if (selectedDate == null || selectedTime == null) {
-                  Get.snackbar('Missing info', 'Please select date & time');
+                  AlertInfo.show(
+                      context: context, text: 'Please select date & time');
                   return;
                 }
 
@@ -142,7 +144,6 @@ class _PostExpirationState extends State<PostExpiration> {
                 Get.back();
               },
             ),
-
           ],
         ));
   }

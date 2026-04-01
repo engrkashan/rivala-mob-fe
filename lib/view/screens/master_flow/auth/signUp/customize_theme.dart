@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/providers/media_provider.dart';
 import 'package:rivala/controllers/providers/theme_provider.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/theme_model.dart';
@@ -190,7 +191,9 @@ class _CustomizeThemeState extends State<CustomizeTheme> {
                       mbot: 30,
                       ontap: () async {
                         //Get.offAll(() => PersistentBottomNavBar());
+                        final mediaProvider = context.read<MediaProvider>();
                         await theme.addCustomTheme(ThemeModel(
+                            coverImage: mediaProvider.uploadedUrl,
                             colorDark: colorToHex(kheader),
                             color1: colorToHex(kheader),
                             color2: colorToHex(ksubHeader),
