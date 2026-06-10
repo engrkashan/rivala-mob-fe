@@ -92,11 +92,43 @@ class ChatProvider extends ChangeNotifier {
       setSending(false);
     }
   }
-
-  Future<void> deleteMessage(String messageId) async {
+  Future<void> deleteMessage(String messageId, String chatId) async {
     try {
       await _repo.deleteMessage(messageId);
       _chats.removeWhere((m) => m.id == messageId);
+
+      // Update conversation list with new last message
+      if (_chats.isNotEmpty) {
+        final lastMsg = _chats.last;
+        final idx = _allChats.indexWhere((c) => c.chatId == chatId);
+        if (idx != -1) {
+          final chat = _allChats[idx];
+          _allChats[idx] = ChatUser(
+            id: chat.id,
+            chatId: chat.chatId,
+            name: chat.name,
+            avatarUrl: chat.avatarUrl,
+            lastMessage: lastMsg.content,
+            lastMessageTime: lastMsg.createdAt,
+          );
+          _filteredChats = List.from(_allChats);
+        }
+      } else {
+        // No messages left - clear lastMessage
+        final idx = _allChats.indexWhere((c) => c.chatId == chatId);
+        if (idx != -1) {
+          final chat = _allChats[idx];
+          _allChats[idx] = ChatUser(
+            id: chat.id,
+            chatId: chat.chatId,
+            name: chat.name,
+            avatarUrl: chat.avatarUrl,
+            lastMessage: null,
+            lastMessageTime: null,
+          );
+          _filteredChats = List.from(_allChats);
+        }
+      }
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -113,16 +145,37 @@ class ChatProvider extends ChangeNotifier {
       _error = e.toString();
     }
   }
-
   Future<void> clearChat(String chatId) async {
     try {
       await _repo.clearChat(chatId);
       _chats.clear();
+      final idx = _allChats.indexWhere((c) => c.chatId == chatId);
+      if (idx != -1) {
+        final chat = _allChats[idx];
+        _allChats[idx] = ChatUser(
+          id: chat.id,
+          chatId: chat.chatId,
+          name: chat.name,
+          avatarUrl: chat.avatarUrl,
+          lastMessage: null,
+          lastMessageTime: null,
+        );
+        _filteredChats = List.from(_allChats);
+      }
       notifyListeners();
     } catch (e) {
       _error = e.toString();
     }
   }
+  // Future<void> clearChat(String chatId) async {
+  //   try {
+  //     await _repo.clearChat(chatId);
+  //     _chats.clear();
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _error = e.toString();
+  //   }
+  // }
 
   // ─── Conversation List ─────────────────────────────────────────────────────
 

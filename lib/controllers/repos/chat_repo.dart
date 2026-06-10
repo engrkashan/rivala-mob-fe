@@ -11,7 +11,7 @@ class ChatRepo {
       endpoints: Endpoints.messagesHistory,
       query: {"chatId": chatId},
     );
-    final list = res['users'] as List;
+    final list = (res['messages'] ?? res['data'] ?? []) as List;
     return list.map((item) => MessageModel.fromJson(item)).toList();
   }
 

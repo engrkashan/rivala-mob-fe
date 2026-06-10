@@ -15,6 +15,7 @@ import '../../../../controllers/providers/brands_provider.dart';
 import '../../../../controllers/providers/follow_provider.dart';
 import '../../../../models/store_model.dart';
 import '../../../../models/product_model.dart';
+import '../../../widgets/common_image_view_widget.dart';
 
 class StoreMainProfile extends StatefulWidget {
   final String? slug;
@@ -125,7 +126,7 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 22),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.between,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
                                       child: MyText(

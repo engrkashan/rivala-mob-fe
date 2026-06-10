@@ -236,12 +236,10 @@ class _ChatsState extends State<Chats> {
                     message:
                         'This will permanently remove this message for everyone.',
                     confirmText: 'Delete',
-                    onConfirm: () {
-                      if (msg.id != null) {
-                        context
-                            .read<ChatProvider>()
-                            .deleteMessage(msg.id!);
-                      }
+    onConfirm: () {
+    if (msg.id != null) {
+    context.read<ChatProvider>().deleteMessage(msg.id!, _chatId);
+    }
                     },
                   );
                 },
@@ -305,6 +303,7 @@ class _ChatsState extends State<Chats> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5FDF9),
         appBar: AppBar(
+          clipBehavior: Clip.none,
           backgroundColor: kwhite,
           elevation: 1,
           leading: IconButton(
@@ -364,76 +363,72 @@ class _ChatsState extends State<Chats> {
             ],
           ),
           actions: [
-            // 3-dot menu — Clear Chat / Delete Chat — matches web header menu
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.more_vert_rounded,
-                      color: Colors.black87),
-                  onPressed: () =>
-                      setState(() => _showHeaderMenu = !_showHeaderMenu),
-                ),
-                if (_showHeaderMenu)
-                  Positioned(
-                    right: 8,
-                    top: 40,
-                    child: Material(
-                      elevation: 8,
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: 190,
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        decoration: BoxDecoration(
-                          color: kwhite,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: kgrey2),
-                        ),
-                        child: Column(
-                          children: [
-                            _menuItem(
-                              icon: Icons.clear_all_rounded,
-                              label: 'Clear Chat',
-                              onTap: () {
-                                setState(
-                                    () => _showHeaderMenu = false);
-                                _showConfirmDialog(
-                                  title: 'Clear Conversation?',
-                                  message:
-                                      'This will delete all messages for both parties.',
-                                  confirmText: 'Clear',
-                                  isDanger: false,
-                                  onConfirm: () {
-                                    context
-                                        .read<ChatProvider>()
-                                        .clearChat(_chatId);
-                                  },
-                                );
-                              },
-                            ),
-                            _menuItem(
-                              icon: Icons.delete_outline_rounded,
-                              label: 'Delete Chat',
-                              color: Colors.red,
-                              onTap: () {
-                                setState(
-                                    () => _showHeaderMenu = false);
-                                _showConfirmDialog(
-                                  title: 'Delete Conversation?',
-                                  message:
-                                      'This will permanently delete this conversation for everyone.',
-                                  confirmText: 'Delete',
-                                  onConfirm: () {
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+            Builder(
+              builder: (context) {
+                return IconButton(
+                  icon: const Icon(
+                    Icons.more_vert_rounded,
+                    color: Colors.black87,
                   ),
-              ],
+                  onPressed: () async {
+                    final RenderBox button =
+                    context.findRenderObject() as RenderBox;
+                    final RenderBox overlay =
+                    Overlay.of(context).context.findRenderObject()
+                    as RenderBox;
+
+                    final result = await showMenu<String>(
+                      context: context,
+                      color: kwhite,
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      position: RelativeRect.fromRect(
+                        Rect.fromPoints(
+                          button.localToGlobal(
+                            Offset.zero,
+                            ancestor: overlay,
+                          ),
+                          button.localToGlobal(
+                            button.size.bottomRight(Offset.zero),
+                            ancestor: overlay,
+                          ),
+                        ),
+                        Offset.zero & overlay.size,
+                      ),
+                      items: const [
+                        PopupMenuItem<String>(
+                          value: 'clear',
+                          child: Row(
+                            children: [
+                              Icon(Icons.clear_all_rounded),
+                              SizedBox(width: 10),
+                              Text('Clear Chat'),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    );
+
+                    if (result == 'clear') {
+                      _showConfirmDialog(
+                        title: 'Clear Conversation?',
+                        message:
+                        'This will delete all messages for both parties.',
+                        confirmText: 'Clear',
+                        isDanger: false,
+                        onConfirm: () {
+                          context
+                              .read<ChatProvider>()
+                              .clearChat(_chatId);
+                        },
+                      );
+                    }
+                  },
+                );
+              },
             ),
           ],
         ),
