@@ -6,9 +6,6 @@ import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// Category Management screen — mirrors the web's
-/// sell-on-rivala/category-management section.
-/// Uses CategoriesProvider.loadCategories() to list all store categories.
 class CategoryManagement extends StatefulWidget {
   const CategoryManagement({super.key});
 
