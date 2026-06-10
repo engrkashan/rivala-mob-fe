@@ -22,6 +22,15 @@ class WalletMain extends StatefulWidget {
 class _WalletMainState extends State<WalletMain> {
   int selectedIndex = -1;
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<WalletProvider>().loadWalletData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> mainMenuItems = [
       {
@@ -75,7 +84,7 @@ class _WalletMainState extends State<WalletMain> {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     MyText(
-                      text: 'Sell On Rivala',
+                      text: 'Wallet',
                       size: 28,
                       weight: FontWeight.bold,
                       color: kblack,

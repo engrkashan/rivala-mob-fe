@@ -3,6 +3,7 @@ import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/earned_commission/commission_earned.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/category_management/category_management.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/fullfillment/active_shopping_methods.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/order_management.dart/order_management.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/product_management/product_manage_main.dart';
@@ -95,6 +96,15 @@ class _SellOnRivalaState extends State<SellOnRivala> {
               CustomPageRoute(
                 page: SellerRestrictionsScreen(),
               ),
+            )
+      },
+      // Matches web: sell-on-rivala/category-management
+      {
+        'text': 'Category Management',
+        'icon': Assets.imagesCollection3,
+        'delay': 1150,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: const CategoryManagement()),
             )
       },
     ];

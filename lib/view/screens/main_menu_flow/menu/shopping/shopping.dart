@@ -3,7 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
-import 'package:rivala/view/screens/main_menu_flow/menu/orders/guest_accout_login/login_guest_account.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/orders/my_orders.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/subscription/subscription_management.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
@@ -26,8 +26,9 @@ class _ShoppingState extends State<Shopping> {
         'textt': 'Orders',
         'icon': Assets.imagesOrders,
         'delay': 100,
+        // Matches web: navigates to BuyerOrders (MyOrders on mobile)
         'ontap': () => Navigator.of(context)
-            .push(CustomPageRoute(page: LoginGuestAccount())),
+            .push(CustomPageRoute(page: MyOrders())),
       },
       {
         'textt': 'Subscriptions',

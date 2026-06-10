@@ -8,6 +8,7 @@ import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/earned_comm
 import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/pages/pages_main.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/personal_info/personal_info.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/wallet/payment/payment_management.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/create_linkss/manuall_links/create_new_link.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/customize_theme.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
@@ -90,6 +91,15 @@ class _ManageStoreState extends State<ManageStore> {
                   hasDelete: true,
                 ),
               ),
+            )
+      },
+      // Matches web: manage-your-store/payment-methods
+      {
+        'text': 'Payment Methods',
+        'icon': Assets.imagesPaymnet,
+        'delay': 1000,
+        'onTap': () => Navigator.of(context).push(
+              CustomPageRoute(page: PaymentManagement()),
             )
       },
       // {
