@@ -88,9 +88,9 @@ class _CategoryManagementState extends State<CategoryManagement> {
                   weight: FontWeight.w600,
                   color: kblack,
                 ),
-                subtitle: (cat.slug != null)
+                subtitle: (cat.description != null && cat.description!.isNotEmpty)
                     ? MyText(
-                        text: cat.slug!,
+                        text: cat.description!,
                         size: 12,
                         color: ktertiary,
                       )

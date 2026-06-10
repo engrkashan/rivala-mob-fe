@@ -12,17 +12,26 @@ class ChatProvider extends ChangeNotifier {
   List<ChatUser> _allChats = [];
   List<ChatUser> get allChats => _allChats;
 
+  // Filtered list for search in conversation list
+  List<ChatUser> _filteredChats = [];
+  List<ChatUser> get filteredChats => _filteredChats;
+
   ChatModel? _initiateChat;
   ChatModel? get initiateChat => _initiateChat;
-
-  // List<ChatModel> _filteredChats = [];
-  // List<ChatModel> get filteredChats => _filteredChats;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   bool _isSending = false;
   bool get isSending => _isSending;
+
+  // Editing state
+  String? _editingMessageId;
+  String? get editingMessageId => _editingMessageId;
+  void setEditingMessage(String? id) {
+    _editingMessageId = id;
+    notifyListeners();
+  }
 
   String? _error;
   String? get error => _error;
@@ -39,13 +48,14 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ─── Messages ──────────────────────────────────────────────────────────────
+
   Future<void> loadMessages(String chatId) async {
     setLoading(true);
     try {
       final messages = await _repo.getMessages(chatId);
       _chats = messages;
-      // _filteredChats = _chats;
-      _error = "";
+      _error = null;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -54,20 +64,61 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> sendMessage(String chatId, String content) async {
-    if (content.isEmpty) return;
+    if (content.trim().isEmpty) return;
     setSending(true);
     try {
-      final newMessage = await _repo.sendMessage(chatId, content);
-      _chats.add(newMessage);
+      if (_editingMessageId != null) {
+        // Edit existing message
+        final updated = await _repo.editMessage(_editingMessageId!, content);
+        final idx = _chats.indexWhere((m) => m.id == _editingMessageId);
+        if (idx != -1) _chats[idx] = updated;
+        _editingMessageId = null;
+      } else {
+        // New message
+        final newMessage = await _repo.sendMessage(chatId, content);
+        _chats.add(newMessage);
+      }
       getAllChats();
       notifyListeners();
     } catch (e) {
       _error = e.toString();
-      // Optionally show a snackbar or toast here via a service or callback
     } finally {
       setSending(false);
     }
   }
+
+  Future<void> deleteMessage(String messageId) async {
+    try {
+      await _repo.deleteMessage(messageId);
+      _chats.removeWhere((m) => m.id == messageId);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+    }
+  }
+
+  Future<void> reactToMessage(
+      String messageId, String type, String chatId) async {
+    try {
+      await _repo.reactToMessage(messageId, type, chatId);
+      // Reload messages to get fresh reactions
+      await loadMessages(chatId);
+    } catch (e) {
+      _error = e.toString();
+    }
+  }
+
+  Future<void> clearChat(String chatId) async {
+    try {
+      await _repo.clearChat(chatId);
+      _chats.clear();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+    }
+  }
+
+  // ─── Conversation List ─────────────────────────────────────────────────────
 
   Future<void> loadUnreadMessages() async {
     try {
@@ -75,8 +126,42 @@ class ChatProvider extends ChangeNotifier {
       _unreadChats = messages;
       notifyListeners();
     } catch (e) {
-      print("Error loading unread messages: $e");
+      debugPrint("Error loading unread messages: $e");
     }
+  }
+
+  Future<void> getAllChats() async {
+    setLoading(true);
+    try {
+      _allChats = await _repo.getChats();
+      // Sort by lastMessageTime descending — matches web sidebar sort
+      _allChats.sort((a, b) {
+        final aTime = a.lastMessageTime ?? DateTime(2000);
+        final bTime = b.lastMessageTime ?? DateTime(2000);
+        return bTime.compareTo(aTime);
+      });
+      _filteredChats = List.from(_allChats);
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _allChats = [];
+      _filteredChats = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  void searchChats(String query) {
+    if (query.trim().isEmpty) {
+      _filteredChats = List.from(_allChats);
+    } else {
+      final q = query.toLowerCase();
+      _filteredChats = _allChats.where((c) {
+        return c.name.toLowerCase().contains(q) ||
+            (c.lastMessage ?? '').toLowerCase().contains(q);
+      }).toList();
+    }
+    notifyListeners();
   }
 
   Future<void> getInitiateChat(String receiverId) async {
@@ -86,19 +171,6 @@ class ChatProvider extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = e.toString();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  Future<void> getAllChats() async {
-    setLoading(true);
-    try {
-      _allChats = await _repo.getChats();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-      _allChats = [];
     } finally {
       setLoading(false);
     }

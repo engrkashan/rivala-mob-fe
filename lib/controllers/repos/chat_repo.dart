@@ -33,6 +33,34 @@ class ChatRepo {
     return MessageModel.fromJson(res['message']);
   }
 
+  Future<void> deleteMessage(String messageId) async {
+    await api.deleteRequest(endpoint: Endpoints.messagesWithId(messageId));
+  }
+
+  Future<MessageModel> editMessage(String messageId, String content) async {
+    final res = await api.putResponse(
+      endpoints: Endpoints.messagesWithId(messageId),
+      data: {"content": content},
+    );
+    return MessageModel.fromJson(res['message']);
+  }
+
+  Future<void> reactToMessage(
+      String messageId, String type, String chatId) async {
+    await api.postResponse(
+      endpoints: Endpoints.reactToMessage,
+      data: {
+        "messageId": messageId,
+        "type": type,
+        "chatId": chatId,
+      },
+    );
+  }
+
+  Future<void> clearChat(String chatId) async {
+    await api.deleteRequest(endpoint: Endpoints.clearChat(chatId));
+  }
+
   Future<Map<String, int>> getUnreadMessages() async {
     final res = await api.getResponse(endpoints: Endpoints.messagesUnread);
     return Map<String, int>.from(res['unreadCounts'] ?? {});
