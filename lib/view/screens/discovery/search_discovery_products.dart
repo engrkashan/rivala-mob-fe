@@ -65,6 +65,8 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                     // readOnly: true,
                     onChanged: (e) {
                       context.read<ProductProvider>().onSearchChanged(e);
+                      // Minimal setState only to toggle the hint/results visibility
+                      // based on text length; Consumer<ProductProvider> handles data rebuilds
                       setState(() {});
                     },
                   ),
@@ -73,8 +75,8 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                   ),
                   Consumer<BrandsProvider>(
                     builder: (context, ref, _) {
+                      if (ref.currentStore == null) return const SizedBox.shrink();
                       return row_widget(
-                          // icon: ref.currentStor,
                           icon: ref.currentStore?.logoUrl,
                           title: ref.currentStore?.name,
                           iconSize: 54,
@@ -87,16 +89,37 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                   SizedBox(
                     height: 12,
                   ),
-                  if (searchCon.text.isNotEmpty)
+                  if (searchCon.text.length < 2)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: Center(
+                        child: Text(
+                          'Type at least 2 characters to search...',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    )
+                  else
                     Consumer<ProductProvider>(
                       builder: (context, ref, _) {
                         print("prd length: ${ref.searchProductsList?.length}");
                         final prds = ref.searchProductsList;
+                        if (prds == null || prds.isEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: Text(
+                                'No results found',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          );
+                        }
                         return ListView.builder(
                           padding: EdgeInsets.all(0),
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: prds?.length ?? 0,
+                          itemCount: prds.length,
                           itemBuilder: (context, switchIndex) {
                             return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
@@ -104,7 +127,7 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                                   size: 54,
                                   hpad: 0,
                                   bgColor: ktransparent,
-                                  product: prds![switchIndex],
+                                  product: prds[switchIndex],
                                   isProduct: true,
                                   onlyTexts: true,
                                 ));

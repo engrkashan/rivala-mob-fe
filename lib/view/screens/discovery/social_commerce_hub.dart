@@ -16,6 +16,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../controllers/providers/post_provider.dart';
 import '../../../controllers/providers/product_provider.dart';
 import '../master_store_flow/store_menu/following_profile.dart';
+import '../master_flow/creators/creator_posts_screen.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -26,56 +27,43 @@ class SocialCommerceHub extends StatefulWidget {
 
 class _SocialCommerceHubState extends State<SocialCommerceHub> {
   final ScrollController _scrollController = ScrollController();
-  final Set<String> _loadedFeeds = {};
+  bool _isScrollLoadingScheduled = false;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<BrandsProvider>().loadRecentBrands();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
+      // Load all feeds in parallel — mirrors the web's useEffect dispatch pattern
+      context.read<BrandsProvider>().loadRecentBrands();
       context.read<ProductProvider>().loadFeed("recent");
-      _loadedFeeds.add("recent");
-
-      final postProvider = context.read<PostProvider>();
-      postProvider.loadCreators();
-      postProvider.loadDiscoverPosts();
+      context.read<ProductProvider>().loadFeed("trending");
+      context.read<ProductProvider>().loadFeed("back-to-school");
+      // "picks-for-you" & "local-product" are loaded via location on web;
+      // load them as feeds here so the sections appear when data arrives
+      context.read<ProductProvider>().loadFeed("picks-for-you");
+      context.read<ProductProvider>().loadFeed("local-product");
+      context.read<PostProvider>().loadCreators();
     });
 
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
+    // Guard: only fire once per frame to avoid excessive calls
+    if (_isScrollLoadingScheduled) return;
     if (!_scrollController.hasClients) return;
 
     final position = _scrollController.position;
     final triggerPoint = position.maxScrollExtent * 0.7;
 
     if (position.pixels > triggerPoint) {
-      _lazyLoadFeeds();
-    }
-  }
-
-  void _lazyLoadFeeds() {
-    final feeds = [
-      "high-earning",
-      "back-to-school",
-      "trending",
-      "for-you",
-      "local-product",
-    ];
-
-    final productProvider = context.read<ProductProvider>();
-
-    for (final feed in feeds) {
-      if (_loadedFeeds.contains(feed)) continue;
-
-      _loadedFeeds.add(feed);
-      productProvider.loadFeed(feed);
-      debugPrint("Lazy loaded: $feed");
-      break; // load ONE at a time (important)
+      _isScrollLoadingScheduled = true;
+      // Reset flag after a short delay so future scrolls can trigger again
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) _isScrollLoadingScheduled = false;
+      });
     }
   }
 
@@ -92,8 +80,9 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
       builder: (_, brands, __) {
         final recent = brands.store;
 
+        // Loading state — same skeleton style as product rows
         if (recent == null) {
-          return CircularProgressIndicator();
+          return SizedBox(height: 180, child: _buildSkeletonProductRow());
         }
 
         if (recent.isEmpty) {
@@ -115,10 +104,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               return GestureDetector(
                 onTap: () => Navigator.push(
                     context,
-                    // MaterialPageRoute(
-                    //     builder: (_) => StoreMainProfile(
-                    //           slug: brand.slug,
-                    //         ))
                     CustomPageRoute(
                         page: FollowerMaiProfile(
                       store: brand,
@@ -161,7 +146,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
               final products = prd.productsFor(feedKey) ?? [];
 
               if (products.isEmpty) {
-                return _SkeletonProductRow();
+                return _buildSkeletonProductRow();
               }
 
               return ListView.separated(
@@ -196,14 +181,16 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
     );
   }
 
-  Widget _buildPostSection() {
+  /// Recent Creators section — mirrors the web's "Recent Creators" section
+  /// which uses getUsersWithPosts() (loadCreators on mobile).
+  Widget _buildCreatorsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 22, vertical: 16),
           child: row_widget(
-            title: "Discover Posts",
+            title: "Recent Creators",
             texSize: 20,
             weight: FontWeight.bold,
           ),
@@ -212,40 +199,37 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
           height: 180,
           child: Consumer<PostProvider>(
             builder: (_, postProv, __) {
-              final posts = postProv.posts;
+              final creators = postProv.creators;
 
-              if (posts.isEmpty && postProv.isLoading) {
-                return _SkeletonProductRow();
+              if (creators == null || (creators.isEmpty && postProv.isLoading)) {
+                return _buildSkeletonProductRow();
               }
 
-              if (posts.isEmpty) {
+              if (creators.isEmpty) {
                 return const SizedBox(
                   height: 150,
-                  child: Center(child: Text("No posts found")),
+                  child: Center(child: Text("No creators found")),
                 );
               }
 
               return ListView.separated(
                 padding: const EdgeInsets.only(left: 22),
                 scrollDirection: Axis.horizontal,
-                itemCount: posts.length,
+                itemCount: creators.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 16),
                 itemBuilder: (_, index) {
-                  final p = posts[index];
-                  final thumbnail =
-                      (p.media?.isNotEmpty ?? false) ? p.media!.first : null;
-
+                  final creator = creators[index];
                   return GestureDetector(
-                    onTap: () {
-                      // Future: Navigate to Post detailed view
-                    },
+                    onTap: () => Get.to(
+                      () => CreatorPostsScreen(creatorId: creator.id ?? ''),
+                    ),
                     child: curated_brand_widget(
                       size: 135,
                       radius: 20,
                       fit: BoxFit.cover,
-                      networkImg: thumbnail,
-                      title: p.title ?? "Post",
-                      desc: "@${p.author?.username ?? 'user'}",
+                      networkImg: creator.avatarUrl,
+                      title: creator.name ?? creator.username ?? 'Creator',
+                      desc: "@${creator.username ?? ''}",
                     ),
                   );
                 },
@@ -257,7 +241,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
     );
   }
 
-  Widget _SkeletonProductRow() {
+  Widget _buildSkeletonProductRow() {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
@@ -319,33 +303,31 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
             paddingBottom: 10,
           ),
           _buildHorizontalBrandList(),
+          // Section order matches the web exactly:
+          // Recent Products → High Earning Products → Back to School
+          // → Picks for You → Local Products → Recent Creators
           _buildProductSection(
             feedKey: "recent",
             title: "Recent Products",
           ),
           _buildProductSection(
-            feedKey: "high-earning",
+            feedKey: "trending",
             title: "High Earning Products",
             iconAsset: Assets.imagesEarned,
           ),
-          _buildPostSection(),
           _buildProductSection(
             feedKey: "back-to-school",
             title: "Back to School",
           ),
           _buildProductSection(
-            feedKey: "trending",
-            title: "Trending Now",
-            iconAsset: Assets.imagesTrending,
-          ),
-          _buildProductSection(
-            feedKey: "for-you",
-            title: "For You",
+            feedKey: "picks-for-you",
+            title: "Picks for You",
           ),
           _buildProductSection(
             feedKey: "local-product",
             title: "Local Products",
           ),
+          _buildCreatorsSection(),
         ],
       ),
     );
