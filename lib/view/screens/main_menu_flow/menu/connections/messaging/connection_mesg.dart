@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/config/routes.dart';
 import 'package:rivala/consts/app_colors.dart';
@@ -207,15 +208,11 @@ class _ConnectionMesgState extends State<ConnectionMesg> {
                       unread: unread,
                       timeLabel: _formatTime(chat.lastMessageTime),
                       onTap: () {
-                        Navigator.of(context).push(
-                          CustomPageRoute(
-                            page: Chats(
+                        Get.to(() => Chats(
                               receiverId: chat.id,
                               title: chat.name,
                               avatarUrl: chat.avatarUrl,
-                            ),
-                          ),
-                        );
+                            ));
                       },
                     );
                   },

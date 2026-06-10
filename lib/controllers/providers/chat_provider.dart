@@ -48,6 +48,12 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearChatState() {
+    _chats = [];
+    _initiateChat = null;
+    notifyListeners();
+  }
+
   // ─── Messages ──────────────────────────────────────────────────────────────
 
   Future<void> loadMessages(String chatId) async {

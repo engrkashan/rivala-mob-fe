@@ -24,7 +24,7 @@ class HeaderImageStack extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use the theme nested directly in the store response
     final currentTheme = store?.theme;
-    final coverUrl = currentTheme?.coverImage ?? store?.owner?.avatarUrl;
+    final coverUrl = store?.hero?.heroImageUrl ?? currentTheme?.coverImage ?? store?.owner?.avatarUrl;
 
     // Resolve theme color or default to grey
     Color backgroundColor = kdargrey;
@@ -44,33 +44,35 @@ class HeaderImageStack extends StatelessWidget {
       }
     }
     return Stack(
-      alignment: Alignment.center,
       children: [
-        // Background cover image / Color
-        Container(
-          width: Get.width,
-          height: 300,
-          decoration: BoxDecoration(
-            color: backgroundColor,
+        // Background cover image / Color (Positioned.fill sizes to the content column below)
+        Positioned.fill(
+          child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
+            child: Container(
+              color: backgroundColor,
+              child: (coverUrl != null && coverUrl.isNotEmpty)
+                  ? ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.35),
+                        BlendMode.srcOver,
+                      ),
+                      child: CommonImageView(
+                        url: coverUrl,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ),
-          child: (coverUrl != null && coverUrl.isNotEmpty)
-              ? CommonImageView(
-                  url: coverUrl,
-                  width: Get.width,
-                  height: 300,
-                  fit: BoxFit.cover,
-                )
-              : const SizedBox.shrink(),
         ),
 
-        // Centered Content
-        Positioned(
-          top: 50, // Adjust this value if needed
-          left: 0,
-          right: 0,
+        // Centered Content (dynamic size, drives Stack height)
+        Padding(
+          padding: const EdgeInsets.only(top: 80, bottom: 24, left: 20, right: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Profile Image / Initials
               if (store?.logoUrl != null && store!.logoUrl!.isNotEmpty)
@@ -99,12 +101,12 @@ class HeaderImageStack extends StatelessWidget {
                     ),
                   ),
                 ),
+              const SizedBox(height: 10),
 
               // Profile Name
               MyText(
                 text: store?.name ?? "",
                 color: headerColor,
-               // color: kwhite,
                 size: 22,
                 weight: FontWeight.bold,
                 textAlign: TextAlign.center,
@@ -113,22 +115,19 @@ class HeaderImageStack extends StatelessWidget {
 
               // Likes & Username
               MyText(
-                text: '@${store?.owner?.username ?? ""} ',
+                text: '@${store?.slug ?? store?.owner?.username ?? ""} · ${store?.counts?['likes'] ?? 0} Likes',
                 color: headerColor.withOpacity(0.8),
-                //color: kwhite,
                 size: 12,
                 weight: FontWeight.w400,
                 paddingBottom: 8,
                 useCustomFont: true,
               ),
+
               if (showContent == true) ...{
-                // Description
+                // Description (store hero bodyText or owner bio)
                 MyText(
-                  paddingTop: 15,
-                  text: (store?.owner?.bio != null &&
-                          store!.owner!.bio!.isNotEmpty)
-                      ? store!.owner!.bio!
-                      : '',
+                  paddingTop: 8,
+                  text: store?.hero?.bodyText ?? store?.owner?.bio ?? '',
                   color: kwhite,
                   size: 12,
                   textAlign: TextAlign.center,
@@ -147,11 +146,11 @@ class HeaderImageStack extends StatelessWidget {
                         child: buttonContainer(
                           onTap: () =>
                               Get.to(() => OurFollowers(initialIndex: 0)),
-                          text: '  Followers',
-                          bgColor: ksecondary.withOpacity(0.2),
+                          text: '${store?.counts?['followers'] ?? 0} Followers',
+                          bgColor: ksecondary.withOpacity(0.25),
                           txtColor: kwhite,
                           textsize: 11,
-                          hPadding: 30,
+                          hPadding: 10,
                           vPadding: 7,
                           useCustomFont: true,
                         ),
@@ -161,11 +160,11 @@ class HeaderImageStack extends StatelessWidget {
                         child: buttonContainer(
                           onTap: () =>
                               Get.to(() => OurFollowers(initialIndex: 1)),
-                          text: '  Following',
-                          bgColor: ksecondary.withOpacity(0.2),
+                          text: '${store?.counts?['following'] ?? 0} Following',
+                          bgColor: ksecondary.withOpacity(0.25),
                           txtColor: kwhite,
                           textsize: 11,
-                          hPadding: 30,
+                          hPadding: 10,
                           vPadding: 7,
                           useCustomFont: true,
                         ),
@@ -188,7 +187,6 @@ class HeaderImageStack extends StatelessWidget {
                   page: StoreMenu(
                 store: store,
               )));
-              // Get.to(StoreMenu());
             },
             widget: Image.asset(
               Assets.imagesMenubutton,
@@ -201,7 +199,6 @@ class HeaderImageStack extends StatelessWidget {
     );
   }
 }
-
 
 class store_image_stack extends StatelessWidget {
   final double? height, iconSize, width, radius;
@@ -289,7 +286,7 @@ class store_image_stack extends StatelessWidget {
           ],
         ),
         if (showContent == true) ...{
-          SizedBox(
+          const SizedBox(
             height: 6,
           ),
           MyText(
@@ -299,31 +296,19 @@ class store_image_stack extends StatelessWidget {
             useCustomFont: true,
             size: 13,
           ),
-          Row(
-            children: [
-              if (singlePrice == false)
-                MyText(
-                  text: price ?? '\$69.00 USD',
-                  color: contentColor ?? kheader,
-                  weight: FontWeight.w400,
-                  size: 9,
-                  decoration: TextDecoration.lineThrough,
-                  useCustomFont: true,
-                ),
-              MyText(
-                text: "\$${price}" ?? '\$50.00 USD',
-                color: contentColor ?? kheader,
-                weight: FontWeight.w400,
-                size: 9,
-                useCustomFont: true,
-              ),
-            ],
-          )
+          MyText(
+            text: price != null ? '\$$price' : '\$50.00',
+            color: contentColor ?? kheader,
+            weight: FontWeight.w500,
+            size: 12,
+            useCustomFont: true,
+          ),
         }
       ],
     );
   }
 }
+
 
 ///
 

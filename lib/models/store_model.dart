@@ -6,6 +6,7 @@ import 'package:rivala/models/product_model.dart';
 import 'package:rivala/models/link_model.dart';
 import 'package:rivala/models/follow_model.dart';
 import 'package:rivala/models/theme_model.dart';
+import 'package:rivala/models/hero_section_model.dart';
 
 StoreModel storeModelFromJson(String str) =>
     StoreModel.fromJson(json.decode(str));
@@ -25,6 +26,8 @@ class StoreModel {
 
   UserModel? owner;
   ThemeModel? theme;
+  HeroSectionModel? hero;
+  Map<String, dynamic>? counts;
   List<CollectionModel> collections;
   List<ProductModel> products;
   List<LinkModel> links;
@@ -43,6 +46,8 @@ class StoreModel {
     this.updatedAt,
     this.owner,
     this.theme,
+    this.hero,
+    this.counts,
     List<CollectionModel>? collections,
     List<ProductModel>? products,
     List<LinkModel>? links,
@@ -68,6 +73,8 @@ class StoreModel {
     String? updatedAt,
     UserModel? owner,
     ThemeModel? theme,
+    HeroSectionModel? hero,
+    Map<String, dynamic>? counts,
     List<CollectionModel>? collections,
     List<ProductModel>? products,
     List<LinkModel>? links,
@@ -86,6 +93,8 @@ class StoreModel {
       updatedAt: updatedAt ?? this.updatedAt,
       owner: owner ?? this.owner,
       theme: theme ?? this.theme,
+      hero: hero ?? this.hero,
+      counts: counts ?? this.counts,
       collections: collections ?? this.collections,
       products: products ?? this.products,
       links: links ?? this.links,
@@ -109,6 +118,8 @@ class StoreModel {
       updatedAt: json["updatedAt"],
       owner: json["owner"] != null ? UserModel.fromJson(json["owner"]) : null,
       theme: json["theme"] != null ? ThemeModel.fromJson(json["theme"]) : null,
+      hero: json["hero"] != null ? HeroSectionModel.fromJson(json["hero"]) : null,
+      counts: json["counts"] as Map<String, dynamic>?,
       collections: (json["collections"] as List?)
               ?.map((e) => CollectionModel.fromJson(e))
               .toList() ??
@@ -146,6 +157,9 @@ class StoreModel {
       "createdAt": createdAt,
       "updatedAt": updatedAt,
       "owner": owner?.toJson(),
+      "theme": theme?.toJson(),
+      "hero": hero?.toJson(),
+      "counts": counts,
       "collections": collections.map((e) => e.toJson()).toList(),
       "products": products.map((e) => e.toJson()).toList(),
       "links": links.map((e) => e.toJson()).toList(),

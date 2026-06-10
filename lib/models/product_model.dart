@@ -5,6 +5,7 @@ import 'package:rivala/models/store_model.dart';
 import 'package:rivala/models/user_model.dart';
 import 'package:rivala/models/promotions_model.dart';
 import 'package:rivala/models/collection_model.dart';
+import 'package:rivala/models/category_model.dart';
 
 class ProductModel {
   final String? id;
@@ -31,6 +32,8 @@ class ProductModel {
   final List<PromotionModel>? promotions;
   final List<CollectionModel>? collections;
   final List<ProductReview>? reviews; // Fixed typo: review → reviews
+  final CategoryModel? productCategory;
+  final String? category;
 
   /// Const constructor
   const ProductModel({
@@ -58,6 +61,8 @@ class ProductModel {
     this.promotions,
     this.collections,
     this.reviews,
+    this.productCategory,
+    this.category,
   });
 
   /// Factory from JSON
@@ -101,6 +106,10 @@ class ProductModel {
       collections: (json['collections'] as List<dynamic>?)
           ?.map((e) => CollectionModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      productCategory: json['ProductCategory'] != null
+          ? CategoryModel.fromJson(json['ProductCategory'] as Map<String, dynamic>)
+          : null,
+      category: json['category'] as String?,
       // Reviews
       reviews: (json['reviews'] as List<dynamic>?)
           ?.map((e) => ProductReview.fromJson(e as Map<String, dynamic>))
@@ -199,6 +208,8 @@ class ProductModel {
         'promotions': promotions!.map((e) => e.toJson()).toList(),
       if (collections != null)
         'collections': collections!.map((e) => e.toJson()).toList(),
+      if (productCategory != null) 'ProductCategory': productCategory!.toJson(),
+      if (category != null) 'category': category,
     }..removeWhere((key, value) => value == null);
   }
 
@@ -228,6 +239,8 @@ class ProductModel {
     List<PromotionModel>? promotions,
     List<CollectionModel>? collections,
     List<ProductReview>? reviews,
+    CategoryModel? productCategory,
+    String? category,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -254,6 +267,8 @@ class ProductModel {
       promotions: promotions ?? this.promotions,
       collections: collections ?? this.collections,
       reviews: reviews ?? this.reviews,
+      productCategory: productCategory ?? this.productCategory,
+      category: category ?? this.category,
     );
   }
 
@@ -282,6 +297,8 @@ class ProductModel {
         other.storeId == storeId &&
         const DeepCollectionEquality().equals(other.sizes, sizes) &&
         const DeepCollectionEquality().equals(other.colors, colors) &&
+        other.productCategory == productCategory &&
+        other.category == category &&
         const DeepCollectionEquality().equals(other.reviews, reviews);
   }
 
@@ -302,6 +319,8 @@ class ProductModel {
       latitude,
       longitude,
       country,
+      productCategory,
+      category,
       owner,
       ownerId,
       const DeepCollectionEquality().hash(image),

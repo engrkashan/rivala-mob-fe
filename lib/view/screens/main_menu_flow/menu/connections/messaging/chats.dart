@@ -44,6 +44,7 @@ class _ChatsState extends State<Chats> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _currentUserId = context.read<AuthProvider>().currentUserId;
       final provider = context.read<ChatProvider>();
+      provider.clearChatState(); // Clear old chat state immediately
       await provider.getInitiateChat(widget.receiverId);
 
       final chat = provider.initiateChat;
@@ -496,7 +497,8 @@ class _ChatsState extends State<Chats> {
                     items.add(_DateSeparator(label: date));
                     for (final msg in grouped[date]!) {
                       // isSentBy: msg.sender?.id === userId (matches web)
-                      final isMe = msg.sender?.id == _currentUserId ||
+                      final isMe = msg.sender?.id == 'me' ||
+                          msg.sender?.id == _currentUserId ||
                           msg.senderId == _currentUserId;
                       items.add(_MessageBubble(
                         msg: msg,
