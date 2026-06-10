@@ -9,7 +9,7 @@ import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custom_dropdown.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
-
+import 'package:get/get.dart';
 import '../../../../../../controllers/providers/brands_provider.dart';
 import '../../../../../../controllers/providers/media_provider.dart';
 import '../../../../../widgets/my_button.dart';
@@ -66,6 +66,9 @@ class _ManagePersonalInfoState extends State<ManagePersonalInfo> {
             centerTitle: true,
             actions: [
               Bounce_widget(
+                  ontap: () {
+                    Get.back();
+                  },
                   widget: Image.asset(
                 Assets.imagesClose,
                 width: 18,

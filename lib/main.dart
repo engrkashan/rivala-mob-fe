@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -42,9 +43,13 @@ import 'controllers/providers/reports_provider.dart';
 import 'controllers/providers/squads_provider.dart';
 import 'controllers/providers/user/seller_provider.dart';
 import 'controllers/repos/media_repo.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   Stripe.publishableKey =
       "pk_test_51ONbNUGiLncS8H2RdBxcNeR317Nao7sT21wtoQzezP6qBcSBi9a0QVmdpkjHItIECAJDt5I8Ti3odGvNIZPV8WEv00OlDoF6CJ";
 

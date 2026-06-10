@@ -7,8 +7,15 @@ class LinkProvider extends ChangeNotifier {
   List<LinkModel> _links = [];
   List<LinkModel> get links => _links;
 
+
+  bool get allActive => _links.isNotEmpty && _links.every((l) => l.status == 'active');
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  void toggleAllLinks() {
+    final newStatus = allActive ? 'inactive' : 'active';
+    _links = _links.map((l) => l.copyWith(status: newStatus)).toList();
+    notifyListeners();
+  }
   void setLoading(bool val) {
     _isLoading = val;
     notifyListeners();

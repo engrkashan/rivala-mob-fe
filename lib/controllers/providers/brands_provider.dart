@@ -14,7 +14,8 @@ class BrandsProvider extends ChangeNotifier {
 
   final List<StoreModel> _allStores = [];
   List<StoreModel> get allStores => _allStores;
-
+  StoreModel? _visitedStore;
+  StoreModel? get visitedStore => _visitedStore;
   List<StoreModel> _filteredStores = [];
   List<StoreModel> get filteredStores => _filteredStores;
 
@@ -131,7 +132,8 @@ class BrandsProvider extends ChangeNotifier {
     setLoading(true);
     // clearCurrentStore();
     try {
-      _currentStore = await _brandsRepo.getStoreBySlug(slug);
+     // _currentStore = await _brandsRepo.getStoreBySlug(slug);
+      _visitedStore = await _brandsRepo.getStoreBySlug(slug);
       _error = null;
     } catch (e) {
       _error = e.toString();

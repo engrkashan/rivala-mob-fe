@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "809632613285",
+    "project_id": "rivala-8efed",
+    "storage_bucket": "rivala-8efed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809632613285:android:d7f945867aa1998be61e4c",
+        "android_client_info": {
+          "package_name": "com.example.rivala"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "809632613285-ila67jvcv20th8v835jn9somvjqbdrdh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rivala",
+            "certificate_hash": "426195599cc18afe6dbe20b269e47d2164888bf4"
+          }
+        },
+        {
+          "client_id": "809632613285-kptkqrk5a1dv7qpj0sk035jiui3o3g9l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1kVzUg_pPkryXw14bWG8fovP3628R3ac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809632613285-kptkqrk5a1dv7qpj0sk035jiui3o3g9l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "809632613285-qmgjrvtsnpjo770kvquks7s3b4v4lpfo.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rivala"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

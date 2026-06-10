@@ -14,6 +14,8 @@ import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 
+import '../../../../../config/network/session.dart';
+
 class MasterAccountSet extends StatefulWidget {
   const MasterAccountSet({super.key});
 
@@ -22,6 +24,24 @@ class MasterAccountSet extends StatefulWidget {
 }
 
 class _MasterAccountSetState extends State<MasterAccountSet> {
+  @override
+  void initState() {
+    super.initState();
+    _emailCon.addListener(_checkEmail);
+    _loadSavedData(); // Data load karna
+  }
+
+  Future<void> _loadSavedData() async {
+    final session = Session();
+    final data = await session.getPersonalInfo();
+
+    setState(() {
+      _nameCon.text = data["name"] ?? '';
+      _usernameCon.text = data["username"] ?? '';
+      _emailCon.text = data["email"] ?? '';
+      _bioCon.text = data["bio"] ?? '';
+    });
+  }
   final _birthdayCon = TextEditingController();
   final _nameCon = TextEditingController();
   final _usernameCon = TextEditingController();
@@ -30,7 +50,30 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
   final _passwordCon = TextEditingController();
   final _confirmPasswordCon = TextEditingController();
   bool _isObSecure = true;
-
+  String? _passwordError;
+  void _checkEmail() {
+    final authProvider = context.read<AuthProvider>();
+    authProvider.checkEmailAvailability(_emailCon.text.trim());
+  }
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Password cannot be empty";
+    }
+    if (value.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return "Password must contain at least 1 uppercase letter";
+    }
+    if (!RegExp(r'[0-9]').hasMatch(value)) {
+      return "Password must contain at least 1 number";
+    }
+    // Optional: Special character
+    // if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+    //   return "Password must contain at least 1 special character";
+    // }
+    return null;
+  }
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -62,7 +105,13 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
       });
     }
   }
-
+  @override
+  void dispose() {
+    _emailCon.dispose();
+    _passwordCon.dispose();
+    _confirmPasswordCon.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -77,6 +126,9 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                 centerTitle: true,
                 actions: [
                   Bounce_widget(
+                      ontap: () {
+                        Get.back();
+                      },
                       widget: Image.asset(
                     Assets.imagesClose,
                     width: 18,
@@ -96,7 +148,9 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                         vertical: 15, horizontal: 22),
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      EditImgStack(),
+                      EditImgStack(
+                        imageUrl: auth.user?.avatarUrl,
+                      ),
                       SizedBox(
                         height: 40,
                       ),
@@ -142,44 +196,34 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                         controller: _emailCon,
                         hint: 'Enter your email address',
                         label: 'Email Address',
-                        suffixIcon: Image.asset(
-                          Assets.imagesEdit,
-                          width: 20,
-                          height: 20,
-                        ),
-                        validator: (val) {
-                          if (val != null && val.isEmpty) {
-                            return "email cannot be empty";
-                          }
-                          if (val != null && val.isEmail) {
-                            return "email is not valid";
-                          }
-                          return null;
-                        },
+                        errorText: auth.emailError,
+                        suffixIcon: Image.asset(Assets.imagesEdit, width: 20, height: 20),
                         delay: 600,
                         filledColor: kblack.withOpacity(0.05),
                         bordercolor: ktransparent,
+                        textInputAction: TextInputAction.next,
+                        onFieldSubmitted: (_) => _checkEmail(),
+                        onEditingComplete: _checkEmail,
                       ),
                       MyTextField(
                         controller: _passwordCon,
                         hint: 'Enter password',
                         label: 'Password',
+                        isObSecure: _isObSecure,
                         suffixIcon: Icon(
                           _isObSecure ? Icons.visibility_off : Icons.visibility,
                           color: Colors.grey,
                         ),
                         suffixTap: () {
-                          _isObSecure = !_isObSecure;
-                          setState(() {});
+                          setState(() => _isObSecure = !_isObSecure);
                         },
-                        validator: (val) {
-                          if (val != null && val.isEmpty) {
-                            return "Password cannot be empty";
-                          }
-                          return null;
+                        errorText: _passwordError,                    // ← Error show hoga
+                        onChanged: (value) {
+                          setState(() {
+                            _passwordError = _validatePassword(value);
+                          });
                         },
-                        isObSecure: _isObSecure,
-                        delay: 600,
+                        delay: 700,
                         filledColor: kblack.withOpacity(0.05),
                         bordercolor: ktransparent,
                       ),
@@ -223,6 +267,10 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                   mBottom: 40,
                   mhoriz: 22,
                   onTap: () async {
+                    if (auth.emailError != null) {
+                      AlertInfo.show(context: context, text: auth.emailError!);
+                      return;
+                    }
                     String? uploadedAvatarUrl;
                     if (Provider.of<MediaProvider>(context, listen: false)
                             .selectedImage !=
@@ -249,7 +297,12 @@ class _MasterAccountSetState extends State<MasterAccountSet> {
                     await auth.sentOtp(identifier: _emailCon.text.trim());
 
                     Get.to(() => MasterVerifyAccount());
-
+                    await Session().savePersonalInfo(
+                      name: _nameCon.text.trim(),
+                      username: _usernameCon.text.trim(),
+                      email: _emailCon.text.trim(),
+                      bio: _bioCon.text.trim(),
+                    );
                     // Get.to(() => GradientSuccessScreen(
                     //       title: 'Well done',
                     //       desc: 'Now let’s select your theme.',

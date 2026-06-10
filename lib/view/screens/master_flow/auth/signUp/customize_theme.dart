@@ -17,6 +17,8 @@ import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/theme_selection_widget.dart';
 
+import '../../../../../controllers/controller_instances.dart';
+import '../../../../../controllers/providers/brands_provider.dart';
 import '../../../../../font_customisation/font_customization.dart';
 
 class CustomizeTheme extends StatefulWidget {
@@ -83,6 +85,9 @@ class _CustomizeThemeState extends State<CustomizeTheme> {
             centerTitle: true,
             actions: [
               Bounce_widget(
+                ontap: () {
+                  Get.back();
+                },
                 widget: Image.asset(
                   Assets.imagesClose,
                   width: 18,
@@ -189,29 +194,57 @@ class _CustomizeThemeState extends State<CustomizeTheme> {
                     Mybutton2(
                       buttonText: 'Save',
                       mbot: 30,
-                      ontap: () async {
-                        //Get.offAll(() => PersistentBottomNavBar());
-                        final mediaProvider = context.read<MediaProvider>();
-                        await theme.addCustomTheme(ThemeModel(
-                            coverImage: mediaProvider.uploadedUrl,
-                            colorDark: colorToHex(kheader),
-                            color1: colorToHex(kheader),
-                            color2: colorToHex(ksubHeader),
-                            color3: colorToHex(kbody),
-                            colorLight: colorToHex(kbutton),
-                            bodyFont: fontController.selectedFont.value));
-                        print("HEX header = ${colorToHex(kheader)}");
-                        Get.to(() => StoreMainProfile());
-                        Get.to(() => GradientSuccessScreen(
-                              title: 'Well done!',
-                              desc: 'Now, let’s import your links.',
-                              buttontext: 'Import your links',
-                              ontap: () {
-                                Get.to(() => MasterCreateLink());
-                              },
-                            ));
-                      },
-                    )
+                ontap: () async {
+                final mediaProvider = context.read<MediaProvider>();
+
+                try {
+
+                if (mediaProvider.selectedImage != null &&
+                mediaProvider.uploadedUrl == null) {
+                await mediaProvider.upload();
+                }
+
+                final createdTheme = await theme.addCustomTheme(
+                ThemeModel(
+                coverImage: mediaProvider.uploadedUrl,
+                colorDark: colorToHex(kheader),
+                color1: colorToHex(kheader),
+                color2: colorToHex(ksubHeader),
+                color3: colorToHex(kbody),
+                colorLight: colorToHex(kbutton),
+                bodyFont: fontController.selectedFont.value));
+                print("HEX header = ${colorToHex(kheader)}");
+
+
+                if (createdTheme != null && createdTheme.id != null) {
+                await theme.attach(createdTheme.id!);
+                }
+
+                await context.read<BrandsProvider>().loadCurrentStore();
+                print("full store = ${context.read<BrandsProvider>().currentStore?.toJson()}");
+                print("theme = ${context.read<BrandsProvider>().currentStore?.theme?.coverImage}");
+
+                navBarController.getCurrentScreen(
+                navBarController.pageRoutes[3], 3, context);
+                Get.until((route) => route.isFirst);
+                } catch (e) {
+                Get.snackbar(
+                "Error",
+                "Failed to save theme or upload image. Please try again.",
+                snackPosition: SnackPosition.BOTTOM,
+                );
+                print("Error during save: $e");
+                }
+
+                // Get.to(() => GradientSuccessScreen(
+                          //       title: 'Well done!',
+                          //       desc: 'Now, let’s import your links.',
+                          //       buttontext: 'Import your links',
+                          //       ontap: () {
+                          //         Get.to(() => MasterCreateLink());
+                          //       },
+                          //     ));
+                      })
                   ],
                 );
               }),

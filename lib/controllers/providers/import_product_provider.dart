@@ -22,7 +22,7 @@ class ImportProductProvider extends ChangeNotifier {
   }
 
   Future<void> pickCsvFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
     );

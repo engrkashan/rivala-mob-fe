@@ -9,11 +9,17 @@ import 'package:rivala/view/widgets/store_widgets/fotter.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 
 import '../../../../controllers/providers/brands_provider.dart';
+import '../../../../models/store_model.dart';
 
 class OurFollowers extends StatefulWidget {
   final int initialIndex;
-  const OurFollowers({super.key, this.initialIndex = 0});
+  final StoreModel? store;
 
+  const OurFollowers({
+    super.key,
+    this.initialIndex = 0,
+    this.store,
+  });
   @override
   State<OurFollowers> createState() => _OurFollowersState();
 }
@@ -61,7 +67,8 @@ class _OurFollowersState extends State<OurFollowers> {
           Consumer<BrandsProvider>(builder: (context, ref, _) {
             return HeaderImageStack(
               showContent: false,
-              store: ref.currentStore,
+              store: widget.store ?? ref.currentStore,
+              //store: ref.currentStore,
             );
           }),
           Padding(
@@ -82,9 +89,13 @@ class _OurFollowersState extends State<OurFollowers> {
             ),
           ),
           Consumer<BrandsProvider>(builder: (context, ref, _) {
+            final store = widget.store ?? ref.currentStore;
             final list = isFollowers
-                ? ref.currentStore?.followers
-                : ref.currentStore?.followings;
+                ? store?.followers
+                : store?.followings;
+            // final list = isFollowers
+            //     ? ref.currentStore?.followers
+            //     : ref.currentStore?.followings;
             if (list == null || list.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.all(22.0),
@@ -123,9 +134,10 @@ class _OurFollowersState extends State<OurFollowers> {
           }),
           SizedBox(height: 30),
           Consumer<BrandsProvider>(builder: (context, ref, _) {
-            return StoreFotter(
-              store: ref.currentStore,
-            );
+            return
+              StoreFotter(
+                store: widget.store ?? ref.currentStore,
+              );
           })
         ],
       ),

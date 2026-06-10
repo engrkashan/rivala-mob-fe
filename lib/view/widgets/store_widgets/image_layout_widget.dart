@@ -34,6 +34,7 @@ class ImageLayoutWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
           child: image_appbar(
             store: store ?? StoreModel(),
+            onProfileTap: ontap,
           ),
         ),
         Expanded(

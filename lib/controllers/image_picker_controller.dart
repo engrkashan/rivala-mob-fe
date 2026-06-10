@@ -49,7 +49,28 @@ class ImagePickerController extends GetxController {
       quality: 75,
     );
   }
+  Future<void> pickImageFromGallery() async {
 
+    final List<XFile> images = await _picker.pickMultiImage(
+      imageQuality: 80,
+    );
+
+    if (images.isNotEmpty) {
+
+      final files = images.map((xfile) => File(xfile.path)).toList();
+
+
+      selectedMedia.value = files;
+      selectedImages.value = files;
+
+      // Navigate to filter screen
+      Get.to(() => SelectPostFilters(
+        isVideo: false,
+      ));
+    } else {
+      print('No images selected.');
+    }
+  }
   Future<String?> applyVideoFilter({
     required String inputPath,
     required String filterName,
@@ -178,7 +199,7 @@ class ImagePickerController extends GetxController {
   }
 
   Future<void> pickMultipleMedia() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],

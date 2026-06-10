@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/master_flow/new_post/tag_collection/tag_collection.dart';
@@ -9,6 +11,8 @@ import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
+
+import '../../../../../controllers/providers/post_provider.dart';
 
 class AddLocation extends StatefulWidget {
   const AddLocation({super.key});
@@ -143,7 +147,14 @@ class _AddLocationState extends State<AddLocation> {
             buttonText: 'Done',
             mbot: 30,
             hpad: 22,
-            ontap: () => Get.back(),
+
+            ontap: () {
+              if (userLocation != null) {
+
+                context.read<PostProvider>().setLocation(userLocation!);
+              }
+              Get.back();
+            },
             ontap2: () => Get.back(),
           ),
         ],

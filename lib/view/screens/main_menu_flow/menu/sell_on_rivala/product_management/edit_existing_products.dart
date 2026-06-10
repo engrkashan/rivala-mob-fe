@@ -27,6 +27,8 @@ import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
 
+import '../../../../../widgets/bounce_widget.dart';
+
 class EditExistingProducts extends StatefulWidget {
   final bool? hasProducts;
   final ProductModel? product; // Add product model
@@ -330,7 +332,7 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
   bool subscriptionEnabled = true;
 
   Future<void> _pickMedia() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.media,
     );
@@ -363,8 +365,15 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    // square_image_stack(
-                    //     url: widget.product?.image?.first), // Pass image
+                    square_image_stack(
+                      images: images,
+                      onPickImage: _pickMedia,
+                      onRemoveImage: (index) {
+                        setState(() {
+                          images.removeAt(index);
+                        });
+                      },
+                    ),
                     SizedBox(
                       height: 40,
                     ),
@@ -910,7 +919,7 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
                                   });
                                 }
                               },
-                              child: promo_row(
+                              child: PromoRow(
                                 title: "${attr['name']}: $variantNames",
                                 icon: Assets.imagesAttribute,
                                 iconColor: ktertiary,
@@ -976,6 +985,125 @@ class _EditExistingProductsState extends State<EditExistingProducts> {
             ),
           ),
       ],
+    );
+  }
+}
+class square_image_stack extends StatelessWidget {
+  final List<String> images;
+  final VoidCallback onPickImage;
+  final Function(int) onRemoveImage;
+
+  const square_image_stack({
+    super.key,
+    required this.images,
+    required this.onPickImage,
+    required this.onRemoveImage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        height: 170,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: images.length + 1,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+            // ADD IMAGE BUTTON
+            if (index == images.length) {
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Bounce_widget(
+                    ontap: onPickImage,
+                    widget: CustomeContainer(
+                      height: 150,
+                      width: 150,
+                      color: kbackground,
+                      radius: 15,
+                      mtop: 0,
+                      widget: Center(
+                        child: Image.asset(
+                          Assets.imagesExportt,
+                          color: ktertiary.withOpacity(0.5),
+                          width: 70,
+                          height: 69,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -15,
+                    left: -6,
+                    child: Bounce_widget(
+                      ontap: onPickImage,
+                      widget: Image.asset(
+                        Assets.imagesEdit2,
+                        width: 42,
+                        height: 42,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            final image = images[index];
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                CustomeContainer(
+                  height: 150,
+                  width: 150,
+                  radius: 15,
+                  mtop: 0,
+                  hpad: 0,
+                  vpad: 0,
+                  widget: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: image.startsWith('http')
+                        ? Image.network(
+                      image,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.file(
+                      File(image),
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+
+                // REMOVE BUTTON
+                Positioned(
+                  top: -5,
+                  right: -5,
+                  child: InkWell(
+                    onTap: () => onRemoveImage(index),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }
