@@ -36,72 +36,63 @@ class PostDetails extends StatefulWidget {
 }
 
 class _PostDetailsState extends State<PostDetails> {
-  bool isFeaturedPost = false;
-  List<Map<String, dynamic>> get postOptions => [
-        {
-          "icon": Assets.imagesFeatured,
-          "title": "Featured Post",
-          "ontap": () {
-            setState(() {
-              isFeaturedPost = !isFeaturedPost;
-            });
-          },
-          'isFeatured': isFeaturedPost
 
-          // 'tags': [""],
+  bool isFeaturedPost = false;
+  List<Map<String, dynamic>> get postOptions {
+
+    final postProvider = context.watch<PostProvider>();
+
+    return [
+      {
+        "icon": Assets.imagesFeatured,
+        "title": "Featured Post",
+        "ontap": () {
+          setState(() {
+            isFeaturedPost = !isFeaturedPost;
+          });
         },
-        // {
-        //   "icon": Assets.imagesPromo,
-        //   "title": "Add promo",
-        //   'ontap': () {
-        //     Get.to(() => StartNewPromo());
-        //   },
-        //   //  'tags': ["Tech", "Fashion"],
-        // },
-        {
-          "icon": Assets.imagesTags,
-          "title": "Tag products",
-          'ontap': () {
-            Get.to(() => PostTags());
-          },
-          'tags': Provider.of<PostProvider>(context, listen: false)
-              .tagProducts
-              .map((e) => e!.title!)
-              .toList(),
+        'isFeatured': isFeaturedPost
+      },
+      {
+        "icon": Assets.imagesTags,
+        "title": "Tag products",
+        'ontap': () {
+          Get.to(() => PostTags());
         },
-        {
-          "icon": Assets.imagesTagcollection,
-          "title": "Tag collections",
-          'ontap': () {
-            Get.to(() => TagCollection());
-          },
-          'tags': Provider.of<PostProvider>(context, listen: false)
-              .tagCollections
-              .map((e) => e?.name ?? "")
-              .toList(),
-          'tagIcon': Assets.imagesTagcollection
+        'tags': postProvider.tagProducts.map((e) => e!.title!).toList(),
+      },
+      {
+        "icon": Assets.imagesTagcollection,
+        "title": "Tag collections",
+        'ontap': () {
+          Get.to(() => TagCollection());
         },
-        {
-          "icon": Assets.imagesPostexp,
-          "title": "Post expiration",
-          'ontap': () {
-            Get.to(() => PostExpiration());
-          },
-          'hasText': true,
-          'addedText': context.watch<PostProvider>().postExpiration == null
-              ? null
-              : context.watch<PostProvider>().formattedExpiration(context),
+        'tags': postProvider.tagCollections.map((e) => e?.name ?? "").toList(),
+        'tagIcon': Assets.imagesTagcollection
+      },
+      {
+        "icon": Assets.imagesPostexp,
+        "title": "Post expiration",
+        'ontap': () {
+          Get.to(() => PostExpiration());
         },
-        {
-          "icon": Assets.imagesLocation,
-          "title": "Add location",
-          'ontap': () {
-            Get.to(() => AddLocation());
-          },
-          'hasText': true,
-          'addedText': 'Seattle, WA'
+        'hasText': true,
+        'addedText': postProvider.postExpiration == null
+            ? null
+            : postProvider.formattedExpiration(context),
+      },
+      {
+        "icon": Assets.imagesLocation,
+        "title": "Add location",
+        'ontap': () {
+          Get.to(() => AddLocation());
         },
-      ];
+        'hasText': true,
+
+        'addedText': postProvider.selectedLocation ?? 'Add location',
+      },
+    ];
+  }
 
   final titleController = TextEditingController();
   final desc = TextEditingController();
@@ -127,6 +118,9 @@ class _PostDetailsState extends State<PostDetails> {
             centerTitle: true,
             actions: [
               Bounce_widget(
+                  ontap: () {
+                    Get.back();
+                  },
                   widget: Image.asset(
                 Assets.imagesClose,
                 width: 18,

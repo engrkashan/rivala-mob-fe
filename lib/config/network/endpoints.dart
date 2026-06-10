@@ -88,6 +88,10 @@ class Endpoints {
   static const String forgotPassword = "/onboarding/forgot-password";
   static const String resetPassword = "/onboarding/reset-password";
   static const String restriction = "/sellerRestriction";
+//------------social login------------------
+  static const String socialLoginGoogle = "/onboarding/google";
+  static const String socialLoginApple = "/onboarding/apple";
+  static const String socialLoginMicrosoft = "/onboarding/microsoft";
 
 //   =========orders==============
   static const String orders = "/orders";
@@ -193,4 +197,8 @@ class Endpoints {
 
 //   =========revenue==========
   static const String revenue = "/revenue";
+  static String get checkEmail => '/auth/check-email';
+
+  static const String terms = "/terms-and-condition";
+  static const String privacy = "/privacy-policy";
 }

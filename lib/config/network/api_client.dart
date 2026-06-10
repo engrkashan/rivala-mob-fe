@@ -260,10 +260,21 @@ class ApiClient {
 
     final respBody = await response.stream.bytesToString();
 
-    // Quick parse to mock _handleResponse
+    
     final fakeResponse =
         http.Response(respBody, response.statusCode, request: response.request);
     return _handleResponse(fakeResponse);
+  }
+  Future<dynamic> getPublicResponse({required String endpoint}) async {
+    final url = Uri.parse(ApiConfig.baseUrl + endpoint);
+
+
+    final response = await http.get(url, headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    });
+
+    return _handleResponse(response);
   }
 }
 

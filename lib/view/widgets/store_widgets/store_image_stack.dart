@@ -35,7 +35,14 @@ class HeaderImageStack extends StatelessWidget {
         backgroundColor = kdargrey;
       }
     }
-
+    Color headerColor = kwhite; // Default fallback
+    if (currentTheme?.color2 != null) {
+      try {
+        headerColor = hexToColor(currentTheme!.color2!);
+      } catch (e) {
+        headerColor = kwhite;
+      }
+    }
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -96,7 +103,8 @@ class HeaderImageStack extends StatelessWidget {
               // Profile Name
               MyText(
                 text: store?.name ?? "",
-                color: kwhite,
+                color: headerColor,
+               // color: kwhite,
                 size: 22,
                 weight: FontWeight.bold,
                 textAlign: TextAlign.center,
@@ -106,7 +114,8 @@ class HeaderImageStack extends StatelessWidget {
               // Likes & Username
               MyText(
                 text: '@${store?.owner?.username ?? ""} ',
-                color: kwhite,
+                color: headerColor.withOpacity(0.8),
+                //color: kwhite,
                 size: 12,
                 weight: FontWeight.w400,
                 paddingBottom: 8,
@@ -193,7 +202,7 @@ class HeaderImageStack extends StatelessWidget {
   }
 }
 
-/////
+
 class store_image_stack extends StatelessWidget {
   final double? height, iconSize, width, radius;
   final bool? showContent, showShadow, quickbut, showIcon, singlePrice;

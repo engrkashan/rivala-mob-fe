@@ -7,7 +7,6 @@ import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/my_button.dart';
-import 'package:rivala/view/widgets/my_calender.dart';
 import 'package:rivala/view/widgets/my_text_field.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
@@ -21,130 +20,296 @@ class PostExpiration extends StatefulWidget {
 }
 
 class _PostExpirationState extends State<PostExpiration> {
-  final List suggestions = ['Fall Fashion', 'Hidden Gems', 'Jackets'];
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
   final TextEditingController dateController = TextEditingController();
+
+  // Date aur Time select karne ka centralized logic
+  Future<void> _pickDateTime() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      // Logic Fix: Agar past select karna hai toh 1900 se shuru karein
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: kblue,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (date == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: selectedTime ?? TimeOfDay.now(),
+    );
+
+    if (time == null) return;
+
+    setState(() {
+      selectedDate = date;
+      selectedTime = time;
+      dateController.text =
+      '${date.month}/${date.day}/${date.year}, ${time.format(context)}';
+    });
+  }
+
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: kwhite,
-        appBar: simpleAppBar(
-            context: context,
-            title: 'Create collection',
-            centerTitle: true,
-            actions: [
-              Bounce_widget(
-                  ontap: () {
-                    Get.back();
-                  },
-                  widget: Image.asset(
-                    Assets.imagesClose,
-                    width: 18,
-                    height: 18,
-                  )),
-              SizedBox(
-                width: 12,
-              )
-            ]),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
-                physics: const BouncingScrollPhysics(),
+      backgroundColor: kwhite,
+      appBar: simpleAppBar(
+        context: context,
+        title: 'Set Expiration',
+        centerTitle: true,
+        actions: [
+          Bounce_widget(
+              ontap: () => Get.back(),
+              widget: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Image.asset(Assets.imagesClose, width: 18, height: 18),
+              )),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MyText(
-                      color: ktertiary,
-                      weight: FontWeight.w400,
-                      text:
-                          'Set a date and time if you’d like the post to be shared for a limited time. You will still be able to access the post once it has expired. ',
-                      size: 16,
-                      paddingBottom: 35),
-                  MyTextField(
-                    controller: dateController,
-                    bordercolor: kblack,
-                    hint: 'Select date & time',
-                    hintColor: kblack,
-                    radius: 50,
-                    readOnly: true,
-                    ontapp: () async {
-                      final date = await showDatePicker(
-                        context: Get.context!,
-                        initialDate: selectedDate ?? DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2100),
-                      );
-
-                      if (date == null) return;
-
-                      final time = await showTimePicker(
-                        context: Get.context!,
-                        initialTime: selectedTime ?? TimeOfDay.now(),
-                      );
-
-                      if (time == null) return;
-
-                      setState(() {
-                        selectedDate = date;
-                        selectedTime = time;
-                        dateController.text =
-                            '${date.month}/${date.day}/${date.year}, ${time.format(context)}';
-                      });
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  // Instruction Box
                   Container(
-                    height: 300,
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: MyCalender(
-                      selectedDate: selectedDate,
-                      onDateSelected: (date) {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      },
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: kblue.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: kblue.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: kblue, size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: MyText(
+                            color: kblack.withOpacity(0.7),
+                            weight: FontWeight.w400,
+                            text: 'Set a date and time if you’d like the post to be shared for a limited time. You will still be able to access the post once it has expired.',
+                            size: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  calender_row()
+                  const SizedBox(height: 30),
+
+                  // Date Input Label
+                  MyText(text: "Expiry Date & Time", size: 14, weight: FontWeight.w600),
+                  const SizedBox(height: 10),
+
+                  // Polished TextField
+                  MyTextField(
+                    controller: dateController,
+                    bordercolor: kblack.withOpacity(0.1),
+                    hint: 'MM/DD/YYYY, --:--',
+                    hintColor: kblack.withOpacity(0.4),
+                    radius: 15, // Rounding thori soft ki
+                    readOnly: true,
+                    ontapp: _pickDateTime,
+                    suffixIcon: Icon(
+                        selectedDate == null ? Icons.calendar_today_rounded : Icons.edit_calendar_rounded,
+                        size: 20,
+                        color: kblue
+                    ),
+                  ),
                 ],
               ),
             ),
-            Mybutton2(
-              buttonText2: 'Cancel',
-              buttonText: 'Done',
-              mbot: 30,
-              hpad: 22,
-              ontap2: () {
-                Get.back();
-              },
-              ontap: () {
-                if (selectedDate == null || selectedTime == null) {
-                  AlertInfo.show(
-                      context: context, text: 'Please select date & time');
-                  return;
-                }
+          ),
 
-                final dateTime = DateTime(
-                  selectedDate!.year,
-                  selectedDate!.month,
-                  selectedDate!.day,
-                  selectedTime!.hour,
-                  selectedTime!.minute,
-                );
+          // Bottom Buttons
+          Mybutton2(
+            buttonText2: 'Cancel',
+            buttonText: 'Done',
+            mbot: 30,
+            hpad: 22,
+            ontap2: () => Get.back(),
+            ontap: () {
+              if (selectedDate == null || selectedTime == null) {
+                AlertInfo.show(context: context, text: 'Please select date & time');
+                return;
+              }
+              final dateTime = DateTime(
+                selectedDate!.year, selectedDate!.month, selectedDate!.day,
+                selectedTime!.hour, selectedTime!.minute,
+              );
+              context.read<PostProvider>().setPostExpiration(dateTime);
+              Get.back();
+            },
+          ),
+        ],
+      ),
+    );
 
-                context.read<PostProvider>().setPostExpiration(dateTime);
-
-                Get.back();
-              },
-            ),
-          ],
-        ));
   }
 }
+// import 'package:alert_info/alert_info.dart';
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:provider/provider.dart';
+// import 'package:rivala/consts/app_colors.dart';
+// import 'package:rivala/generated/assets.dart';
+// import 'package:rivala/view/widgets/appbar.dart';
+// import 'package:rivala/view/widgets/bounce_widget.dart';
+// import 'package:rivala/view/widgets/my_button.dart';
+// import 'package:rivala/view/widgets/my_calender.dart';
+// import 'package:rivala/view/widgets/my_text_field.dart';
+// import 'package:rivala/view/widgets/my_text_widget.dart';
+//
+// import '../../../../../controllers/providers/post_provider.dart';
+//
+// class PostExpiration extends StatefulWidget {
+//   const PostExpiration({super.key});
+//
+//   @override
+//   State<PostExpiration> createState() => _PostExpirationState();
+// }
+//
+// class _PostExpirationState extends State<PostExpiration> {
+//   final List suggestions = ['Fall Fashion', 'Hidden Gems', 'Jackets'];
+//   DateTime? selectedDate;
+//   TimeOfDay? selectedTime;
+//
+//   final TextEditingController dateController = TextEditingController();
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         backgroundColor: kwhite,
+//         appBar: simpleAppBar(
+//             context: context,
+//             title: 'Create collection',
+//             centerTitle: true,
+//             actions: [
+//               Bounce_widget(
+//                   ontap: () {
+//                     Get.back();
+//                   },
+//                   widget: Image.asset(
+//                     Assets.imagesClose,
+//                     width: 18,
+//                     height: 18,
+//                   )),
+//               SizedBox(
+//                 width: 12,
+//               )
+//             ]),
+//         body: Column(
+//           crossAxisAlignment: CrossAxisAlignment.stretch,
+//           children: [
+//             Expanded(
+//               child: ListView(
+//                 shrinkWrap: true,
+//                 padding:
+//                     const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
+//                 physics: const BouncingScrollPhysics(),
+//                 children: [
+//                   MyText(
+//                       color: ktertiary,
+//                       weight: FontWeight.w400,
+//                       text:
+//                           'Set a date and time if you’d like the post to be shared for a limited time. You will still be able to access the post once it has expired. ',
+//                       size: 16,
+//                       paddingBottom: 35),
+//                   MyTextField(
+//                     controller: dateController,
+//                     bordercolor: kblack,
+//                     hint: 'Select date & time',
+//                     hintColor: kblack,
+//                     radius: 50,
+//                     readOnly: true,
+//                     ontapp: () async {
+//                       final date = await showDatePicker(
+//                         context: Get.context!,
+//                         initialDate: selectedDate ?? DateTime.now(),
+//                         firstDate: DateTime.now(),
+//                         lastDate: DateTime(2100),
+//                       );
+//
+//                       if (date == null) return;
+//
+//                       final time = await showTimePicker(
+//                         context: Get.context!,
+//                         initialTime: selectedTime ?? TimeOfDay.now(),
+//                       );
+//
+//                       if (time == null) return;
+//
+//                       setState(() {
+//                         selectedDate = date;
+//                         selectedTime = time;
+//                         dateController.text =
+//                             '${date.month}/${date.day}/${date.year}, ${time.format(context)}';
+//                       });
+//                     },
+//                   ),
+//                   SizedBox(
+//                     height: 20,
+//                   ),
+//                   Container(
+//                     height: 300,
+//                     padding: EdgeInsets.symmetric(horizontal: 10),
+//                     child: MyCalender(
+//                       selectedDate: selectedDate,
+//                       onDateSelected: (date) {
+//                         setState(() {
+//                           selectedDate = date;
+//                         });
+//                       },
+//                     ),
+//                   ),
+//                   calender_row()
+//                 ],
+//               ),
+//             ),
+//             Mybutton2(
+//               buttonText2: 'Cancel',
+//               buttonText: 'Done',
+//               mbot: 30,
+//               hpad: 22,
+//               ontap2: () {
+//                 Get.back();
+//               },
+//               ontap: () {
+//                 if (selectedDate == null || selectedTime == null) {
+//                   AlertInfo.show(
+//                       context: context, text: 'Please select date & time');
+//                   return;
+//                 }
+//
+//                 final dateTime = DateTime(
+//                   selectedDate!.year,
+//                   selectedDate!.month,
+//                   selectedDate!.day,
+//                   selectedTime!.hour,
+//                   selectedTime!.minute,
+//                 );
+//
+//                 context.read<PostProvider>().setPostExpiration(dateTime);
+//
+//                 Get.back();
+//               },
+//             ),
+//           ],
+//         ));
+//   }
+// }

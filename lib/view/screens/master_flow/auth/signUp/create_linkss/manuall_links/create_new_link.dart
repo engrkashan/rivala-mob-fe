@@ -48,36 +48,93 @@ class _IndiviualLinkState extends State<CreateNewLink> {
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 22),
               physics: const BouncingScrollPhysics(),
               children: [
+                // if (widget.hasAddOpt == true)
+                //   Padding(
+                //     padding: const EdgeInsets.only(bottom: 30),
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //       children: [
+                //         row_widget(
+                //           onTap: () {
+                //             Get.to(() => IndiviualLink());
+                //           },
+                //           icon: Assets.imagesAdd3,
+                //           title: ' Add new link',
+                //           iconSize: 22,
+                //           texSize: 12,
+                //           weight: FontWeight.bold,
+                //         ),
+                //         row_widget(
+                //           onTap: () {
+                //             Get.to(() => ImportLinktreeEmail());
+                //           },
+                //           icon: Assets.imagesLinktree,
+                //           title: ' Import from LinkTree',
+                //           iconSize: 22,
+                //           texSize: 12,
+                //           weight: FontWeight.bold,
+                //           textColor: kblue,
+                //         ),
+                //       ],
+                //     ),
+                //   ),
                 if (widget.hasAddOpt == true)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        row_widget(
-                          onTap: () {
-                            Get.to(() => IndiviualLink());
-                          },
-                          icon: Assets.imagesAdd3,
-                          title: ' Add new link',
-                          iconSize: 22,
-                          texSize: 12,
-                          weight: FontWeight.bold,
+                  Consumer<LinkProvider>(
+                    builder: (context, ref, _) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            row_widget(
+                              onTap: () => Get.to(() => IndiviualLink()),
+                              icon: Assets.imagesAdd3,
+                              title: ' Add new link',
+                              iconSize: 22,
+                              texSize: 12,
+                              weight: FontWeight.bold,
+                            ),
+                            Row(
+                              children: [
+                                // Select All toggle
+                                MyText(
+                                  text: 'Select All  ',
+                                  size: 12,
+                                  weight: FontWeight.bold,
+                                  color: kblack,
+                                ),
+                                SwitchButton(
+                                  isActive: ref.allActive,
+                                  onChanged: (_) => ref.toggleAllLinks(),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        row_widget(
-                          onTap: () {
-                            Get.to(() => ImportLinktreeEmail());
-                          },
+                      );
+                    },
+                  ),
+                Consumer<LinkProvider>(
+                  builder: (context, ref, _) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 30),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: row_widget(
+                          onTap: () => Get.to(() => ImportLinktreeEmail()),
                           icon: Assets.imagesLinktree,
-                          title: ' Import from LinkTree',
+                          title: ref.allActive
+                              ? ' Imported from LinkTree'
+                              : ' Import from LinkTree',
                           iconSize: 22,
                           texSize: 12,
                           weight: FontWeight.bold,
                           textColor: kblue,
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
+                ),
                 Consumer<LinkProvider>(
                   builder: (context, ref, _) {
                     final linkItems = ref.links;

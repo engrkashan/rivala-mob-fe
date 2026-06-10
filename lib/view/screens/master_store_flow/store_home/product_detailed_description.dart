@@ -23,6 +23,8 @@ import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import 'main_profile.dart';
+
 class ProductDetailedDescription extends StatefulWidget {
   final ProductModel product;
   const ProductDetailedDescription({super.key, required this.product});
@@ -62,6 +64,13 @@ class _ProductDetailedDescriptionState
             backgroundColor: ktransparent,
             body: ImageLayoutWidget(
               store: prd.store,
+              ontap: () {
+                Get.to(
+                      () => StoreMainProfile(
+                    slug: prd.store?.slug,
+                  ),
+                );
+              },
               bodyWidget: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

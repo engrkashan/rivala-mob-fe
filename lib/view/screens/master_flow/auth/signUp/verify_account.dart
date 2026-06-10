@@ -106,17 +106,19 @@ class _MasterVerifyAccountState extends State<MasterVerifyAccount> {
                       Consumer<AuthProvider>(builder: (context, ref, _) {
                         return Mybutton2(
                           ontap: () async {
-                            await ref.verifyEmail(
-                                otp: _otpController.text.trim());
 
-                            if (ref.error != null && ref.error!.isNotEmpty) {
-                              AlertInfo.show(
-                                context: context,
-                                text: ref.error!,
-                              );
+                            if (_otpController.text.trim().isEmpty) {
+                              AlertInfo.show(context: context, text: "Please enter the OTP");
                               return;
                             }
+                            // 2. Call verification
+                            await ref.verifyEmail(otp: _otpController.text.trim());
 
+
+                            if (ref.error != null && ref.error!.isNotEmpty) {
+                              AlertInfo.show(context: context, text: ref.error!);
+                              return;
+                            }
                             // ✅ OTP SUCCESS → NAVIGATE
                             Get.to(() => GradientSuccessScreen(
                                   title: 'Well done',

@@ -84,7 +84,8 @@ class GradientSuccessScreen extends StatelessWidget {
                                   },
                                   onGalleryPick: () async {
                                     Get.back();
-                                    controller.pickMultipleMedia();
+                                    //controller.pickMultipleMedia();
+                                    controller.pickImageFromGallery();
                                   },
                                 );
                               },

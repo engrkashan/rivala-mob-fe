@@ -103,23 +103,75 @@ class _MasterSignInState extends State<MasterSignIn>
                         paddingTop: 18,
                         paddingBottom: 40,
                       ),
+
+
                       signIn_opt_row(
                         delay: 200,
+                        ontap: () async {
+                          final auth = Provider.of<AuthProvider>(context, listen: false);
+                          await auth.signInWithGoogle();
+
+                          if (auth.error == null && auth.isLoggedIn) {
+                            Get.offAll(() => PersistentBottomNavBar());
+                          } else if (auth.error != null) {
+                            AlertInfo.show(context: context, text: auth.error!);
+                          }
+                        },
                       ),
                       SizedBox(
                         height: 10,
                       ),
                       signIn_opt_row(
-                          icon: Assets.imagesApple,
-                          title: 'Sign in with Apple',
-                          delay: 400),
+                        icon: Assets.imagesApple,
+                        title: 'Sign in with Apple',
+                        delay: 400,
+                        ontap: () async {
+
+                          final auth =
+                          Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          );
+
+                          await auth.signInWithApple();
+
+                          if (auth.error == null && auth.isLoggedIn) {
+                            Get.offAll(() => PersistentBottomNavBar());
+                          } else if (auth.error != null) {
+                            AlertInfo.show(
+                              context: context,
+                              text: auth.error!,
+                            );
+                          }
+                        },
+                      ),
                       SizedBox(
                         height: 10,
                       ),
                       signIn_opt_row(
-                          icon: Assets.imagesMicrosoft,
-                          title: 'Sign in with Microsoft',
-                          delay: 600),
+                        icon: Assets.imagesMicrosoft,
+                        title: 'Sign in with Microsoft',
+                        delay: 600,
+                        ontap: () async {
+
+                          final auth =
+                          Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          );
+
+                          await auth.signInWithMicrosoft();
+
+                          if (auth.error == null && auth.isLoggedIn) {
+                            Get.offAll(() => PersistentBottomNavBar());
+                          } else if (auth.error != null) {
+                            AlertInfo.show(
+                              context: context,
+                              text: auth.error!,
+                            );
+                          }
+                        },
+                      ),
                       SizedBox(
                         height: 30,
                       ),
@@ -227,13 +279,18 @@ class _MasterSignInState extends State<MasterSignIn>
 }
 
 class signIn_opt_row extends StatelessWidget {
-  final String? icon, title;
+
+  final String? icon;
+  final String? title;
   final int? delay;
+  final VoidCallback? ontap;
+
   const signIn_opt_row({
     super.key,
     this.icon,
     this.title,
     this.delay,
+    this.ontap,
   });
 
   @override
@@ -241,6 +298,7 @@ class signIn_opt_row extends StatelessWidget {
     return Animate(
       effects: [MoveEffect(delay: Duration(milliseconds: delay ?? 500))],
       child: Bounce_widget(
+        ontap: ontap,
         widget: CustomeContainer(
           height: 55,
           mtop: 0,

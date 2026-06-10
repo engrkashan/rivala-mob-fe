@@ -12,8 +12,24 @@ class StoreFotter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = store?.theme;
+
+    final bgColor = theme?.colorDark != null
+        ? hexToColor(theme!.colorDark!)
+        : kheader;
+
+
+    final headerTextColor = theme?.color2 != null
+        ? hexToColor(theme!.color2!)
+        : kwhite;
+
+    // CHANGE: was kwhite hardcoded, now from theme
+    final bodyTextColor = theme?.color3 != null
+        ? hexToColor(theme!.color3!)
+        : kwhite;
+
     final themeColor = store?.theme?.colorDark;
-    final bgColor = themeColor != null ? hexToColor(themeColor) : kheader;
+   // final bgColor = themeColor != null ? hexToColor(themeColor) : kheader;
     return Container(
       width: double.infinity,
       color: bgColor,
@@ -51,7 +67,7 @@ class StoreFotter extends StatelessWidget {
             ),
           MyText(
             text: 'This is ${store?.name}',
-            color: kwhite,
+            color: headerTextColor,
             size: 18,
             weight: FontWeight.w600,
             paddingBottom: 15,
@@ -62,8 +78,8 @@ class StoreFotter extends StatelessWidget {
             text: (store?.owner?.bio != null && store!.owner!.bio!.isNotEmpty)
                 ? store!.owner!.bio!
                 : 'Designed and created for the outdoor lovers who are searching for sunshine filled coastlines, beachfront cafés and crystal blue waves.',
-            color: kwhite,
-            size: 14,
+            color: bodyTextColor,
+              size: 14,
             weight: FontWeight.w400,
             paddingBottom: 25,
             useCustomFont: true,
@@ -71,7 +87,7 @@ class StoreFotter extends StatelessWidget {
           MyText(
             paddingTop: 60,
             text: '© ${store?.name}\nAll rights reserved',
-            color: kwhite, //ksubHeader,
+            color: bodyTextColor, //ksubHeader,
             size: 13,
             weight: FontWeight.w500,
             useCustomFont: true,

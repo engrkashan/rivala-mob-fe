@@ -28,90 +28,88 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
         dummyimgeStack(),
         Scaffold(
           backgroundColor: ktransparent,
+          resizeToAvoidBottomInset: true, // add this
           body: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                 child: image_appbar(),
               ),
-              Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: CustomeContainer(
-                  height: 500,
-                  color: kwhite,
-                  hpad: 0,
-                  vpad: 0,
-                  widget: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: ContainerAppbar(
-                          title: 'New Collection',
-                          isCenter: true,
-                        )
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Divider(
-                          color: kgrey2,
+              Expanded( // Spacer ki jagah Expanded
+                child: SingleChildScrollView( // scroll enable
+                  padding: EdgeInsets.only(
+                    left: 15,
+                    right: 15,
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 20, // keyboard ke upar space
+                  ),
+                  child: CustomeContainer(
+                    color: kwhite,
+                    hpad: 0,
+                    vpad: 0,
+                    widget: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min, // important
+                      children: [
+                        SizedBox(height: 15),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: ContainerAppbar(
+                            title: 'New Collection',
+                            isCenter: true,
+                          ),
                         ),
-                      ),
-                      MyText(
-                        text: 'Collection name',
-                        size: 14,
-                        color: kheader, //kter
-                        weight: FontWeight.w400,
-                        paddingLeft: 18,
-                        paddingBottom: 10,
-                         useCustomFont: true,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: MyTextField(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Divider(color: kgrey2),
+                        ),
+                        MyText(
+                          text: 'Collection name',
+                          size: 14,
+                          color: kheader,
+                          weight: FontWeight.w400,
+                          paddingLeft: 18,
+                          paddingBottom: 10,
+                          useCustomFont: true,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: MyTextField(
+                            radius: 50,
+                            hint: 'Digital Products',
+                            useCustomFont: true,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: MyTextField(
+                            radius: 15,
+                            hint: '280 character limit. . .',
+                            label: 'Collection description',
+                            useCustomFont: true,
+                            maxLines: 7,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        CustomeContainer(
+                          hasShadow: true,
+                          color: kwhite,
                           radius: 50,
-                          hint: 'Digital Products',
-                           useCustomFont: true,
+                          widget: MyButton(
+                            fontColor: kwhite,
+                            onTap: () => Get.to(() => AddProductInstore()),
+                            buttonText: 'Save Collection',
+                            useCustomFont: true,
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: MyTextField(
-                          radius: 15,
-                          hint: '280 character limit. . .',
-                          label: 'Collection description',
-                           useCustomFont: true,
-                          maxLines: 7,
-                        ),
-                      ),
-                      Spacer(),
-                      CustomeContainer(
-                        hasShadow: true,
-                        color: kwhite,
-                        radius: 50,
-                        widget: MyButton(
-                          fontColor: kwhite, //buttoncolor
-                          onTap: () {
-                            Get.to(() => AddProductInstore());
-                          },
-                          buttonText: 'Save Collection',
-                           useCustomFont: true,
-                        ),
-                      )
-                    ],
+                        SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Spacer(),
-              SizedBox()
             ],
           ),
-        ),
+        )
       ],
     );
   }

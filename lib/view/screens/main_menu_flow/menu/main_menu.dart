@@ -9,6 +9,7 @@ import 'package:rivala/view/screens/main_menu_flow/menu/manage_store/manage_stor
 import 'package:rivala/view/screens/main_menu_flow/menu/sell_on_rivala/sell_on_rivala.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/shopping.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/wallet/wallet_main.dart';
+import 'package:rivala/view/screens/master_flow/auth/terms_conditions.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
@@ -17,6 +18,10 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:provider/provider.dart';
 import '../../../../controllers/providers/user/auth_provider.dart';
 import '../../../../view/widgets/common_image_view_widget.dart';
+import '../../master_flow/auth/privay_policy.dart';
+import '../../master_flow/auth/signIn/signin.dart';
+import '../../master_flow/auth/signUp/customize_theme.dart';
+import '../../master_flow/auth/signUp/select_theme.dart';
 
 class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
@@ -181,30 +186,143 @@ class _MainMenuState extends State<MainMenu> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    MyText(
-                      text: 'Terms of Services',
-                      size: 10,
-                      color: kblack,
-                      weight: FontWeight.w500,
+                    Bounce_widget(
+                      ontap: () {
+                        Get.to(() => const TermsConditions());
+                      },
+                      widget: MyText(
+                        text: 'Terms of Services',
+                        size: 10,
+                        color: kblack,
+                        weight: FontWeight.w500,
+                      ),
                     ),
                     SizedBox(width: 47),
-                    MyText(
-                      text: 'Privacy Policy',
-                      size: 10,
-                      color: kblack,
-                      weight: FontWeight.w500,
-                    ),
+                    Bounce_widget(
+                      ontap: () => Get.to(() => const PrivacyPolicy()),
+                      widget: MyText(
+                        text: 'Privacy Policy',
+                        size: 10,
+                        color: kblack,
+                        weight: FontWeight.w500,
+                      ),
+                    )
                   ],
                 ),
-                MyText(
-                  paddingTop: 20,
-                  textAlign: TextAlign.center,
-                  text: 'Set Theme',
-                  weight: FontWeight.w500,
-                  size: 10,
-                  color: Color(0xffD2468D),
-                  paddingBottom: 100,
+                Bounce_widget(
+                  ontap: () {
+                    Get.to(() => const CustomizeTheme());
+                  },
+                  widget: MyText(
+                    paddingTop: 20,
+                    textAlign: TextAlign.center,
+                    text: 'Set Theme',
+                    weight: FontWeight.w500,
+                    size: 10,
+                    color: const Color(0xffD2468D),
+                  ),
                 ),
+                const SizedBox(height: 10),
+                Bounce_widget(
+                  ontap: () {
+                    // Confirmation Dialog
+                    Get.dialog(
+                      Dialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        backgroundColor: kwhite,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+
+                              const Icon(Icons.logout_rounded, color: Colors.red, size: 50),
+                              const SizedBox(height: 20),
+
+                              MyText(
+                                text: "Logout Confirmation",
+                                size: 20,
+                                weight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              const SizedBox(height: 10),
+
+                              MyText(
+                                text: "Are you sure you want to sign out of your account?",
+                                size: 14,
+                                color: ktertiary,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 30),
+
+                              Row(
+                                children: [
+                                  // Cancel Button
+                                  Expanded(
+                                    child: Bounce_widget(
+                                      ontap: () => Get.back(),
+                                      widget: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        decoration: BoxDecoration(
+                                          color: ktertiary.withOpacity(0.1), // Subtle color
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Center(child: MyText(text: "Cancel", color: kblack, weight: FontWeight.w600)),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+
+
+                                  Expanded(
+                                    child: Bounce_widget(
+                                      ontap: () async {
+                                        Get.back();
+                                        await context.read<AuthProvider>().logout();
+                                       // Get.offAll(() => const MasterSignIn());
+                                      },
+                                      widget: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        decoration: BoxDecoration(
+                                          gradient: kgradmainmenu,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child:   Center(
+                                          child: MyText(
+                                            text: "Logout",
+                                            color: Colors.white, // kwhite
+                                            weight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  widget: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.logout, color: Colors.red, size: 20),
+                        SizedBox(width: 10),
+                        MyText(
+                          text: 'Logout',
+                          color: Colors.red,
+                          weight: FontWeight.w600,
+                          size: 14,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 50),
               ],
             ),
           ),

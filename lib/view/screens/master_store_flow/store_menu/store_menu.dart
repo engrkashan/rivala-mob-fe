@@ -38,13 +38,16 @@ class _StoreMenuState extends State<StoreMenu> {
       {
         "text": "Our Followers",
         "ontap": () {
-          Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
+          Navigator.of(context).push(CustomPageRoute(page:  OurFollowers(
+            store: widget.store,
+          )));
         }
       },
       {
         "text": "Who We're Following",
         "ontap": () {
-          Navigator.of(context).push(CustomPageRoute(page: OurFollowers()));
+          Navigator.of(context).push(CustomPageRoute(page: OurFollowers( store: widget.store,
+            initialIndex: 1,)));
         }
       },
       {
@@ -233,15 +236,19 @@ class _ExpandableSelectionTileState extends State<ExpandableSelectionTile> {
                   children: [
                     Row(
                       children: [
-                        MyText(
-                          text: option['text'],
-                          color: ksubHeader,
-                          size: 20,
-                          textAlign: TextAlign.start,
-                          useCustomFont: true,
+                        Expanded(
+                          child: MyText(
+                            text: option['text'],
+                            color: ksubHeader,
+                            size: 20,
+                            textAlign: TextAlign.start,
+                            useCustomFont: true,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
-                    ),
+                    )
                   ],
                 ),
               ),

@@ -12,9 +12,12 @@ import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 import '../../../../controllers/providers/brands_provider.dart';
 
 class StoreMainProfile extends StatefulWidget {
-  // final String? slug;
-  const StoreMainProfile({super.key});
+  final String? slug;
 
+  const StoreMainProfile({
+    super.key,
+    this.slug,
+  });
   @override
   State<StoreMainProfile> createState() => _StoreMainProfileState();
 }
@@ -24,9 +27,16 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BrandsProvider>().loadCurrentStore();
+      final brands = context.read<BrandsProvider>();
+
+      if (widget.slug != null && widget.slug!.isNotEmpty) {
+        brands.loadStoreByHandle(widget.slug!);
+      } else {
+        brands.loadCurrentStore();
+      }
     });
   }
+
 
   // @override
   // void didUpdateWidget(covariant StoreMainProfile oldWidget) {
@@ -53,18 +63,32 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
           SliverToBoxAdapter(
             child: Consumer<BrandsProvider>(
               builder: (context, brands, _) {
-                if (brands.currentStore == null) {
+                final store = widget.slug != null
+                    ? brands.visitedStore
+                    : brands.currentStore;
+
+                if (store == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return HeaderImageStack(store: brands.currentStore);
+
+                return HeaderImageStack(store: store);
               },
             ),
+            //     if (brands.currentStore == null) {
+            //       return const Center(child: CircularProgressIndicator());
+            //     }
+            //     return HeaderImageStack(store: brands.currentStore);
+            //   },
+            // ),
           ),
 
           // Collections List
           Consumer<BrandsProvider>(
             builder: (context, collectionProvider, _) {
-              final collections = collectionProvider.currentStore?.collections;
+             // final collections = collectionProvider.currentStore?.collections;
+              final collections = widget.slug != null
+                  ? collectionProvider.visitedStore?.collections
+                  : collectionProvider.currentStore?.collections;
               if (collections == null || collections.isEmpty) {
                 return const SliverToBoxAdapter(
                   child: Padding(
@@ -154,7 +178,10 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
           // Store Products
           Consumer<BrandsProvider>(
             builder: (context, brands, _) {
-              final products = brands.currentStore?.products;
+         //     final products = brands.currentStore?.products;
+              final products = widget.slug != null
+                  ? brands.visitedStore?.products
+                  : brands.currentStore?.products;
               if (products == null || products.isEmpty) {
                 return const SliverToBoxAdapter(child: SizedBox.shrink());
               }
@@ -221,9 +248,13 @@ class _StoreMainProfileState extends State<StoreMainProfile> {
           SliverFillRemaining(
             hasScrollBody: false,
             child: Consumer<BrandsProvider>(builder: (context, brands, _) {
-              return StoreFotter(
-                store: brands.currentStore,
-              );
+              return
+
+                StoreFotter(
+                  store: widget.slug != null
+                      ? brands.visitedStore
+                      : brands.currentStore,
+                );
             }),
           )
         ],

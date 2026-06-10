@@ -29,6 +29,9 @@ class _IndiviualLinkState extends State<IndiviualLink> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MediaProvider>().clearImage();
+    });
   }
 
   final name = TextEditingController();
@@ -42,10 +45,13 @@ class _IndiviualLinkState extends State<IndiviualLink> {
         backgroundColor: kwhite,
         appBar: simpleAppBar(
             context: context,
-            title: isLink ? link?.name : "Instagram",
+            title: isLink ? link?.name : "Create new link",
             centerTitle: true,
             actions: [
               Bounce_widget(
+                  ontap: () {
+                    Get.back();
+                  },
                   widget: Image.asset(
                 Assets.imagesClose,
                 width: 18,
@@ -67,7 +73,7 @@ class _IndiviualLinkState extends State<IndiviualLink> {
                 children: [
                   MyTextField(
                     controller: name,
-                    hint: isLink ? link?.name : 'Instagram',
+                    hint: isLink ? link?.name : '',
                     label: 'Link Name',
                     hintColor: ktertiary,
                     delay: 200,
@@ -75,7 +81,7 @@ class _IndiviualLinkState extends State<IndiviualLink> {
                   ),
                   MyTextField(
                     controller: url,
-                    hint: isLink ? link?.url : 'instagram.com/austinlarsen27',
+                    hint: isLink ? link?.url : '',
                     label: 'URL',
                     delay: 400,
                     hintColor: ktertiary,
@@ -90,25 +96,40 @@ class _IndiviualLinkState extends State<IndiviualLink> {
                         weight: FontWeight.w500,
                         color: kblack),
                   ),
-                  SlideAnimation(
-                    delay: 700,
-                    child: Bounce_widget(
-                      ontap: () async {
-                        await context.read<MediaProvider>().pickImage();
-                      },
-                      widget: CustomeContainer(
-                        height: 188,
-                        color: kgrey4,
-                        radius: 15,
-                        mtop: 0,
-                        widget: Center(
-                            child: Image.asset(
-                          Assets.imagesExportt,
-                          width: 70,
-                          height: 69,
-                        )),
-                      ),
-                    ),
+                  Consumer<MediaProvider>(
+                    builder: (context, media, _) {
+                      return SlideAnimation(
+                        delay: 700,
+                        child: Bounce_widget(
+                          ontap: () async {
+                            await context.read<MediaProvider>().pickImage();
+                          },
+                          widget: CustomeContainer(
+                            height: 188,
+                            color: kgrey4,
+                            radius: 15,
+                            mtop: 0,
+                            widget: media.selectedImage != null
+                                ? ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.file(
+                                media.selectedImage!,
+                                width: double.infinity,
+                                height: 188,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                                : Center(
+                              child: Image.asset(
+                                Assets.imagesExportt,
+                                width: 70,
+                                height: 69,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   if (isLink)
                     SlideAnimation(
@@ -129,15 +150,25 @@ class _IndiviualLinkState extends State<IndiviualLink> {
               mBottom: 80,
               mhoriz: 35,
               onTap: () async {
-                await context.read<MediaProvider>().upload();
-                final uploadUrl = context.read<MediaProvider>().uploadedUrl;
+                final media = context.read<MediaProvider>();
+
+                if (media.selectedImage != null) {
+                  await media.upload();
+                }
+
+                final uploadUrl = media.uploadedUrl;
                 await context.read<BrandsProvider>().loadCurrentStore();
                 final storeId = context.read<BrandsProvider>().currentStore?.id;
+
                 if (!isLink) {
-                  await context
-                      .read<LinkProvider>()
-                      .setLink(name.text, url.text, uploadUrl ?? "", storeId!);
+                  await context.read<LinkProvider>().setLink(
+                    name.text,
+                    url.text,
+                    uploadUrl ?? "",
+                    storeId!,
+                  );
                 }
+                media.clearImage();
                 Get.to(() => CreateNewLink());
               },
             ),

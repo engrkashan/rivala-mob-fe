@@ -16,7 +16,11 @@ class MediaProvider extends ChangeNotifier {
     _isLoading = value;
     notifyListeners();
   }
-
+  void clearImage() {
+    selectedImage = null;
+    uploadedUrl = null;
+    notifyListeners();
+  }
   Future<void> upload({File? url}) async {
     uploadedUrl = null; // Clear previous state
     setLoading(true);
@@ -39,10 +43,15 @@ class MediaProvider extends ChangeNotifier {
 
   File? selectedImage;
   Future<void> pickImage() async {
-    final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? file = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 1080,
+      maxHeight: 1080,
+    );
 
     if (file == null) return;
     selectedImage = File(file.path);
     notifyListeners();
-  }
-}
+  }}
+

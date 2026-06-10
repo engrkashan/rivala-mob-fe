@@ -14,9 +14,14 @@ class PostProvider extends ChangeNotifier {
   List<ProductModel?> tagProducts = [];
   List<CollectionModel?> tagCollections = [];
   List<UserModel>? get creators => _users;
-
+  String? _selectedLocation;
+  String? get selectedLocation => _selectedLocation;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  void setLocation(String location) {
+    _selectedLocation = location;
+    notifyListeners(); // UI update
+  }
   void setLoading(bool value) {
     _isLoading = value;
     notifyListeners();

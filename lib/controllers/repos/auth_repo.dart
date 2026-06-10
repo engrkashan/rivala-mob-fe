@@ -105,11 +105,25 @@ class AuthRepo {
     print(response['accessToken']);
   }
 
+  // Future<void> verifySellerEmail({required String otp}) async {
+  //   final response = await api.postResponse(
+  //     endpoints: Endpoints.verifySellerEmail,
+  //     data: {"otp": otp},
+  //   );
+  // }
   Future<void> verifySellerEmail({required String otp}) async {
+
     final response = await api.postResponse(
       endpoints: Endpoints.verifySellerEmail,
       data: {"otp": otp},
     );
+
+    print("VERIFY RESPONSE: $response");
+
+    if (response["error"] != null) {
+
+      throw Exception(response["error"]);
+    }
   }
 
   Future<void> resendSellerOtp({required String identifier}) async {
@@ -133,5 +147,37 @@ class AuthRepo {
     }
 
     return updatedUser;
+  }
+  // ==================== NEW: Email Check ====================
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      final response = await api.postResponse(
+        endpoints: Endpoints.checkEmail,
+        data: {"email": email},
+      );
+
+      return response['exists'] == true;
+    } catch (e) {
+      print("Check email exists error: $e");
+      return false; // Fail silently (don't block user)
+    }
+  }
+
+
+  Future<UserModel> socialLogin(String endpoint, String idToken) async {
+    final response = await api.postResponse(
+        endpoints: endpoint,
+        data: {"token": idToken}
+    );
+
+    final token = response['accessToken'];
+    final userData = response['seller'] ?? response['user'] ?? response['data'];
+
+    if (token == null || userData == null) {
+      throw ApiException(message: "Social login failed", response: jsonEncode(response), statusCode: 200);
+    }
+
+    await session.saveAuthToken(token);
+    return UserModel.fromJson(userData);
   }
 }

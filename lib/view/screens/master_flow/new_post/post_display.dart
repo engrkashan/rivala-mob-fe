@@ -201,6 +201,7 @@ class image_appbar extends StatelessWidget {
   final StoreModel? store;
   final String? ownerName;
   final String? ownerAvatar;
+  final VoidCallback? onProfileTap;
   const image_appbar({
     super.key,
     this.title,
@@ -208,35 +209,38 @@ class image_appbar extends StatelessWidget {
     this.store,
     this.ownerName,
     this.ownerAvatar,
+    this.onProfileTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CommonImageView(
-          url: ownerAvatar ?? store?.logoUrl ?? '',
-          height: 54,
-          width: 54,
-          radius: 50,
-        ),
-        Expanded(
-          child: MyText(
-            text: '@${ownerName ?? store?.name ?? "User"}',
-            color: kwhite,
-            useCustomFont: true,
-            size: 16,
-            weight: FontWeight.w600,
-            paddingLeft: 8,
-            shadow: [
-              Shadow(
-                offset: Offset(5.0, 3.0),
-                blurRadius: 5.0,
-                color: ktertiary,
-              ),
-            ],
+        GestureDetector(
+          onTap: onProfileTap,
+          child: CommonImageView(
+            url: ownerAvatar ?? store?.logoUrl ?? '',
+            height: 54,
+            width: 54,
+            radius: 50,
           ),
         ),
+
+        const SizedBox(width: 8),
+
+        Expanded(
+          child: GestureDetector(
+            onTap: onProfileTap,
+            child: MyText(
+              text: '@${ownerName ?? store?.name ?? "Store"}',
+              color: kwhite,
+              useCustomFont: true,
+              size: 16,
+              weight: FontWeight.w600,
+            ),
+          ),
+        ),
+
         Bounce_widget(
           ontap: () {
             Get.to(() => ReportIisue());
