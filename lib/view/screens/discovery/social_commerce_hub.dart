@@ -16,7 +16,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../controllers/providers/post_provider.dart';
 import '../../../controllers/providers/product_provider.dart';
 import '../master_store_flow/store_menu/following_profile.dart';
-import '../master_flow/creators/creator_posts_screen.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -220,9 +219,9 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 itemBuilder: (_, index) {
                   final creator = creators[index];
                   return GestureDetector(
-                    onTap: () => Get.to(
-                      () => CreatorPostsScreen(creatorId: creator.id ?? ''),
-                    ),
+                    // TODO: Navigate to a dedicated CreatorPostsScreen once built
+                    // Web equivalent: navigate(`/creator/${creator.id}/posts`)
+                    onTap: () {},
                     child: curated_brand_widget(
                       size: 135,
                       radius: 20,
