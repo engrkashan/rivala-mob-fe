@@ -10,6 +10,7 @@ class PostModel {
   int? commentCount;
   final UserModel? author;
   final ProductModel? product;
+  final List<ProductModel>? taggedProducts;
   final DateTime? createdAt;
   bool isLikedByMe;
 
@@ -22,6 +23,7 @@ class PostModel {
     this.commentCount,
     this.author,
     this.product,
+    this.taggedProducts,
     this.createdAt,
     this.isLikedByMe = false,
   });
@@ -46,6 +48,9 @@ class PostModel {
       product: json['product'] != null
           ? ProductModel.fromJson(json['product'])
           : null,
+      taggedProducts: (json['taggedProducts'] as List?)
+          ?.map((e) => ProductModel.fromJson(e))
+          .toList(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,

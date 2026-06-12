@@ -10,6 +10,7 @@ import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_button.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/dummyimage.dart';
+import 'package:rivala/view/screens/master_flow/auth/signIn/signin.dart';
 
 class ViewAddedProduct extends StatefulWidget {
   const ViewAddedProduct({super.key});
@@ -75,25 +76,30 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                          useCustomFont: true,
                       ),
                   Center(
-                    child: Obx(() => Text(
-        'Log in'  ,
-          style: TextStyle(
-            fontSize: 16,
-            fontFamily: fontController.selectedFont.value.isEmpty
-                ? AppFonts.poppins
-                : fontController.selectedFont.value,
-            color: Colors.transparent,
-            decoration: TextDecoration.underline,
-            decorationColor: ktertiary,
-            decorationThickness: 1,
-            decorationStyle: TextDecorationStyle.solid,
-            height: 1.4, // Adjusts spacing between text and underline
-            shadows: [
-              Shadow(color: ktertiary, offset: Offset(0, -3)),
-            ],
-          ),
-          textAlign: TextAlign.center,
-        ))
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.offAllNamed('/signin') ?? Get.offAll(() => SignInScreen());
+                      },
+                      child: Obx(() => Text(
+                        'Log in',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: fontController.selectedFont.value.isEmpty
+                              ? AppFonts.poppins
+                              : fontController.selectedFont.value,
+                          color: Colors.transparent,
+                          decoration: TextDecoration.underline,
+                          decorationColor: ktertiary,
+                          decorationThickness: 1,
+                          decorationStyle: TextDecorationStyle.solid,
+                          height: 1.4, // Adjusts spacing between text and underline
+                          shadows: [
+                            Shadow(color: ktertiary, offset: Offset(0, -3)),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      )),
+                    )
                   ),
                       Spacer(),
                       CustomeContainer(
@@ -103,7 +109,7 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                         widget: MyButton(
                           fontColor: kwhite, //buttoncolor
                           onTap: () {
-                          //  Get.to(() => AddProductInstore());
+                            Get.offAllNamed('/signin') ?? Get.offAll(() => SignInScreen());
                           },
                           buttonText: 'Create my Rivala account',
                            useCustomFont: true,

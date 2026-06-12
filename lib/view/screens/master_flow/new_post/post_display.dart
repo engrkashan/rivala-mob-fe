@@ -9,6 +9,8 @@ import 'package:rivala/view/screens/master_flow/new_post/post_share.dart';
 import 'package:rivala/view/screens/master_flow/new_post/comments_bottom_sheet.dart';
 import 'package:rivala/view/screens/master_store_flow/report_iisue.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/add_product_instore.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/add_product/view_added_product.dart';
+import 'package:rivala/controllers/providers/user/auth_provider.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/multiple_product_post_veiw.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/button_container.dart';
@@ -167,7 +169,12 @@ class _PostDisplayState extends State<PostDisplay> {
                           BottomButtons(
                             icon: Assets.imagesAdd,
                             ontap: () {
-                              Get.to(() => AddProductInstore(product: currentPost.product ?? widget.product));
+                              final auth = Provider.of<AuthProvider>(context, listen: false);
+                              if (auth.isLoggedIn) {
+                                Get.to(() => AddProductInstore(product: currentPost.product ?? widget.product));
+                              } else {
+                                Get.to(() => ViewAddedProduct());
+                              }
                             },
                           ),
                           BottomButtons(
@@ -207,7 +214,7 @@ class _PostDisplayState extends State<PostDisplay> {
                             trackHeight: 44,
                             callback: () {
                               Get.back();
-                              Get.to(() => MultipleProductPostVeiw());
+                              Get.to(() => MultipleProductPostVeiw(post: currentPost));
                             },
                             stretchThumb: true,
                             resetCurve: Curves.bounceOut,

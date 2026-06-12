@@ -239,7 +239,7 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                             return MyButton(
                               icon: Icons.add,
                               imgColor: kwhite,
-                              fontColor: kwhite, //buttoncolor
+                              fontColor: kwhite,
                               buttonText: ref.isLoading ? 'Adding...' : 'Add to store',
                               useCustomFont: true,
                               onTap: () async {
@@ -259,7 +259,8 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                                 if (ref.error.isNotEmpty) {
                                   AlertInfo.show(context: Get.context!, text: ref.error);
                                 } else {
-                                  Get.to(() => ViewAddedProduct());
+                                  AlertInfo.show(context: Get.context!, text: "Product added to collection successfully!", type: AlertType.success);
+                                  Get.back();
                                 }
                               },
                             );
