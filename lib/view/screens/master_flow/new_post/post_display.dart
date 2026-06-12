@@ -170,7 +170,7 @@ class _PostDisplayState extends State<PostDisplay> {
                             icon: Assets.imagesAdd,
                             ontap: () {
                               final auth = Provider.of<AuthProvider>(context, listen: false);
-                              if (auth.isLoggedIn) {
+                              if (auth.user != null) {
                                 Get.to(() => AddProductInstore(product: currentPost.product ?? widget.product));
                               } else {
                                 Get.to(() => ViewAddedProduct());

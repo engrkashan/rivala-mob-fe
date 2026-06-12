@@ -66,7 +66,7 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                       MyText(
                         text: 'To add this product to your storefront, please create a Rivala account.',
                         size: 14,
-                        color: kheader, //kter
+                        color: kheader,
                         weight: FontWeight.w400,
                         paddingLeft: 18,
                         paddingRight: 18,
