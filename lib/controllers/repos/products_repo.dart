@@ -36,6 +36,14 @@ class ProductsRepo {
     return list.map((item) => ProductReview.fromJson(item)).toList();
   }
 
+  Future<ProductReview> createProductReview(String productId, Map<String, dynamic> reviewData) async {
+    final response = await api.postResponse(
+      endpoints: Endpoints.productReview(productId),
+      data: reviewData,
+    );
+    return ProductReview.fromJson(response['review'] ?? response['data'] ?? response);
+  }
+
   Future<List<ProductModel>> getMyProducts() async {
     final response = await api.getResponse(endpoints: Endpoints.myProducts);
 

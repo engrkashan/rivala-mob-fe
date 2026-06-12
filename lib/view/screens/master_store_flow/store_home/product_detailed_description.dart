@@ -9,8 +9,11 @@ import 'package:rivala/models/cart_model.dart';
 import 'package:rivala/models/product_model.dart';
 import 'package:rivala/utils/color_utils.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/select_theme.dart';
-import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/size_guide_bottom_sheet.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/review_bottom_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/ordering/checkout.dart';
+import 'package:rivala/view/screens/master_store_flow/store_home/main_profile.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/button_container.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
@@ -41,15 +44,47 @@ class _ProductDetailedDescriptionState
   String? selectedSize;
   String? selectedColor;
   int _quantity = 1;
+  String _purchaseOption = "one-time";
+  String _subscriptionFrequency = "Every month";
+  bool _inWishlist = false;
 
   @override
   void initState() {
     super.initState();
+    _checkWishlist();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prdd = Provider.of<ProductProvider>(context, listen: false);
       await prdd.loadForYou(widget.product.id ?? "");
       await prdd.loadPrdReviews(widget.product.id ?? "");
     });
+  }
+
+  Future<void> _checkWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final wishlist = prefs.getStringList('wishlist') ?? [];
+    if (mounted) {
+      setState(() {
+        _inWishlist = wishlist.contains(widget.product.id);
+      });
+    }
+  }
+
+  Future<void> _toggleWishlist() async {
+    final prefs = await SharedPreferences.getInstance();
+    final wishlist = prefs.getStringList('wishlist') ?? [];
+    final id = widget.product.id;
+    if (id == null) return;
+
+    if (wishlist.contains(id)) {
+      wishlist.remove(id);
+      setState(() => _inWishlist = false);
+      Get.snackbar('Removed', 'Removed from wishlist', duration: const Duration(seconds: 1));
+    } else {
+      wishlist.add(id);
+      setState(() => _inWishlist = true);
+      Get.snackbar('Added', 'Added to wishlist', duration: const Duration(seconds: 1));
+    }
+    await prefs.setStringList('wishlist', wishlist);
   }
 
   @override
@@ -131,7 +166,7 @@ class _ProductDetailedDescriptionState
                     padding: const EdgeInsets.symmetric(horizontal: 18),
                     child: TwoTextedColumn(
                       text1: prd.title ?? "",
-                      text2: '\$${prd.price}',
+                      text2: '\$${prd.price ?? "0.00"}',
                       size1: 20,
                       size2: 20,
                       color1: kbody,
@@ -140,6 +175,54 @@ class _ProductDetailedDescriptionState
                       useCustomFont: true,
                     ),
                   ),
+                  
+                  // Stock Status
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: (prd.stockQuantity ?? 0) == 0
+                                ? Colors.red.shade100
+                                : ((prd.stockQuantity ?? 0) < 10
+                                    ? Colors.orange.shade100
+                                    : Colors.green.shade100),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            (prd.stockQuantity ?? 0) == 0
+                                ? "Out of Stock"
+                                : ((prd.stockQuantity ?? 0) < 10
+                                    ? "Low Stock"
+                                    : "In Stock"),
+                            style: TextStyle(
+                              color: (prd.stockQuantity ?? 0) == 0
+                                  ? Colors.red.shade800
+                                  : ((prd.stockQuantity ?? 0) < 10
+                                      ? Colors.orange.shade800
+                                      : Colors.green.shade800),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if ((prd.stockQuantity ?? 0) > 0) ...[
+                          const SizedBox(width: 10),
+                          Text(
+                            "${prd.stockQuantity} items left",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ),
+
                   SizedBox(
                     height: 15,
                   ),
@@ -212,12 +295,35 @@ class _ProductDetailedDescriptionState
                   if (sizes.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: MyText(
-                        text: 'Select Size',
-                        size: 14,
-                        color: kheader,
-                        weight: FontWeight.w500,
-                        useCustomFont: true,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MyText(
+                            text: 'Select Size',
+                            size: 14,
+                            color: kheader,
+                            weight: FontWeight.w500,
+                            useCustomFont: true,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => const SizeGuideBottomSheet(),
+                              );
+                            },
+                            child: MyText(
+                              text: 'Size Guide',
+                              size: 12,
+                              color: Colors.blue,
+                              weight: FontWeight.w500,
+                              useCustomFont: true,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -260,12 +366,89 @@ class _ProductDetailedDescriptionState
                     useCustomFont: true,
                   ),
 
-                  // Simplified Purchase Option for MVP
+                  // Purchase Options
                   Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: PurchaseOptsWidget(
-                        title: 'One-Time Purchase',
-                      )),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() => _purchaseOption = "one-time"),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _purchaseOption == "one-time" ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                  color: _purchaseOption == "one-time" ? Colors.black : Colors.grey,
+                                ),
+                                const SizedBox(width: 10),
+                                MyText(text: 'One-Time Purchase', color: Colors.blueGrey, size: 14),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: () => setState(() => _purchaseOption = "subscription"),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      _purchaseOption == "subscription" ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                      color: _purchaseOption == "subscription" ? Colors.black : Colors.grey,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    MyText(text: 'Subscription', color: Colors.blueGrey, size: 14),
+                                  ],
+                                ),
+                                if (_purchaseOption == "subscription") ...[
+                                  const SizedBox(height: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        value: _subscriptionFrequency,
+                                        isExpanded: true,
+                                        icon: const Icon(Icons.keyboard_arrow_down),
+                                        items: ['Every month', 'Every two months', 'Every two weeks']
+                                            .map((String val) {
+                                          return DropdownMenuItem<String>(
+                                            value: val,
+                                            child: Text(val, style: TextStyle(color: Colors.blueGrey, fontSize: 14)),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          if (val != null) {
+                                            setState(() => _subscriptionFrequency = val);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   // Quantity Selector
                   MyText(
@@ -358,6 +541,65 @@ class _ProductDetailedDescriptionState
                     }),
                   ],
 
+                  // More Items Banner
+                  if (prd.store?.slug != null && prd.store!.slug!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.to(() => StoreMainProfile(slug: prd.store!.slug));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(Icons.storefront, color: Colors.grey.shade700, size: 24),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "More items in the store",
+                                      style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      "@${prd.store!.slug}",
+                                      style: const TextStyle(
+                                          color: Color(0xFF1D6FA3),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(Icons.chevron_right, color: Colors.grey.shade500),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
                   // Reviews Section (kept as is)
                   Consumer<ProductProvider>(
                     builder: (context, provider, _) {
@@ -368,13 +610,38 @@ class _ProductDetailedDescriptionState
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(
-                                left: 18, top: 20, bottom: 12),
-                            child: MyText(
-                              text: 'Customer Reviews',
-                              size: 15,
-                              color: kheader,
-                              weight: FontWeight.w500,
-                              useCustomFont: true,
+                                left: 18, right: 18, top: 20, bottom: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                MyText(
+                                  text: 'Customer Reviews',
+                                  size: 15,
+                                  color: kheader,
+                                  weight: FontWeight.w500,
+                                  useCustomFont: true,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (prd.id != null) {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (context) => ReviewBottomSheet(productId: prd.id!),
+                                      );
+                                    }
+                                  },
+                                  child: MyText(
+                                    text: 'Write a Review',
+                                    size: 13,
+                                    color: Colors.blue,
+                                    weight: FontWeight.w500,
+                                    decoration: TextDecoration.underline,
+                                    useCustomFont: true,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(
@@ -518,11 +785,32 @@ class _ProductDetailedDescriptionState
                       widget: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          GestureDetector(
-                            onTap: () => Get.back(),
-                            child: BottomButtons(
-                              icon: Assets.imagesBack2,
-                            ),
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () => Get.back(),
+                                child: BottomButtons(
+                                  icon: Assets.imagesBack2,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              GestureDetector(
+                                onTap: _toggleWishlist,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: Icon(
+                                    _inWishlist ? Icons.favorite : Icons.favorite_border,
+                                    color: _inWishlist ? Colors.red : Colors.grey.shade700,
+                                    size: 22,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           InkWell(
                             borderRadius: BorderRadius.circular(50),

@@ -114,7 +114,22 @@ class ProductProvider extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = e.toString();
-      _prds = [];
+      _prdReviews = [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> createProductReview(String productId, Map<String, dynamic> reviewData) async {
+    setLoading(true);
+    try {
+      final newReview = await _productRepo.createProductReview(productId, reviewData);
+      _prdReviews = [newReview, ...?_prdReviews];
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
     } finally {
       setLoading(false);
     }
@@ -190,7 +205,7 @@ class ProductProvider extends ChangeNotifier {
     try {
       await _productRepo.updateProduct(model);
       _error = null;
-      await loadAllProducts(); // Refresh list
+      await loadAllProducts();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -203,7 +218,7 @@ class ProductProvider extends ChangeNotifier {
     try {
       await _productRepo.deleteProduct(id);
       _error = null;
-      await loadCurrentProducts(); // Refresh "My Products" list
+      await loadCurrentProducts();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -241,7 +256,7 @@ class ProductProvider extends ChangeNotifier {
     _debouncer.run(() async {
       _lastQuery = query;
 
-      // 🔁 Cache hit
+      // Cache hit
       if (_cache.containsKey(query)) {
         searchProductsList = _cache[query];
         notifyListeners();
