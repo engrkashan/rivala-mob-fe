@@ -15,7 +15,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../controllers/providers/post_provider.dart';
 import '../../../controllers/providers/product_provider.dart';
-import '../master_store_flow/store_menu/following_profile.dart';
+import '../master_store_flow/store_home/main_profile.dart';
 import '../master_flow/new_post/post_display.dart';
 import '../../../models/store_model.dart';
 
@@ -215,18 +215,10 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                   final creator = creators[index];
                   return GestureDetector(
                     onTap: () {
-                      final dummyStore = StoreModel(
-                        id: creator.id,
-                        name: creator.name ?? creator.username,
-                        slug: creator.username,
-                        logoUrl: creator.avatarUrl,
-                        ownerId: creator.id,
-                        owner: creator,
-                      );
                       Navigator.push(
                         context,
                         CustomPageRoute(
-                          page: FollowerMaiProfile(store: dummyStore),
+                          page: StoreMainProfile(slug: creator.username),
                         ),
                       );
                     },
@@ -290,7 +282,12 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
 
                   return GestureDetector(
                     onTap: () {
-                      Get.to(() => PostDisplay(post: post));
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: PostDisplay(post: post),
+                        ),
+                      );
                     },
                     child: curated_brand_widget(
                       size: 135,
