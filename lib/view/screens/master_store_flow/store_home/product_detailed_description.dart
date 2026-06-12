@@ -26,6 +26,7 @@ import 'package:rivala/view/widgets/store_widgets/product_desc_widgets.dart';
 import 'package:rivala/view/widgets/store_widgets/store_image_stack.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../master_flow/new_post/post_display.dart';
 import 'main_profile.dart';
 
 class ProductDetailedDescription extends StatefulWidget {
