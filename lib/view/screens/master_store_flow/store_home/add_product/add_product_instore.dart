@@ -259,7 +259,7 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                                 if (ref.error.isNotEmpty) {
                                   AlertInfo.show(context: Get.context!, text: ref.error);
                                 } else {
-                                  AlertInfo.show(context: Get.context!, text: "Product added to collection successfully!", type: AlertType.success);
+                                  AlertInfo.show(context: Get.context!, text: "Product added to collection successfully!");
                                   Get.back();
                                 }
                               },

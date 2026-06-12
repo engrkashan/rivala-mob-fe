@@ -78,7 +78,7 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                   Center(
                     child: GestureDetector(
                       onTap: () {
-                        Get.offAllNamed('/signin') ?? Get.offAll(() => SignInScreen());
+                        Get.offAllNamed('/signin') ?? Get.offAll(() => MasterSignIn());
                       },
                       child: Obx(() => Text(
                         'Log in',
@@ -109,7 +109,7 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                         widget: MyButton(
                           fontColor: kwhite, //buttoncolor
                           onTap: () {
-                            Get.offAllNamed('/signin') ?? Get.offAll(() => SignInScreen());
+                            Get.offAllNamed('/signin') ?? Get.offAll(() => MasterSignIn());
                           },
                           buttonText: 'Create my Rivala account',
                            useCustomFont: true,
