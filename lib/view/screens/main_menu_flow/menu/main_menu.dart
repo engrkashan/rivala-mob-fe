@@ -124,8 +124,8 @@ class _MainMenuState extends State<MainMenu> {
                         onTap: () {
                           // Navigate to profile?
                         },
-                        title: user?.name != null
-                            ? '@${user!.username ?? user.name}'
+                        title: user != null
+                            ? '@${user.username ?? user.name ?? 'User'}'
                             : '@User',
                         textColor: kdargrey,
                         iconData: Icons.keyboard_arrow_down_rounded,

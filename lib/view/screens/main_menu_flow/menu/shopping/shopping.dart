@@ -5,6 +5,7 @@ import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/orders/my_orders.dart';
 import 'package:rivala/view/screens/main_menu_flow/menu/shopping/subscription/subscription_management.dart';
+import 'package:rivala/view/screens/main_menu_flow/menu/wallet/payment/payment_management.dart';
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/main_menu_widgets/circle_icon.dart';
@@ -36,6 +37,13 @@ class _ShoppingState extends State<Shopping> {
         'delay': 250,
         'ontap': () => Navigator.of(context)
             .push(CustomPageRoute(page: SubscriptionManagement())),
+      },
+      {
+        'textt': 'Payments',
+        'icon': Assets.imagesPaymnet,
+        'delay': 400,
+        'ontap': () => Navigator.of(context)
+            .push(CustomPageRoute(page: PaymentManagement())),
       },
     ];
     return Scaffold(
