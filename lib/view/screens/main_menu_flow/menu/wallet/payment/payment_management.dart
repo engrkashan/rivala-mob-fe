@@ -44,12 +44,73 @@ class _PaymentManagementState extends State<PaymentManagement> {
                 children: [
                   Consumer<PaymentMethodsProvider>(
                     builder: (context, ref, _) {
+                      if (ref.isLoading) {
+                        return const Center(
+                            child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: CircularProgressIndicator(color: kblack),
+                        ));
+                      }
+                      
+                      if (ref.paymentMethods == null || ref.paymentMethods!.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40.0),
+                          child: Column(
+                            children: [
+                              Image.asset(Assets.imagesBankinfo, height: 60, color: Colors.grey.shade400),
+                              const SizedBox(height: 15),
+                              MyText(
+                                text: "No payment methods added yet! 💳✨",
+                                size: 16,
+                                color: Colors.grey.shade600,
+                                weight: FontWeight.w500,
+                              ),
+                              const SizedBox(height: 5),
+                              MyText(
+                                text: "Add a card or bank account to easily manage your purchases.",
+                                size: 12,
+                                color: Colors.grey.shade500,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return ListView.builder(
-                        itemCount: ref.paymentMethods?.length ?? 0,
+                        itemCount: ref.paymentMethods!.length,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
-                          final card = ref.paymentMethods?[index];
+                          final card = ref.paymentMethods![index];
+                          String cardBrandStr = ref.detectCardBrand(card.cardNumber ?? '');
+                          String? displayIcon;
+                          String displayText = card.cardNumber ?? '';
+
+                          if (card.type == 'CARD') {
+                            if (cardBrandStr == 'visa') {
+                              displayIcon = Assets.imagesVisa;
+                            } else if (cardBrandStr == 'mastercard') {
+                              displayIcon = Assets.imagesMastercard;
+                            } else {
+                              displayIcon = Assets.imagesBankinfo;
+                            }
+                            
+                            if (displayText.length > 4) {
+                              displayText = '•••• •••• •••• ${displayText.substring(displayText.length - 4)}';
+                            }
+                          } else if (card.type == 'BANK') {
+                            displayIcon = Assets.imagesBankinfo;
+                            String accNum = card.accountNumber ?? '';
+                            if (accNum.length > 4) {
+                              accNum = '••••${accNum.substring(accNum.length - 4)}';
+                            }
+                            displayText = '${card.bankName ?? 'Bank Account'} $accNum';
+                          } else {
+                            displayIcon = Assets.imagesBankinfo;
+                            displayText = card.walletProvider ?? 'Digital Wallet';
+                          }
+
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: ShoppingRow(
@@ -65,9 +126,9 @@ class _PaymentManagementState extends State<PaymentManagement> {
                               mleft: 0,
                               justIcon: true,
                               weight: FontWeight.w500,
-                              textt: '${card?.cardNumber}',
+                              textt: displayText,
                               mrigth: 0,
-                              // icon: card?.!,
+                              icon: displayIcon,
                             ),
                           );
                         },

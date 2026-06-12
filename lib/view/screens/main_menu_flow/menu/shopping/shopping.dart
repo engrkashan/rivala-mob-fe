@@ -27,7 +27,6 @@ class _ShoppingState extends State<Shopping> {
         'textt': 'Orders',
         'icon': Assets.imagesOrders,
         'delay': 100,
-        // Matches web: navigates to BuyerOrders (MyOrders on mobile)
         'ontap': () => Navigator.of(context)
             .push(CustomPageRoute(page: MyOrders())),
       },
