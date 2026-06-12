@@ -164,7 +164,6 @@ class _PostDetailsState extends State<PostDetails> {
                       physics: const BouncingScrollPhysics(),
                       child: Row(
                         children: [
-                          // 🟢 First: original selectedMedia loop
                           ...List.generate(
                             controller.selectedMedia.length,
                             (index) {
@@ -396,7 +395,7 @@ class _PostDetailsState extends State<PostDetails> {
                         ));
                   }
                 } catch (e) {
-                  Get.back(); // ensure loader is closed
+                  Get.back();
                   AlertInfo.show(
                       context: Get.context!,
                       text: "Failed to upload media: $e");

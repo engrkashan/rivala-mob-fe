@@ -53,7 +53,7 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                   ),
                   MyTextField(
                     controller: searchCon,
-                    hint: 'Swim suit',
+                    hint: 'e.g Swim suit',
                     bordercolor: kgrey2,
                     filledColor: ktransparent,
                     contentvPad: 6.5,
@@ -65,8 +65,6 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                     // readOnly: true,
                     onChanged: (e) {
                       context.read<ProductProvider>().onSearchChanged(e);
-                      // Minimal setState only to toggle the hint/results visibility
-                      // based on text length; Consumer<ProductProvider> handles data rebuilds
                       setState(() {});
                     },
                   ),
@@ -102,7 +100,15 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
                   else
                     Consumer<ProductProvider>(
                       builder: (context, ref, _) {
-                        print("prd length: ${ref.searchProductsList?.length}");
+                        if (ref.isLoading) {
+                          return const Padding(
+                            padding: EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+
                         final prds = ref.searchProductsList;
                         if (prds == null || prds.isEmpty) {
                           return const Padding(
@@ -142,11 +148,4 @@ class _SearchDiscoveryProductsState extends State<SearchDiscoveryProducts> {
         ));
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     context.read<ProductProvider>().loadAllProducts();
-  //   });
-  // }
 }

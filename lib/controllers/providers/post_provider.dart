@@ -83,4 +83,56 @@ class PostProvider extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<void> toggleLike(String postId) async {
+    try {
+      // Optimistic update
+      final index = _posts.indexWhere((p) => p.id == postId);
+      if (index != -1) {
+        final post = _posts[index];
+        post.isLikedByMe = !post.isLikedByMe;
+        post.likeCount = (post.likeCount ?? 0) + (post.isLikedByMe ? 1 : -1);
+        notifyListeners();
+      }
+      
+      await postRepo.toggleLike(postId);
+    } catch (e) {
+      debugPrint("Error toggling like: $e");
+      // Revert optimistic update
+      final index = _posts.indexWhere((p) => p.id == postId);
+      if (index != -1) {
+        final post = _posts[index];
+        post.isLikedByMe = !post.isLikedByMe;
+        post.likeCount = (post.likeCount ?? 0) + (post.isLikedByMe ? 1 : -1);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<List<PostCommentModel>> getComments(String postId) async {
+    try {
+      return await postRepo.getComments(postId);
+    } catch (e) {
+      debugPrint("Error fetching comments: $e");
+      return [];
+    }
+  }
+
+  Future<PostCommentModel?> addComment(String postId, String content) async {
+    try {
+      final newComment = await postRepo.postComment(postId, content);
+      if (newComment != null) {
+        final index = _posts.indexWhere((p) => p.id == postId);
+        if (index != -1) {
+          final post = _posts[index];
+          post.commentCount = (post.commentCount ?? 0) + 1;
+          notifyListeners();
+        }
+      }
+      return newComment;
+    } catch (e) {
+      debugPrint("Error adding comment: $e");
+      return null;
+    }
+  }
 }

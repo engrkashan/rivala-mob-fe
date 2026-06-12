@@ -93,7 +93,12 @@ class ProductModel {
       storeId: json['storeId'] as String?,
       store: json['store'] != null
           ? StoreModel.fromJson(json['store'] as Map<String, dynamic>)
-          : null,
+          : (json['storeName'] != null
+              ? StoreModel(
+                  name: json['storeName'] as String?,
+                  slug: json['storeSlug'] as String?,
+                )
+              : null),
       // Images: handle both [{url: "..."}] and direct ["url1", "url2"]
       image: _parseImageList(json['images'] ?? json['image']),
       // Sizes: handle both [{size: "M"}] and ["M", "L"]

@@ -6,11 +6,12 @@ class PostModel {
   final String? title;
   final String? description;
   final List<String>? media;
-  final int? likeCount;
-  final int? commentCount;
+  int? likeCount;
+  int? commentCount;
   final UserModel? author;
   final ProductModel? product;
   final DateTime? createdAt;
+  bool isLikedByMe;
 
   PostModel({
     this.id,
@@ -22,6 +23,7 @@ class PostModel {
     this.author,
     this.product,
     this.createdAt,
+    this.isLikedByMe = false,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
@@ -34,8 +36,8 @@ class PostModel {
         if (e is Map) return e['url']?.toString() ?? '';
         return e.toString();
       }).toList(),
-      likeCount: json['likeCount'],
-      commentCount: json['commentCount'],
+      likeCount: json['_count']?['postLikes'] ?? json['likeCount'],
+      commentCount: json['_count']?['postComments'] ?? json['commentCount'],
       author: (json['author'] != null)
           ? UserModel.fromJson(json['author'])
           : (json['user'] != null)
@@ -44,6 +46,32 @@ class PostModel {
       product: json['product'] != null
           ? ProductModel.fromJson(json['product'])
           : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      isLikedByMe: (json['postLikes'] as List?)?.isNotEmpty ?? false,
+    );
+  }
+}
+
+class PostCommentModel {
+  final String? id;
+  final String? content;
+  final UserModel? user;
+  final DateTime? createdAt;
+
+  PostCommentModel({
+    this.id,
+    this.content,
+    this.user,
+    this.createdAt,
+  });
+
+  factory PostCommentModel.fromJson(Map<String, dynamic> json) {
+    return PostCommentModel(
+      id: json['id'],
+      content: json['content'],
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,

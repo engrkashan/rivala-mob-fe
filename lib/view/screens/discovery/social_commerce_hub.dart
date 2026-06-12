@@ -34,13 +34,10 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Load all feeds in parallel — mirrors the web's useEffect dispatch pattern
       context.read<BrandsProvider>().loadRecentBrands();
       context.read<ProductProvider>().loadFeed("recent");
       context.read<ProductProvider>().loadFeed("trending");
       context.read<ProductProvider>().loadFeed("back-to-school");
-      // "picks-for-you" & "local-product" are loaded via location on web;
-      // load them as feeds here so the sections appear when data arrives
       context.read<ProductProvider>().loadFeed("picks-for-you");
       context.read<ProductProvider>().loadFeed("local-product");
       context.read<PostProvider>().loadCreators();
@@ -50,7 +47,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
   }
 
   void _onScroll() {
-    // Guard: only fire once per frame to avoid excessive calls
     if (_isScrollLoadingScheduled) return;
     if (!_scrollController.hasClients) return;
 
@@ -59,7 +55,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
 
     if (position.pixels > triggerPoint) {
       _isScrollLoadingScheduled = true;
-      // Reset flag after a short delay so future scrolls can trigger again
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) _isScrollLoadingScheduled = false;
       });
@@ -155,7 +150,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 separatorBuilder: (_, __) => const SizedBox(width: 16),
                 itemBuilder: (_, index) {
                   final p = products[index];
-                  // print("Product Images ${p.image?.first ?? ""}");
                   return GestureDetector(
                     onTap: () => Get.to(
                       () => ProductDetailedDescription(product: p),
@@ -180,8 +174,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
     );
   }
 
-  /// Recent Creators section — mirrors the web's "Recent Creators" section
-  /// which uses getUsersWithPosts() (loadCreators on mobile).
   Widget _buildCreatorsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,8 +211,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 itemBuilder: (_, index) {
                   final creator = creators[index];
                   return GestureDetector(
-                    // TODO: Navigate to a dedicated CreatorPostsScreen once built
-                    // Web equivalent: navigate(`/creator/${creator.id}/posts`)
                     onTap: () {},
                     child: curated_brand_widget(
                       size: 135,
@@ -302,9 +292,6 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
             paddingBottom: 10,
           ),
           _buildHorizontalBrandList(),
-          // Section order matches the web exactly:
-          // Recent Products → High Earning Products → Back to School
-          // → Picks for You → Local Products → Recent Creators
           _buildProductSection(
             feedKey: "recent",
             title: "Recent Products",

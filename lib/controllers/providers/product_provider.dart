@@ -91,14 +91,17 @@ class ProductProvider extends ChangeNotifier {
     return null;
   }
 
+  List<ProductModel>? _recommendedPrds;
+  List<ProductModel>? get recommendedPrds => _recommendedPrds;
+
   Future<void> loadForYou(String id) async {
     setLoading(true);
     try {
-      _prds = await _productRepo.getForYouPrd(id);
+      _recommendedPrds = await _productRepo.getForYouPrd(id);
       _error = null;
     } catch (e) {
       _error = e.toString();
-      _prds = [];
+      _recommendedPrds = [];
     } finally {
       setLoading(false);
     }
@@ -227,7 +230,13 @@ class ProductProvider extends ChangeNotifier {
   String _lastQuery = "";
 
   void onSearchChanged(String query) {
-    if (query.trim().length < 2 || query == _lastQuery) return;
+    if (query.trim().length < 2) {
+      _lastQuery = "";
+      searchProductsList = null;
+      notifyListeners();
+      return;
+    }
+    if (query == _lastQuery) return;
 
     _debouncer.run(() async {
       _lastQuery = query;
@@ -238,7 +247,8 @@ class ProductProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      getSearchProducts(query);
+      await getSearchProducts(query);
+      _cache[query] = searchProductsList ?? [];
     });
   }
 }

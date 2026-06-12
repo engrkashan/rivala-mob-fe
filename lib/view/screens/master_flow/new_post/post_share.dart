@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/models/post_model.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
 import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/expanded_row.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 class PostShare extends StatefulWidget {
-  const PostShare({super.key});
+  final PostModel? post;
+  const PostShare({super.key, this.post});
 
   @override
   State<PostShare> createState() => _PostShareState();
@@ -17,6 +20,12 @@ class PostShare extends StatefulWidget {
 class _PostShareState extends State<PostShare> {
   @override
   Widget build(BuildContext context) {
+    final post = widget.post;
+    final authorName = post?.author?.name ?? post?.author?.username ?? 'Anonymous';
+    final authorHandle = post?.author?.username != null ? '@${post!.author!.username}' : '';
+    final title = post?.title ?? 'Post';
+    final shareLink = "https://rivala.com/post/${post?.id ?? ''}";
+
     return Scaffold(
         backgroundColor: Color(0xff404040),
         body: Column(
@@ -53,18 +62,22 @@ class _PostShareState extends State<PostShare> {
                           offset: Offset(4, 4),
                         ),
                       ]),
-                      child: Image.asset(
-                        Assets.imagesApolo,
-                        width: 93,
-                        height: 93,
+                      child: ClipOval(
+                        child: CommonImageView(
+                          url: post?.author?.avatarUrl,
+                          imagePath: post?.author?.avatarUrl == null ? Assets.imagesApolo : null,
+                          width: 93,
+                          height: 93,
+                          fit: BoxFit.cover,
+                        ),
                       )),
                   SizedBox(
                     height: 16,
                   ),
                   Center(
                     child: TwoTextedColumn(
-                      text1: 'Apollo & Sage',
-                      text2: '@apollo.and.sage',
+                      text1: authorName,
+                      text2: authorHandle,
                       size1: 22,
                       size2: 14,
                       color1: kwhite,
@@ -77,7 +90,7 @@ class _PostShareState extends State<PostShare> {
                   MyText(
                     paddingBottom: 30,
                     paddingTop: 45,
-                    text: 'Share “Blue Floral Short”',
+                    text: 'Share “$title”',
                     size: 18,
                     weight: FontWeight.bold,
                     color: kwhite,
@@ -101,6 +114,10 @@ class _PostShareState extends State<PostShare> {
                       children: [
                         Expanded(
                             child: Bounce_widget(
+                                ontap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Downloading QR Code...')));
+                                },
                                 widget: Image.asset(
                           Assets.imagesDownloadqr,
                           height: 65,
@@ -110,6 +127,13 @@ class _PostShareState extends State<PostShare> {
                         ),
                         Expanded(
                             child: Bounce_widget(
+                                ontap: () async {
+                                  await Clipboard.setData(ClipboardData(text: shareLink));
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Link copied to clipboard!')));
+                                  }
+                                },
                                 widget: Image.asset(
                           Assets.imagesCopyqr,
                           height: 65,

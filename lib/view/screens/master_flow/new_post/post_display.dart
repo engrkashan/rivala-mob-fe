@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/store_model.dart';
+import 'package:provider/provider.dart';
+import 'package:rivala/controllers/providers/post_provider.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_share.dart';
+import 'package:rivala/view/screens/master_flow/new_post/comments_bottom_sheet.dart';
 import 'package:rivala/view/screens/master_store_flow/report_iisue.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/add_product_instore.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/multiple_product_post_veiw.dart';
@@ -109,8 +112,7 @@ class _PostDisplayState extends State<PostDisplay> {
                 image_appbar(
                   ontap: widget.ontap,
                   store:
-                      store, // Fallback need handling in widget if store is null but owner is not
-                  // For now, let's keep it simple or modify image_appbar too
+                      store,
                   ownerName: owner?.username ?? store?.name,
                   ownerAvatar: owner?.avatarUrl ?? store?.logoUrl,
                 ),
@@ -143,48 +145,78 @@ class _PostDisplayState extends State<PostDisplay> {
                   iconSize: 40,
                 ),
                 const SizedBox(height: 15),
-                CustomeContainer(
-                  color: kwhite,
-                  radius: 50,
-                  vpad: 8,
-                  hpad: 8,
-                  widget: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      BottomButtons(
-                        icon: Assets.imagesAdd,
-                        ontap: () {
-                          Get.to(() => AddProductInstore());
-                        },
+                Consumer<PostProvider>(
+                  builder: (context, provider, _) {
+                    final currentPost = provider.posts.firstWhere(
+                      (p) => p.id == widget.post?.id,
+                      orElse: () => widget.post ?? PostModel(),
+                    );
+                    
+                    final likes = currentPost.likeCount?.toString() ?? '0';
+                    final comments = currentPost.commentCount?.toString() ?? '0';
+                    final isLiked = currentPost.isLikedByMe;
+
+                    return CustomeContainer(
+                      color: kwhite,
+                      radius: 50,
+                      vpad: 8,
+                      hpad: 8,
+                      widget: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          BottomButtons(
+                            icon: Assets.imagesAdd,
+                            ontap: () {
+                              Get.to(() => AddProductInstore());
+                            },
+                          ),
+                          BottomButtons(
+                            icon: Assets.imagesLike,
+                            iconColor: isLiked ? Colors.red : null,
+                            ontap: () {
+                              if (currentPost.id != null) {
+                                provider.toggleLike(currentPost.id!);
+                              }
+                            },
+                            textt: likes,
+                          ),
+                          BottomButtons(
+                            icon: Assets.imagesComment,
+                            ontap: () {
+                              if (currentPost.id != null) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.75,
+                                    child: CommentsBottomSheet(postId: currentPost.id!),
+                                  ),
+                                );
+                              }
+                            },
+                            textt: comments,
+                          ),
+                          BottomButtons(
+                            icon: Assets.imagesShare,
+                            ontap: () {
+                              Get.to(() => PostShare(post: currentPost));
+                            },
+                          ),
+                          SimpleExample(
+                            trackHeight: 44,
+                            callback: () {
+                              Get.back();
+                              Get.to(() => MultipleProductPostVeiw());
+                            },
+                            stretchThumb: true,
+                            resetCurve: Curves.bounceOut,
+                            resetDuration: const Duration(milliseconds: 3000),
+                          ),
+                        ],
                       ),
-                      BottomButtons(
-                        icon: Assets.imagesLike,
-                        ontap: () {},
-                        textt: likes,
-                      ),
-                      BottomButtons(
-                        icon: Assets.imagesComment,
-                        ontap: () {},
-                        textt: comments,
-                      ),
-                      BottomButtons(
-                        icon: Assets.imagesShare,
-                        ontap: () {
-                          Get.to(() => PostShare());
-                        },
-                      ),
-                      SimpleExample(
-                        trackHeight: 44,
-                        callback: () {
-                          Get.back();
-                          Get.to(() => MultipleProductPostVeiw());
-                        },
-                        stretchThumb: true,
-                        resetCurve: Curves.bounceOut,
-                        resetDuration: const Duration(milliseconds: 3000),
-                      ),
-                    ],
-                  ),
+                    );
+                  }
                 ),
               ],
             ),
@@ -259,7 +291,8 @@ class image_appbar extends StatelessWidget {
 class BottomButtons extends StatelessWidget {
   final String? icon, textt;
   final VoidCallback? ontap;
-  const BottomButtons({super.key, this.icon, this.ontap, this.textt});
+  final Color? iconColor;
+  const BottomButtons({super.key, this.icon, this.ontap, this.textt, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +311,7 @@ class BottomButtons extends StatelessWidget {
                 icon ?? Assets.imagesAdd,
                 height: 16,
                 width: 18,
+                color: iconColor,
               )),
               if (textt != null)
                 MyText(

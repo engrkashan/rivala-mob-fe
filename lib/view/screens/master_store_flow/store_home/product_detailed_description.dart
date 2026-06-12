@@ -39,11 +39,11 @@ class _ProductDetailedDescriptionState
   final PageController _pageController = PageController();
 
   String? selectedSize;
+  String? selectedColor;
   int _quantity = 1;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prdd = Provider.of<ProductProvider>(context, listen: false);
@@ -163,15 +163,41 @@ class _ProductDetailedDescriptionState
                           itemBuilder: (context, index) {
                             final String hexColor = colors[index];
                             final Color color = hexColor.toColor();
+                            final bool isSelected = selectedColor == hexColor;
 
-                            // Simple selection logic for demo purposes
-                            // Ideally needs state variable for selectedColor
                             return Padding(
                               padding: const EdgeInsets.only(right: 12),
-                              child: color_picker(
-                                bgColor: color,
-                                size: 48,
-                                showShadow: true,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedColor = hexColor;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: isSelected ? kblack : Colors.transparent,
+                                        width: 2.5),
+                                  ),
+                                  padding: const EdgeInsets.all(2.5),
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: color,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.25),
+                                          blurRadius: 6,
+                                          spreadRadius: 2,
+                                          offset: const Offset(2, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             );
                           },
@@ -282,7 +308,7 @@ class _ProductDetailedDescriptionState
                   ),
 
                   // "You might also like" section
-                  if (Provider.of<ProductProvider>(context).prds?.isNotEmpty ??
+                  if (Provider.of<ProductProvider>(context).recommendedPrds?.isNotEmpty ??
                       false) ...[
                     MyText(
                       text: 'You might also like',
@@ -300,9 +326,9 @@ class _ProductDetailedDescriptionState
                         physics: BouncingScrollPhysics(),
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children: List.generate(recommended.prds?.length ?? 0,
+                          children: List.generate(recommended.recommendedPrds?.length ?? 0,
                               (index) {
-                            final prd = recommended.prds![index];
+                            final prd = recommended.recommendedPrds![index];
                             final String? firstImage =
                                 (prd.image?.isNotEmpty == true)
                                     ? prd.image!.first
@@ -357,8 +383,6 @@ class _ProductDetailedDescriptionState
                               physics: const BouncingScrollPhysics(),
                               itemCount: reviews.length,
                               itemBuilder: (context, index) {
-                                // ... existing review item builder ...
-                                // For brevity, assuming existing logic or will fix if broken
                                 final review = reviews[index];
                                 return Container(
                                   width: 300,
@@ -381,7 +405,6 @@ class _ProductDetailedDescriptionState
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // User + Rating
                                       Row(
                                         children: [
                                           CircleAvatar(
@@ -506,6 +529,7 @@ class _ProductDetailedDescriptionState
                                       product: widget.product,
                                       quantity: _quantity,
                                       size: selectedSize,
+                                      color: selectedColor,
                                     ),
                                   );
                               Get.to(() => ProductCheckout());
