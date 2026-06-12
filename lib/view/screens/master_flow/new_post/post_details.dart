@@ -315,6 +315,14 @@ class _PostDetailsState extends State<PostDetails> {
                               hasText: postOptions[index]['hasText'],
                               addedText: postOptions[index]['addedText'],
                               isFeatured: postOptions[index]['isFeatured'],
+                              switchValue: postOptions[index]['isFeatured'],
+                              onSwitchChanged: (val) {
+                                if (index == 0) {
+                                  setState(() {
+                                    isFeaturedPost = val;
+                                  });
+                                }
+                              },
                               tagIcon: postOptions[index]['tagIcon'],
                             ),
                             Divider(
@@ -391,7 +399,7 @@ class _PostDetailsState extends State<PostDetails> {
                           desc: 'Now let’s share your post.',
                           buttontext: 'Share your post!',
                           ontap: () {
-                            Get.to(() => PersistentBottomNavBar());
+                            Get.offAll(() => PersistentBottomNavBar());
                           },
                         ));
                   }

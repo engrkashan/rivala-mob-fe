@@ -20,6 +20,7 @@ import '../../../../models/product_model.dart';
 import '../../../../models/collection_model.dart';
 import '../../../../models/squad_model.dart';
 import '../../master_store_flow/store_home/product_detailed_description.dart';
+import '../../master_store_flow/store_home/add_product/add_product_instore.dart';
 
 class PostTags extends StatefulWidget {
   const PostTags({super.key});
@@ -79,7 +80,22 @@ class _PostTagsState extends State<PostTags> {
                       final prdList = ref.prds ?? [];
 
                       if (prdList.isEmpty) {
-                        return const Center(child: Text("No products found"));
+                        return Padding(
+                          padding: const EdgeInsets.all(22.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text("No products found"),
+                              const SizedBox(height: 16),
+                              Mybutton2(
+                                buttonText: "Create Product",
+                                ontap: () {
+                                  Get.to(() => const AddProductInstore());
+                                },
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
                       return ListView.builder(
@@ -92,6 +108,15 @@ class _PostTagsState extends State<PostTags> {
                             child: tags_search_row(
                               product: prdList[index],
                               isProduct: true,
+                              onItemSelected: (p) {
+                                final postProvider = context.read<PostProvider>();
+                                final isSelected = postProvider.tagProducts.any((prod) => prod?.id == p.id);
+                                if (isSelected) {
+                                  postProvider.tagProducts.removeWhere((prod) => prod?.id == p.id);
+                                } else {
+                                  postProvider.tagProducts.add(p);
+                                }
+                              },
                             ),
                           );
                         },

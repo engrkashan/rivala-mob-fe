@@ -13,6 +13,7 @@ import 'package:rivala/view/widgets/my_text_widget.dart';
 
 import '../../../../../controllers/providers/post_provider.dart';
 import '../../../../../models/collection_model.dart';
+import 'package:rivala/view/screens/master_flow/new_post/tag_collection/create_collection.dart';
 
 class TagCollection extends StatefulWidget {
   const TagCollection({super.key});
@@ -79,7 +80,22 @@ class _TagCollectionState extends State<TagCollection> {
                       height: 20,
                     ),
                     if (collection.isEmpty)
-                      Center(child: MyText(text: "No Collections Available")),
+                      Padding(
+                        padding: const EdgeInsets.all(22.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("No Collections Available"),
+                            const SizedBox(height: 16),
+                            Mybutton2(
+                              buttonText: "Create Collection",
+                              ontap: () {
+                                Get.to(() => const CreateCollection());
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
