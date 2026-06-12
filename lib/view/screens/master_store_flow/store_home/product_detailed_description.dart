@@ -604,7 +604,6 @@ class _ProductDetailedDescriptionState
                   Consumer<ProductProvider>(
                     builder: (context, provider, _) {
                       final reviews = provider.prdReviews ?? [];
-                      if (reviews.isEmpty) return const SizedBox();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -644,7 +643,16 @@ class _ProductDetailedDescriptionState
                               ],
                             ),
                           ),
-                          SizedBox(
+                          if (reviews.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                              child: Text(
+                                "No reviews yet. Be the first to write a review!",
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              ),
+                            )
+                          else
+                            SizedBox(
                             height: 260,
                             child: ListView.builder(
                               padding:

@@ -16,6 +16,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../controllers/providers/post_provider.dart';
 import '../../../controllers/providers/product_provider.dart';
 import '../master_store_flow/store_menu/following_profile.dart';
+import '../master_flow/new_post/post_display.dart';
+import '../../../models/store_model.dart';
 
 class SocialCommerceHub extends StatefulWidget {
   const SocialCommerceHub({super.key});
@@ -41,6 +43,7 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
       context.read<ProductProvider>().loadFeed("picks-for-you");
       context.read<ProductProvider>().loadFeed("local-product");
       context.read<PostProvider>().loadCreators();
+      context.read<PostProvider>().loadDiscoverPosts();
     });
 
     _scrollController.addListener(_onScroll);
@@ -211,7 +214,22 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                 itemBuilder: (_, index) {
                   final creator = creators[index];
                   return GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      final dummyStore = StoreModel(
+                        id: creator.id,
+                        name: creator.name ?? creator.username,
+                        slug: creator.username,
+                        logoUrl: creator.avatarUrl,
+                        ownerId: creator.id,
+                        owner: creator,
+                      );
+                      Navigator.push(
+                        context,
+                        CustomPageRoute(
+                          page: FollowerMaiProfile(store: dummyStore),
+                        ),
+                      );
+                    },
                     child: curated_brand_widget(
                       size: 135,
                       radius: 20,
@@ -219,6 +237,68 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
                       networkImg: creator.avatarUrl,
                       title: creator.name ?? creator.username ?? 'Creator',
                       desc: "@${creator.username ?? ''}",
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommunityFeeds() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          child: row_widget(
+            title: "Community Feeds",
+            texSize: 20,
+            weight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 180,
+          child: Consumer<PostProvider>(
+            builder: (_, postProv, __) {
+              final posts = postProv.posts;
+
+              if (posts.isEmpty && postProv.isLoading) {
+                return _buildSkeletonProductRow();
+              }
+
+              if (posts.isEmpty) {
+                return const SizedBox(
+                  height: 150,
+                  child: Center(child: Text("No posts found")),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.only(left: 22),
+                scrollDirection: Axis.horizontal,
+                itemCount: posts.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, index) {
+                  final post = posts[index];
+                  final image = (post.media != null && post.media!.isNotEmpty)
+                      ? post.media!.first
+                      : null;
+
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(() => PostDisplay(post: post));
+                    },
+                    child: curated_brand_widget(
+                      size: 135,
+                      radius: 20,
+                      fit: BoxFit.cover,
+                      networkImg: image,
+                      title: post.title ?? 'Post',
+                      desc: "@${post.author?.username ?? ''}",
                     ),
                   );
                 },
@@ -314,6 +394,8 @@ class _SocialCommerceHubState extends State<SocialCommerceHub> {
             title: "Local Products",
           ),
           _buildCreatorsSection(),
+          _buildCommunityFeeds(),
+          const SizedBox(height: 50),
         ],
       ),
     );
