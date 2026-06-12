@@ -8,6 +8,8 @@ import 'package:rivala/view/screens/main_menu_flow/menu/wallet/payment/payment_d
 import 'package:rivala/view/widgets/appbar.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
+import '../../../../../../generated/assets.dart';
+
 class PaymentManagement extends StatefulWidget {
   const PaymentManagement({super.key});
 
