@@ -45,7 +45,6 @@ class HeaderImageStack extends StatelessWidget {
     }
     return Stack(
       children: [
-        // Background cover image / Color (Positioned.fill sizes to the content column below)
         Positioned.fill(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
@@ -275,11 +274,12 @@ class store_image_stack extends StatelessWidget {
                   child: Row(
                     children: [
                       buttonContainer(
-                        icon: Icons.add,
+                        icon: Icons.visibility,
                         iconColor: kwhite,
                         bgColor: kblack2.withOpacity(0.5),
-                        text: 'Quick Add',
+                        text: 'Quick View',
                         useCustomFont: true,
+                        onTap: onTap,
                       )
                     ],
                   )),

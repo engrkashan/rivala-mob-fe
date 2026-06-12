@@ -175,7 +175,7 @@ class _PostDisplayState extends State<PostDisplay> {
                             iconColor: isLiked ? Colors.red : null,
                             ontap: () {
                               if (currentPost.id != null) {
-                                provider.toggleLike(currentPost.id!);
+                                provider.toggleLike(currentPost);
                               }
                             },
                             textt: likes,
@@ -190,7 +190,7 @@ class _PostDisplayState extends State<PostDisplay> {
                                   backgroundColor: Colors.transparent,
                                   builder: (context) => SizedBox(
                                     height: MediaQuery.of(context).size.height * 0.75,
-                                    child: CommentsBottomSheet(postId: currentPost.id!),
+                                    child: CommentsBottomSheet(post: currentPost),
                                   ),
                                 );
                               }

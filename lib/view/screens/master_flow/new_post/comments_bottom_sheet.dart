@@ -8,9 +8,9 @@ import 'package:rivala/view/widgets/common_image_view_widget.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 
 class CommentsBottomSheet extends StatefulWidget {
-  final String postId;
+  final PostModel post;
 
-  const CommentsBottomSheet({super.key, required this.postId});
+  const CommentsBottomSheet({super.key, required this.post});
 
   @override
   State<CommentsBottomSheet> createState() => _CommentsBottomSheetState();
@@ -28,9 +28,10 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
   }
 
   Future<void> _loadComments() async {
+    if (widget.post.id == null) return;
     setState(() => _isLoading = true);
     final provider = context.read<PostProvider>();
-    final comments = await provider.getComments(widget.postId);
+    final comments = await provider.getComments(widget.post.id!);
     setState(() {
       _comments = comments;
       _isLoading = false;
@@ -39,13 +40,13 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
 
   Future<void> _postComment() async {
     final text = _commentController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || widget.post.id == null) return;
 
     FocusScope.of(context).unfocus();
     _commentController.clear();
 
     final provider = context.read<PostProvider>();
-    final newComment = await provider.addComment(widget.postId, text);
+    final newComment = await provider.addComment(widget.post, text);
     
     if (newComment != null) {
       setState(() {

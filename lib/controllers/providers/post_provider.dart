@@ -84,16 +84,21 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleLike(String postId) async {
+  Future<void> toggleLike(PostModel post) async {
+    final postId = post.id!;
     try {
-      // Optimistic update
+      // Optimistic update for the feed
       final index = _posts.indexWhere((p) => p.id == postId);
       if (index != -1) {
-        final post = _posts[index];
+        final p = _posts[index];
+        p.isLikedByMe = !p.isLikedByMe;
+        p.likeCount = (p.likeCount ?? 0) + (p.isLikedByMe ? 1 : -1);
+      } else {
+        // Optimistic update for the isolated post passed in
         post.isLikedByMe = !post.isLikedByMe;
         post.likeCount = (post.likeCount ?? 0) + (post.isLikedByMe ? 1 : -1);
-        notifyListeners();
       }
+      notifyListeners();
       
       await postRepo.toggleLike(postId);
     } catch (e) {
@@ -101,11 +106,14 @@ class PostProvider extends ChangeNotifier {
       // Revert optimistic update
       final index = _posts.indexWhere((p) => p.id == postId);
       if (index != -1) {
-        final post = _posts[index];
+        final p = _posts[index];
+        p.isLikedByMe = !p.isLikedByMe;
+        p.likeCount = (p.likeCount ?? 0) + (p.isLikedByMe ? 1 : -1);
+      } else {
         post.isLikedByMe = !post.isLikedByMe;
         post.likeCount = (post.likeCount ?? 0) + (post.isLikedByMe ? 1 : -1);
-        notifyListeners();
       }
+      notifyListeners();
     }
   }
 
@@ -118,16 +126,19 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
-  Future<PostCommentModel?> addComment(String postId, String content) async {
+  Future<PostCommentModel?> addComment(PostModel post, String content) async {
+    final postId = post.id!;
     try {
       final newComment = await postRepo.postComment(postId, content);
       if (newComment != null) {
         final index = _posts.indexWhere((p) => p.id == postId);
         if (index != -1) {
-          final post = _posts[index];
+          final p = _posts[index];
+          p.commentCount = (p.commentCount ?? 0) + 1;
+        } else {
           post.commentCount = (post.commentCount ?? 0) + 1;
-          notifyListeners();
         }
+        notifyListeners();
       }
       return newComment;
     } catch (e) {
