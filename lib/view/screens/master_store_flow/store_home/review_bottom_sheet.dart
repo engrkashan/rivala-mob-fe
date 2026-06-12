@@ -32,13 +32,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final reviewData = {
-        'rating': _rating,
-        'title': title,
-        'content': content,
-      };
-
-      await context.read<ProductProvider>().createProductReview(widget.productId, reviewData);
+      await context.read<ProductProvider>().createProductReview(widget.productId, _rating, title, content);
       
       Get.back();
       Get.snackbar('Success', 'Review submitted successfully', backgroundColor: Colors.green, colorText: Colors.white);

@@ -17,7 +17,7 @@ class ProductProvider extends ChangeNotifier {
 
   List<ProductModel>? searchProductsList;
 
-  List<ProductReview>? _prdReviews;
+  List<ProductReview>? _prdReviews = [];
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -120,18 +120,20 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createProductReview(String productId, Map<String, dynamic> reviewData) async {
-    setLoading(true);
+  Future<void> createProductReview(String productId, int rating, String title, String content) async {
     try {
+      final reviewData = {
+        "rating": rating,
+        "title": title,
+        "content": content
+      };
       final newReview = await _productRepo.createProductReview(productId, reviewData);
-      _prdReviews = [newReview, ...?_prdReviews];
-      _error = null;
-      notifyListeners();
+      if (newReview != null) {
+        _prdReviews?.insert(0, newReview);
+        notifyListeners();
+      }
     } catch (e) {
-      _error = e.toString();
-      rethrow;
-    } finally {
-      setLoading(false);
+      debugPrint("Error creating review: $e");
     }
   }
 
@@ -165,7 +167,7 @@ class ProductProvider extends ChangeNotifier {
     try {
       final allProducts = await _productRepo.getAllProducts();
       _prds = allProducts;
-      _filteredPrds = List.from(allProducts); // always copy
+      _filteredPrds = List.from(allProducts);
       _error = null;
     } catch (e) {
       _error = e.toString();

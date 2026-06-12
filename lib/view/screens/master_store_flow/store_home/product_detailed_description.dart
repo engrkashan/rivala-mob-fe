@@ -51,12 +51,23 @@ class _ProductDetailedDescriptionState
   @override
   void initState() {
     super.initState();
+    selectedColor = widget.product.colors?.isNotEmpty == true
+        ? widget.product.colors!.first
+        : null;
+    selectedSize = widget.product.sizes?.isNotEmpty == true
+        ? widget.product.sizes!.first
+        : null;
+
     _checkWishlist();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final prdd = Provider.of<ProductProvider>(context, listen: false);
-      await prdd.loadForYou(widget.product.id ?? "");
-      await prdd.loadPrdReviews(widget.product.id ?? "");
-    });
+    if (widget.product.id != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final prdd = Provider.of<ProductProvider>(context, listen: false);
+          prdd.loadForYou(widget.product.id ?? "");
+          prdd.loadPrdReviews(widget.product.id!);
+        }
+      });
+    }
   }
 
   Future<void> _checkWishlist() async {
