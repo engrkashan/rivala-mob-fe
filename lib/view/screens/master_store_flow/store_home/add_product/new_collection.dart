@@ -1,7 +1,10 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
+import 'package:rivala/controllers/providers/collections_provider.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/add_product_instore.dart';
 import 'package:rivala/view/widgets/appbar.dart';
@@ -21,6 +24,9 @@ class AddProductNewCollection extends StatefulWidget {
 }
 
 class _AddProductNewCollectionState extends State<AddProductNewCollection> {
+  final nameController = TextEditingController();
+  final descController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -28,19 +34,19 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
         dummyimgeStack(),
         Scaffold(
           backgroundColor: ktransparent,
-          resizeToAvoidBottomInset: true, // add this
+          resizeToAvoidBottomInset: true,
           body: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                 child: image_appbar(),
               ),
-              Expanded( // Spacer ki jagah Expanded
-                child: SingleChildScrollView( // scroll enable
+              Expanded(
+                child: SingleChildScrollView(
                   padding: EdgeInsets.only(
                     left: 15,
                     right: 15,
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 20, // keyboard ke upar space
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 20,
                   ),
                   child: CustomeContainer(
                     color: kwhite,
@@ -48,7 +54,7 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
                     vpad: 0,
                     widget: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min, // important
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(height: 15),
                         Padding(
@@ -74,6 +80,7 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 18),
                           child: MyTextField(
+                            controller: nameController,
                             radius: 50,
                             hint: 'Digital Products',
                             useCustomFont: true,
@@ -82,6 +89,7 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 18),
                           child: MyTextField(
+                            controller: descController,
                             radius: 15,
                             hint: '280 character limit. . .',
                             label: 'Collection description',
@@ -94,11 +102,29 @@ class _AddProductNewCollectionState extends State<AddProductNewCollection> {
                           hasShadow: true,
                           color: kwhite,
                           radius: 50,
-                          widget: MyButton(
-                            fontColor: kwhite,
-                            onTap: () => Get.to(() => AddProductInstore()),
-                            buttonText: 'Save Collection',
-                            useCustomFont: true,
+                          widget: Consumer<CollectionProvider>(
+                            builder: (context, ref, _) {
+                              return MyButton(
+                                fontColor: kwhite,
+                                onTap: () async {
+                                  if (nameController.text.trim().isEmpty) {
+                                    AlertInfo.show(context: context, text: "Name cannot be empty");
+                                    return;
+                                  }
+                                  if (ref.isLoading) return;
+
+                                  await ref.setCollection(nameController.text.trim(), descController.text.trim(), context, productIds: []);
+                                  
+                                  if (ref.error.isNotEmpty) {
+                                    AlertInfo.show(context: context, text: ref.error);
+                                  } else {
+                                    Get.back();
+                                  }
+                                },
+                                buttonText: ref.isLoading ? 'Saving...' : 'Save Collection',
+                                useCustomFont: true,
+                              );
+                            }
                           ),
                         ),
                         SizedBox(height: 20),

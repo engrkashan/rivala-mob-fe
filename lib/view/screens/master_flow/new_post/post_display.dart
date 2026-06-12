@@ -167,7 +167,7 @@ class _PostDisplayState extends State<PostDisplay> {
                           BottomButtons(
                             icon: Assets.imagesAdd,
                             ontap: () {
-                              Get.to(() => AddProductInstore());
+                              Get.to(() => AddProductInstore(product: currentPost.product ?? widget.product));
                             },
                           ),
                           BottomButtons(

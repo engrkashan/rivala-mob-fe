@@ -1,8 +1,13 @@
+import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/main.dart';
+import 'package:rivala/controllers/providers/collections_provider.dart';
+import 'package:rivala/controllers/providers/user/auth_provider.dart';
+import 'package:rivala/models/product_model.dart';
 import 'package:rivala/view/screens/master_flow/new_post/post_display.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/new_collection.dart';
 import 'package:rivala/view/screens/master_store_flow/store_home/add_product/view_added_product.dart';
@@ -16,13 +21,23 @@ import 'package:rivala/view/widgets/post_detail_widget.dart';
 import 'package:rivala/view/widgets/store_widgets/dummyimage.dart';
 
 class AddProductInstore extends StatefulWidget {
-  const AddProductInstore({super.key});
+  final ProductModel? product;
+  const AddProductInstore({super.key, this.product});
 
   @override
   State<AddProductInstore> createState() => _AddProductInstoreState();
 }
 
 class _AddProductInstoreState extends State<AddProductInstore> {
+  String? selectedCollectionId;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CollectionProvider>().loadAllCollections();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -74,33 +89,37 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: Row(
-                          children: [
-                            CommonImageView(
-                              url: dummyImage2,
-                              width: 36,
-                              height: 36,
-                              radius: 100,
-                            ),
-                            Expanded(
-                              child: MyText(
-                                text: 'Jordan Chu',
-                                size: 16,
-                                color: kheader, //kter
-                                weight: FontWeight.w600,
-                                paddingLeft: 8,
-                                 useCustomFont: true,
-                              ),
-                            ),
-                            MyText(
-                              text: 'Change',
-                              size: 14,
-                              color: kheader, //kter
-                              weight: FontWeight.w500,
-                              decoration: TextDecoration.underline,
-                               useCustomFont: true,
-                            ),
-                          ],
+                        child: Consumer<AuthProvider>(
+                          builder: (context, auth, _) {
+                            return Row(
+                              children: [
+                                CommonImageView(
+                                  url: auth.user?.avatarUrl ?? dummyImage2,
+                                  width: 36,
+                                  height: 36,
+                                  radius: 100,
+                                ),
+                                Expanded(
+                                  child: MyText(
+                                    text: auth.user?.name ?? auth.user?.username ?? 'Store Owner',
+                                    size: 16,
+                                    color: kheader, //kter
+                                    weight: FontWeight.w600,
+                                    paddingLeft: 8,
+                                    useCustomFont: true,
+                                  ),
+                                ),
+                                MyText(
+                                  text: 'Change',
+                                  size: 14,
+                                  color: kheader, //kter
+                                  weight: FontWeight.w500,
+                                  decoration: TextDecoration.underline,
+                                  useCustomFont: true,
+                                ),
+                              ],
+                            );
+                          }
                         ),
                       ),
                       Padding(
@@ -124,18 +143,55 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Wrap(
-                              spacing: 5,
-                              children: [
-                                // Limits to 3 max
-                                TagsWidget(
-                                  tag: 'Apparel',
-                                  bgColor: ktransparent,
-                                  fontColor: kbody,
-                                  tagIcon: Assets.imagesCollection2,
-                                   useCustomFont: true,
-                                )
-                              ],
+                            Expanded(
+                              child: Consumer<CollectionProvider>(
+                                builder: (context, ref, _) {
+                                  if (ref.isLoading && ref.allCollections.isEmpty) {
+                                    return const SizedBox(
+                                      height: 30,
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: CircularProgressIndicator()
+                                      ),
+                                    );
+                                  }
+                                  if (ref.allCollections.isEmpty) {
+                                    return const Text("No collections yet.");
+                                  }
+                                  
+                                  // Auto-select first collection if none selected
+                                  if (selectedCollectionId == null && ref.allCollections.isNotEmpty) {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      if (mounted) {
+                                        setState(() {
+                                          selectedCollectionId = ref.allCollections.first.id;
+                                        });
+                                      }
+                                    });
+                                  }
+
+                                  return Wrap(
+                                    spacing: 5,
+                                    children: ref.allCollections.map((col) {
+                                      bool isSelected = selectedCollectionId == col.id;
+                                      return Bounce_widget(
+                                        ontap: () {
+                                          setState(() {
+                                            selectedCollectionId = col.id;
+                                          });
+                                        },
+                                        widget: TagsWidget(
+                                          tag: col.name ?? 'Collection',
+                                          bgColor: isSelected ? kblack : ktransparent,
+                                          fontColor: isSelected ? kwhite : kbody,
+                                          tagIcon: Assets.imagesCollection2,
+                                          useCustomFont: true,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
                             ),
                             MyText(
                               text: '+ New',
@@ -161,7 +217,7 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                       MyText(
                         text: 'Product',
                         size: 14,
-                        color: kheader, //kter
+                        color: kheader,
                         weight: FontWeight.w400,
                         paddingLeft: 18,
                         paddingBottom: 10,
@@ -169,20 +225,45 @@ class _AddProductInstoreState extends State<AddProductInstore> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: store_product_row(),
+                        child: widget.product != null 
+                            ? store_product_row(product: widget.product!)
+                            : const SizedBox(height: 120, child: Center(child: Text("No product provided"))),
                       ),
                       Spacer(),
                       CustomeContainer(
                         hasShadow: true,
                         color: kwhite,
                         radius: 50,
-                        widget: MyButton(
-                          icon: Icons.add,
-                          imgColor: kwhite,
-                          fontColor: kwhite, //buttoncolor
-                          onTap: () {},
-                          buttonText: 'Add to store',
-                           useCustomFont: true,
+                        widget: Consumer<CollectionProvider>(
+                          builder: (context, ref, _) {
+                            return MyButton(
+                              icon: Icons.add,
+                              imgColor: kwhite,
+                              fontColor: kwhite, //buttoncolor
+                              buttonText: ref.isLoading ? 'Adding...' : 'Add to store',
+                              useCustomFont: true,
+                              onTap: () async {
+                                if (ref.isLoading) return;
+                                
+                                if (selectedCollectionId == null) {
+                                  AlertInfo.show(context: Get.context!, text: "Please select a collection first.");
+                                  return;
+                                }
+                                if (widget.product?.id == null) {
+                                  AlertInfo.show(context: Get.context!, text: "Invalid product.");
+                                  return;
+                                }
+
+                                await ref.addProductToCollection(selectedCollectionId!, widget.product!.id!);
+                                
+                                if (ref.error.isNotEmpty) {
+                                  AlertInfo.show(context: Get.context!, text: ref.error);
+                                } else {
+                                  Get.to(() => ViewAddedProduct());
+                                }
+                              },
+                            );
+                          }
                         ),
                       )
                     ],
@@ -200,32 +281,44 @@ class _AddProductInstoreState extends State<AddProductInstore> {
 }
 
 class store_product_row extends StatelessWidget {
+  final ProductModel product;
   const store_product_row({
     super.key,
+    required this.product
   });
 
   @override
   Widget build(BuildContext context) {
+    String image = Assets.imagesDummyimage2;
+    bool isNetworkImg = false;
+    if (product.image != null && product.image!.isNotEmpty) {
+      image = product.image!.first;
+      isNetworkImg = true;
+    }
+
     return Bounce_widget(
       ontap: () {
-        Get.to(() => ViewAddedProduct());
+        // Preview product if needed
       },
       widget: Row(
         children: [
           Stack(
             children: [
               CommonImageView(
-                imagePath: Assets.imagesDummyimage2,
+                imagePath: isNetworkImg ? null : image,
+                url: isNetworkImg ? image : null,
                 width: 110,
                 height: 120, // Image height
                 radius: 15,
+                fit: BoxFit.cover,
               ),
               Positioned(
                 top: 10,
                 left: 10,
                 child: Bounce_widget(
                   widget: CommonImageView(
-                    imagePath: Assets.imagesApolo2,
+                    imagePath: product.store?.logoUrl == null ? Assets.imagesApolo2 : null,
+                    url: product.store?.logoUrl,
                     width: 25,
                     height: 25,
                     radius: 100,
@@ -243,7 +336,7 @@ class store_product_row extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MyText(
-                    text: 'Blue Floral Short',
+                    text: product.title ?? 'Product Name',
                     size: 16,
                     color: kheader,
                     weight: FontWeight.w600,
@@ -252,7 +345,7 @@ class store_product_row extends StatelessWidget {
                      useCustomFont: true,
                   ),
                   MyText(
-                    text: '\$50.00',
+                    text: '\$${product.price?.toStringAsFixed(2) ?? "0.00"}',
                     size: 14,
                     color: kbody,
                     weight: FontWeight.w400,
@@ -261,7 +354,7 @@ class store_product_row extends StatelessWidget {
                      useCustomFont: true,
                   ),
                   MyText(
-                    text: '@apollo.and.sage',
+                    text: '@${product.store?.name ?? "store"}',
                     size: 14,
                     color: kbody,
                     weight: FontWeight.w400,
