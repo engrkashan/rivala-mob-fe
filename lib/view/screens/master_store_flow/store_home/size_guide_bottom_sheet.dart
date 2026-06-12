@@ -71,7 +71,7 @@ class SizeGuideBottomSheet extends StatelessWidget {
                   text: 'Measure yourself and use this guide to find your perfect fit.',
                   color: Colors.grey.shade600,
                   size: 14,
-                  align: TextAlign.center,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
               ],

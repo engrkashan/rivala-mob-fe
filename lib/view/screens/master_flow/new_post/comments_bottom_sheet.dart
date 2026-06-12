@@ -107,7 +107,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                     ? Center(
                         child: MyText(
                           text: 'No comments yet. Be the first to comment!',
-                          color: kgrey,
+                          color: kgrey2 ,
                         ),
                       )
                     : ListView.builder(
