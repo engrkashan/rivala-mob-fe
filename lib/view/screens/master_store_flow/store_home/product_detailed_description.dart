@@ -343,9 +343,12 @@ class _ProductDetailedDescriptionState
                                 price: prd.price.toString(),
                                 singlePrice: true,
                                 onTap: () {
-                                  Get.to(() => ProductDetailedDescription(
-                                        product: prd,
-                                      ));
+                                  Get.to(
+                                    () => ProductDetailedDescription(
+                                      product: prd,
+                                    ),
+                                    preventDuplicates: false,
+                                  );
                                 },
                               ),
                             );
