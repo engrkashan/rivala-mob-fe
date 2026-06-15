@@ -23,6 +23,8 @@ class TagCollection extends StatefulWidget {
 }
 
 class _TagCollectionState extends State<TagCollection> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +56,15 @@ class _TagCollectionState extends State<TagCollection> {
             ),
             Expanded(child: Consumer<CollectionProvider>(
               builder: (context, ref, _) {
-                final collection = ref.allCollections;
+                final query = _searchController.text.trim().toLowerCase();
+                final collection = query.isEmpty
+                    ? ref.allCollections
+                    : ref.allCollections.where((col) {
+                        return (col.name ?? '').toLowerCase().contains(query) ||
+                            (col.description ?? '')
+                                .toLowerCase()
+                                .contains(query);
+                      }).toList();
                 return ListView(
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(
@@ -65,10 +75,14 @@ class _TagCollectionState extends State<TagCollection> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 22),
                       child: MyTextField(
+                        controller: _searchController,
                         radius: 50,
                         filledColor: kgrey4,
                         hint: 'Search your collections . . .',
                         bordercolor: ktransparent,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
                         suffixIcon: Image.asset(
                           Assets.imagesSearch,
                           width: 20,
@@ -134,10 +148,14 @@ class _TagCollectionState extends State<TagCollection> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        context.read<CollectionProvider>().loadAllCollections();
-      });
+      context.read<CollectionProvider>().loadAllCollections();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
 
@@ -165,23 +183,18 @@ class icon_text_row extends StatefulWidget {
 }
 
 class _icon_text_rowState extends State<icon_text_row> {
-  bool isSelected = false;
   @override
   Widget build(BuildContext context) {
+    final postProvider = context.watch<PostProvider>();
+    final collection = widget.collection;
+    final isSelected = collection != null &&
+        postProvider.tagCollections.any((col) => col?.id == collection.id);
+
     return Bounce_widget(
         ontap: () {
-          setState(() {
-            isSelected = !isSelected;
-          });
-          if (isSelected) {
-            Provider.of<PostProvider>(context, listen: false)
-                .tagCollections
-                .add(widget.collection ?? CollectionModel());
-          } else {
-            Provider.of<PostProvider>(context, listen: false)
-                .tagCollections
-                .remove(widget.collection ?? CollectionModel());
-          }
+          if (collection == null) return;
+
+          postProvider.toggleTagCollection(collection);
         },
         widget: Container(
           decoration: BoxDecoration(

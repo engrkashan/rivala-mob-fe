@@ -22,6 +22,19 @@ class PostProvider extends ChangeNotifier {
     _selectedLocation = location;
     notifyListeners(); // UI update
   }
+
+  void toggleTagCollection(CollectionModel collection) {
+    final isSelected = tagCollections.any((col) => col?.id == collection.id);
+
+    if (isSelected) {
+      tagCollections.removeWhere((col) => col?.id == collection.id);
+    } else {
+      tagCollections.add(collection);
+    }
+
+    notifyListeners();
+  }
+
   void setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
