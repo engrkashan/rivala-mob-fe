@@ -22,6 +22,19 @@ class PostProvider extends ChangeNotifier {
     _selectedLocation = location;
     notifyListeners(); // UI update
   }
+
+  void toggleTagCollection(CollectionModel collection) {
+    final isSelected = tagCollections.any((col) => col?.id == collection.id);
+
+    if (isSelected) {
+      tagCollections.removeWhere((col) => col?.id == collection.id);
+    } else {
+      tagCollections.add(collection);
+    }
+
+    notifyListeners();
+  }
+
   void setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -75,7 +88,17 @@ class PostProvider extends ChangeNotifier {
   Future<void> createPost(dynamic post) async {
     setLoading(true);
     try {
-      await postRepo.createPost(post);
+      final createdPost = await postRepo.createPost(post);
+      if (createdPost != null) {
+        _posts.removeWhere((item) => item.id == createdPost.id);
+        _posts.insert(0, createdPost);
+      } else {
+        await loadDiscoverPosts();
+      }
+      tagProducts.clear();
+      tagCollections.clear();
+      _selectedLocation = null;
+      postExpiration = null;
       _error = null;
     } catch (e) {
       _error = e.toString();

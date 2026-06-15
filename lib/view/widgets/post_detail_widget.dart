@@ -3,7 +3,6 @@ import 'package:rivala/consts/app_colors.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/view/widgets/animate_widgets.dart';
 import 'package:rivala/view/widgets/bounce_widget.dart';
-import 'package:rivala/view/widgets/custom_row.dart';
 import 'package:rivala/view/widgets/custome_comtainer.dart';
 import 'package:rivala/view/widgets/my_text_widget.dart';
 import 'package:rivala/view/widgets/switch_button.dart';
@@ -76,12 +75,31 @@ class PostDetailOptRow extends StatelessWidget {
                       height: 20,
                     ),
                   if (hasIcon == true && hasText == true)
-                    row_widget(
-                      isIconRight: true,
-                      iconSize: 20,
-                      icon: Assets.imagesForward,
-                      title: addedText ?? '01/08/2024, 10:00 AM',
-                      texSize: 10,
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: MyText(
+                              text: addedText ?? '01/08/2024, 10:00 AM',
+                              color: kblack,
+                              size: 10,
+                              weight: FontWeight.w500,
+                              textAlign: TextAlign.right,
+                              textOverflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              paddingRight: 5,
+                            ),
+                          ),
+                          Image.asset(
+                            Assets.imagesForward,
+                            width: 20,
+                            fit: BoxFit.contain,
+                            height: 20,
+                          ),
+                        ],
+                      ),
                     )
                 ],
               ),
@@ -130,14 +148,17 @@ class TagsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomeContainer(
-      borderColor: fontColor ?? ktransparent,
-      color: bgColor ?? ktertiary,
-      radius: 50,
-      vpad: 3,
-      hpad: 3,
-      widget: IntrinsicWidth(
-        child: Row(
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width - 60,
+      ),
+      child: CustomeContainer(
+        borderColor: fontColor ?? ktransparent,
+        color: bgColor ?? ktertiary,
+        radius: 50,
+        vpad: 3,
+        hpad: 3,
+        widget: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(

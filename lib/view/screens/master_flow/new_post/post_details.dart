@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:rivala/consts/app_colors.dart';
+import 'package:rivala/controllers/controller_instances.dart';
 import 'package:rivala/controllers/image_picker_controller.dart';
+import 'package:rivala/controllers/navbar_controller.dart';
 import 'package:rivala/generated/assets.dart';
 import 'package:rivala/models/product_model.dart';
 import 'package:rivala/view/screens/master_flow/auth/signUp/discovery_matching/product_setup_success.dart';
@@ -374,7 +376,9 @@ class _PostDetailsState extends State<PostDetails> {
                             .tagCollections
                             .map((e) => e?.id)
                             .toList(),
-                    "locations": null
+                    "locations":
+                        Provider.of<PostProvider>(context, listen: false)
+                            .selectedLocation
                   });
 
                   // Close loading dialog
@@ -390,7 +394,10 @@ class _PostDetailsState extends State<PostDetails> {
                           desc: 'Now let’s share your post.',
                           buttontext: 'Share your post!',
                           ontap: () {
-                            Get.to(() => PersistentBottomNavBar());
+                            navBarController.resetNavigatorKeys();
+                            navBarController.currentIndex.value = 2;
+                            navBarController.currentRoute.value = discover;
+                            Get.offAll(() => const PersistentBottomNavBar());
                           },
                         ));
                   }

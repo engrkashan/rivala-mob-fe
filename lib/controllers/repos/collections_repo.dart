@@ -7,7 +7,10 @@ class CollectionsRepo {
 
   Future<List<CollectionModel>> getCollectionsList() async {
     final response = await api.getResponse(endpoints: Endpoints.collection);
-    final list = response['collections'] as List;
+    final list = (response['collections'] ??
+        response['data']?['collections'] ??
+        response['data']) as List? ??
+        [];
     return list.map((e) => CollectionModel.fromJson(e)).toList();
   }
 

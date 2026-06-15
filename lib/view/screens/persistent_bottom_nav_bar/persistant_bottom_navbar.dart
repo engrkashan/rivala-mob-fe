@@ -26,13 +26,15 @@ class _BottomNavBarState extends State<PersistentBottomNavBar>
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       // showCaseController.initShowCase(context);
-      _animationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 500),
-      );
+      if (!mounted) return;
       await context.read<BrandsProvider>().loadCurrentStore();
+      if (!mounted) return;
       currentStore = context.read<BrandsProvider>().currentStore;
     });
   }

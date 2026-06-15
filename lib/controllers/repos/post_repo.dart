@@ -16,15 +16,29 @@ class PostRepo {
 
   Future<List<PostModel>> getDiscoverPosts() async {
     final response = await api.getResponse(endpoints: Endpoints.discoverPosts);
-    // Assuming response is a list or contains a list under 'posts'
-    final list = (response['posts'] ?? response) as List;
+    final list = response is List
+        ? response
+        : (response['posts'] ??
+                response['data']?['posts'] ??
+                response['data']) as List? ??
+            [];
     return list.map((item) => PostModel.fromJson(item)).toList();
   }
 
-  Future<dynamic> createPost(dynamic data) async {
+  Future<PostModel?> createPost(dynamic data) async {
     try {
-      final response = await api.postResponse(endpoints: Endpoints.posts, data: data);
-      return response;
+      final response =
+          await api.postResponse(endpoints: Endpoints.posts, data: data);
+      if (response is! Map) return null;
+
+      final postData =
+          response['post'] ?? response['data']?['post'] ?? response['data'];
+
+      if (postData is Map) {
+        return PostModel.fromJson(Map<String, dynamic>.from(postData));
+      }
+
+      return null;
     } catch (e) {
       debugPrint("Error in createPost repo: $e");
       rethrow;

@@ -20,8 +20,9 @@ class TagCollection extends StatefulWidget {
   @override
   State<TagCollection> createState() => _TagCollectionState();
 }
-
 class _TagCollectionState extends State<TagCollection> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +54,15 @@ class _TagCollectionState extends State<TagCollection> {
             ),
             Expanded(child: Consumer<CollectionProvider>(
               builder: (context, ref, _) {
-                final collection = ref.allCollections;
+                final query = _searchController.text.trim().toLowerCase();
+                final collection = query.isEmpty
+                    ? ref.allCollections
+                    : ref.allCollections.where((col) {
+                  return (col.name ?? '').toLowerCase().contains(query) ||
+                      (col.description ?? '')
+                          .toLowerCase()
+                          .contains(query);
+                }).toList();
                 return ListView(
                   shrinkWrap: true,
                   padding: const EdgeInsets.symmetric(
@@ -64,10 +73,14 @@ class _TagCollectionState extends State<TagCollection> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 22),
                       child: MyTextField(
+                        controller: _searchController,
                         radius: 50,
                         filledColor: kgrey4,
                         hint: 'Search your collections . . .',
                         bordercolor: ktransparent,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
                         suffixIcon: Image.asset(
                           Assets.imagesSearch,
                           width: 20,
