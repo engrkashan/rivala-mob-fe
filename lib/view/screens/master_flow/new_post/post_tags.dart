@@ -29,6 +29,8 @@ class PostTags extends StatefulWidget {
 }
 
 class _PostTagsState extends State<PostTags> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,10 +65,14 @@ class _PostTagsState extends State<PostTags> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 22),
                     child: MyTextField(
+                      controller: _searchController,
                       radius: 50,
                       filledColor: kgrey4,
                       hint: 'Search products or brands . . .',
                       bordercolor: ktransparent,
+                      onChanged: (value) {
+                        context.read<ProductProvider>().onSearchChanged(value);
+                      },
                       suffixIcon: Image.asset(
                         Assets.imagesSearch,
                         width: 20,
@@ -76,7 +82,20 @@ class _PostTagsState extends State<PostTags> {
                   ),
                   Consumer<ProductProvider>(
                     builder: (context, ref, _) {
-                      final prdList = ref.prds ?? [];
+                      final query = _searchController.text.trim();
+                      final isSearching = query.length >= 2;
+                      final prdList = isSearching
+                          ? ref.searchProductsList ?? []
+                          : ref.prds ?? [];
+
+                      if (ref.isLoading && prdList.isEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 30),
+                            child: CircularProgressIndicator(color: kblack),
+                          ),
+                        );
+                      }
 
                       if (prdList.isEmpty) {
                         return const Center(child: Text("No products found"));
@@ -123,6 +142,12 @@ class _PostTagsState extends State<PostTags> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().loadCurrentProducts();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
 

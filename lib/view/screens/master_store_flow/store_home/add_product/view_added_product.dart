@@ -109,7 +109,7 @@ class _ViewAddedProductState extends State<ViewAddedProduct> {
                         widget: MyButton(
                           fontColor: kwhite, //buttoncolor
                           onTap: () {
-                            Get.offAllNamed('/signin') ?? Get.offAll(() => MasterSignIn());
+                            Get.offAll(() => const MasterSignIn());
                           },
                           buttonText: 'Create my Rivala account',
                            useCustomFont: true,
